@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#080808" rx="64"/>
+  <rect x="32" y="32" width="448" height="448" fill="#131317" stroke="#26262E" stroke-width="16" rx="48"/>
+  <rect x="96" y="96" width="320" height="320" fill="#FF1E27" rx="32"/>
+  <!-- Swiss Cross / Monogram "C" & "718" -->
+  <text x="256" y="320" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Syne', sans-serif" font-size="210" font-weight="900" fill="#FFFFFF" text-anchor="middle">C</text>
+  <circle cx="360" cy="150" r="22" fill="#FFFFFF"/>
+</svg>

@@ -399,18 +399,31 @@ button {
 }
 
 /* ==========================================================================
-   1. HERO SECTION (SWISS MODULAR POSTER GRID)
+   1. HERO SECTION (SWISS MODULAR POSTER GRID - VIEWPORT FIT)
    ========================================================================== */
 .section-hero {
-  padding: 64px 0 80px 0;
+  min-height: calc(100vh - 134px);
+  min-height: calc(100dvh - 134px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 2.5vh, 36px) 0;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
+}
+
+.section-hero .container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .hero-grid {
   display: grid;
   grid-template-columns: 1.25fr 1fr;
-  gap: 56px;
+  gap: clamp(28px, 4vw, 54px);
   align-items: center;
 }
 
@@ -423,17 +436,17 @@ button {
 .spec-header-tag {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 14px;
+  gap: 8px;
+  padding: 5px 12px;
   background: var(--bg-panel);
   border: 1px solid var(--border-subtle);
   border-left: 3px solid var(--vermillion);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 24px;
+  margin-bottom: clamp(10px, 1.6vh, 18px);
 }
 
 .spec-code {
@@ -444,13 +457,13 @@ button {
 /* Massive Swiss Typography Headline */
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(2.8rem, 5.5vw, 4.8rem);
+  font-size: clamp(2.5rem, 4.3vw, 4.2rem);
   font-weight: 800;
   line-height: 0.95;
   letter-spacing: -0.05em;
   text-transform: uppercase;
   color: var(--text-white);
-  margin-bottom: 20px;
+  margin-bottom: clamp(12px, 1.8vh, 18px);
 }
 
 .hero-name-highlight {
@@ -464,21 +477,21 @@ button {
 .hero-typed-role {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-family: var(--font-mono);
-  font-size: 1.05rem;
+  font-size: clamp(0.92rem, 1.1vw, 1.02rem);
   font-weight: 600;
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-hairline);
-  padding: 10px 16px;
-  margin-bottom: 24px;
+  padding: clamp(6px, 1vh, 9px) 14px;
+  margin-bottom: clamp(12px, 1.8vh, 18px);
   width: fit-content;
 }
 
 .role-tag {
   color: var(--vermillion);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
@@ -494,11 +507,11 @@ button {
 }
 
 .hero-summary {
-  font-size: 1.05rem;
+  font-size: clamp(0.94rem, 1.05vw, 1.02rem);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
   max-width: 620px;
-  margin-bottom: 36px;
+  margin-bottom: clamp(14px, 2.2vh, 24px);
 }
 
 .hero-summary strong {
@@ -513,12 +526,12 @@ button {
   gap: 1px;
   background: var(--border-hairline);
   border: 1px solid var(--border-hairline);
-  margin-bottom: 40px;
+  margin-bottom: clamp(14px, 2.2vh, 24px);
 }
 
 .metric-cell {
   background: var(--bg-panel);
-  padding: 18px 16px;
+  padding: clamp(10px, 1.5vh, 16px) clamp(10px, 1.2vw, 16px);
   position: relative;
   transition: all 0.2s ease;
 }
@@ -531,26 +544,26 @@ button {
 
 .metric-index {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--vermillion);
   display: block;
   letter-spacing: 0.1em;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .metric-number {
   font-family: var(--font-heading);
-  font-size: 1.75rem;
+  font-size: clamp(1.45rem, 1.9vw, 1.8rem);
   font-weight: 800;
   color: var(--text-white);
   line-height: 1;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .metric-label {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: clamp(0.62rem, 0.7vw, 0.68rem);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -563,19 +576,19 @@ button {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: clamp(8px, 1vw, 14px);
+  margin-bottom: clamp(14px, 2vh, 22px);
 }
 
 .btn-primary {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 28px;
+  gap: 8px;
+  padding: clamp(10px, 1.4vh, 13px) clamp(16px, 1.8vw, 24px);
   background: var(--vermillion);
   color: var(--text-white);
   font-family: var(--font-mono);
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -603,13 +616,13 @@ button {
 .btn-secondary {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 24px;
+  gap: 8px;
+  padding: clamp(10px, 1.4vh, 13px) clamp(14px, 1.5vw, 20px);
   background: var(--bg-panel);
   color: var(--text-white);
   border: 1px solid var(--border-strong);
   font-family: var(--font-mono);
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -625,13 +638,13 @@ button {
 .btn-outline {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 20px;
+  gap: 6px;
+  padding: clamp(10px, 1.4vh, 13px) clamp(12px, 1.2vw, 16px);
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border-hairline);
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -648,14 +661,14 @@ button {
 .hero-social-strip {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding-top: 16px;
+  gap: 16px;
+  padding-top: clamp(10px, 1.5vh, 16px);
   border-top: 1px solid var(--border-hairline);
 }
 
 .social-strip-label {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -664,19 +677,19 @@ button {
 .social-links-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .social-node-link {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-panel);
   border: 1px solid var(--border-hairline);
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   transition: all 0.2s ease;
 }
 
@@ -699,10 +712,10 @@ button {
 
 .swiss-poster-frame {
   width: 100%;
-  max-width: 440px;
+  max-width: clamp(350px, 31vw, 430px);
   background: #0D0D11;
   border: 1px solid var(--border-strong);
-  padding: 16px;
+  padding: clamp(12px, 1.8vh, 16px);
   position: relative;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 30, 39, 0.1);
 }
@@ -712,14 +725,14 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 12px;
+  padding-bottom: clamp(8px, 1.2vh, 12px);
   border-bottom: 1px solid var(--border-hairline);
-  margin-bottom: 14px;
+  margin-bottom: clamp(10px, 1.4vh, 14px);
 }
 
 .poster-header-code {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   color: var(--vermillion);
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -727,7 +740,7 @@ button {
 
 .poster-header-uid {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   color: var(--text-muted);
   letter-spacing: 0.08em;
 }
@@ -736,7 +749,7 @@ button {
 .poster-canvas-box {
   position: relative;
   width: 100%;
-  height: 380px;
+  height: clamp(310px, 39vh, 385px);
   background: #080808;
   border: 1px solid var(--border-hairline);
   overflow: hidden;
