@@ -345,12 +345,12 @@ function App() {
   // Navigation Items with Swiss Numbering
   const navLinks = [
     { id: 'hero', num: '01', label: 'Overview' },
-    { id: 'projects', num: '02', label: 'Architecture' },
+    { id: 'projects', num: '02', label: 'Projects' },
     { id: 'education', num: '03', label: 'Education' },
-    { id: 'skills', num: '04', label: 'Capabilities' },
+    { id: 'skills', num: '04', label: 'Skills' },
     { id: 'experience', num: '05', label: 'Experience' },
-    { id: 'achievements', num: '06', label: 'Recognition' },
-    { id: 'contact', num: '07', label: 'Communicate' }
+    { id: 'achievements', num: '06', label: 'Awards' },
+    { id: 'contact', num: '07', label: 'Contact' }
   ];
 
   return (

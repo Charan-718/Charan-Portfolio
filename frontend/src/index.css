@@ -210,19 +210,21 @@ button {
   align-items: center;
   justify-content: space-between;
   height: var(--header-height);
+  gap: 16px;
 }
 
 /* Brand Logo with Swiss Geometric Mark */
 .logo-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-align: left;
+  flex-shrink: 0;
 }
 
 .logo-badge {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   background: var(--vermillion);
   color: var(--text-white);
   display: flex;
@@ -230,11 +232,12 @@ button {
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 0.85rem;
   letter-spacing: -0.05em;
   position: relative;
   box-shadow: 0 0 15px var(--vermillion-glow);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
 }
 
 .logo-brand:hover .logo-badge {
@@ -243,11 +246,12 @@ button {
 
 .logo-text {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: -0.04em;
   color: var(--text-white);
   text-transform: uppercase;
+  line-height: 1.1;
 }
 
 .logo-dot {
@@ -257,35 +261,38 @@ button {
 .logo-sub {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   color: var(--text-muted);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   font-weight: 500;
-  margin-top: -2px;
+  margin-top: -1px;
 }
 
 /* Navigation Links */
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  flex-wrap: nowrap;
+  flex-shrink: 1;
 }
 
 .nav-item-link {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 500;
   color: var(--text-secondary);
-  padding: 8px 14px;
-  letter-spacing: 0.06em;
+  padding: 6px 9px;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   position: relative;
+  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
 .nav-item-index {
   color: var(--vermillion);
-  margin-right: 4px;
+  margin-right: 3px;
   font-weight: 700;
 }
 
@@ -295,15 +302,15 @@ button {
 
 .nav-item-link.active {
   color: var(--text-white);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .nav-item-link.active::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 14px;
-  right: 14px;
+  left: 8px;
+  right: 8px;
   height: 2px;
   background: var(--vermillion);
   box-shadow: 0 0 6px var(--vermillion);
@@ -312,22 +319,24 @@ button {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .btn-nav-action {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 6px 12px;
   background: transparent;
   color: var(--text-white);
   border: 1px solid var(--border-strong);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  white-space: nowrap;
   transition: all 0.25s ease;
 }
 
@@ -791,11 +800,11 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: 50% 50%;
   position: relative;
   z-index: 2;
-  filter: grayscale(20%) contrast(110%);
-  transition: all 0.4s ease;
+  filter: grayscale(10%) contrast(108%);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .swiss-poster-frame:hover .poster-profile-img {
