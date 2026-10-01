@@ -15,7 +15,7 @@ function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  // Image error handling to support charan_profile.png or fallback
+  // Image handling for charan_profile.png with fallbacks
   const [imageIndex, setImageIndex] = useState(0);
   const profileImages = [
     `${process.env.PUBLIC_URL}/charan_profile.png`,
@@ -60,10 +60,10 @@ function App() {
   // Dynamic Role Typing Effect
   useEffect(() => {
     const currentRole = ROLES[currentRoleIndex];
-    let typingSpeed = isDeleting ? 30 : 75;
+    let typingSpeed = isDeleting ? 25 : 65;
 
     if (!isDeleting && displayedText === currentRole) {
-      typingSpeed = 2200;
+      typingSpeed = 2000;
       const timer = setTimeout(() => setIsDeleting(true), typingSpeed);
       return () => clearTimeout(timer);
     } else if (isDeleting && displayedText === '') {
@@ -83,29 +83,29 @@ function App() {
     return () => clearTimeout(timer);
   }, [displayedText, isDeleting, currentRoleIndex]);
 
-  // Copy Email to Clipboard with Toast Notification
+  // Copy Email to Clipboard
   const copyEmailToClipboard = () => {
     navigator.clipboard.writeText('charan06082004@gmail.com');
-    showToast('Email copied to clipboard: charan06082004@gmail.com');
+    showToast('SYS_ACTION: Email copied [charan06082004@gmail.com]');
   };
 
   // Copy Phone to Clipboard
   const copyPhoneToClipboard = () => {
     navigator.clipboard.writeText('+91 6302695484');
-    showToast('Phone number copied to clipboard: +91 6302695484');
+    showToast('SYS_ACTION: Phone number copied [+91 6302695484]');
   };
 
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage('');
-    }, 3500);
+    }, 3800);
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      showToast('Please fill in all required fields.');
+      showToast('SYS_ERROR: Please fill all mandatory parameters.');
       return;
     }
 
@@ -146,14 +146,14 @@ function App() {
       const data = await response.json();
 
       if (response.ok && data.success !== false) {
-        showToast('Thank you! Your message has been sent directly to Charan.');
+        showToast('SYS_STATUS: Transmission dispatched to Charan successfully.');
         setFormData({ name: '', email: '', subject: '', message: '' });
       } else {
-        showToast(data.error || 'Failed to deliver message. Please email directly.');
+        showToast(data.error || 'SYS_ERROR: Message delivery failed. Please send direct email.');
       }
     } catch (err) {
       console.error('Contact form submission error:', err);
-      showToast('Note: Make sure backend server is running, or email directly.');
+      showToast('SYS_NOTICE: Make sure local backend server is running on port 5001, or email directly.');
     } finally {
       setIsSubmitting(false);
     }
@@ -166,54 +166,57 @@ function App() {
     }
   };
 
-  // The 3 Projects from Charan's Resume with Live Links & Repositories
+  // Projects from Charan's Resume
   const allProjects = [
     {
       id: 1,
-      title: 'DayFlow — Full-Stack Employee Management and HRMS Platform',
+      index: '01',
+      title: 'DayFlow — Full-Stack HRMS & Workforce Platform',
       category: 'Web Development',
-      badgeText: 'FULL-STACK HRMS & RBAC',
-      description: 'Comprehensive enterprise HRMS platform designed for streamlined employee administration, attendance tracking, time-off requests, and workforce analytics.',
-      impact: 'Implemented role-based access control (RBAC), JWT authentication, modular REST API architecture, and Docker containerization.',
+      badgeText: 'SPEC_01 // HRMS & RBAC',
+      description: 'Enterprise full-stack Human Resource Management System engineered for workforce administration, real-time attendance tracking, time-off approvals, and organizational analytics.',
+      impact: 'Architected role-based access control (RBAC), JWT security layer, modular REST endpoints, and Docker deployment.',
       tags: ['React.js', 'TypeScript', 'TailwindCSS', 'Node.js', 'Express.js', 'PostgreSQL', 'Prisma', 'Docker'],
       demoLink: 'https://day-flow-six.vercel.app/',
       codeLink: 'https://github.com/Charan-718/Day-Flow',
       features: [
-        'Role-based access control (RBAC) & secure JWT authentication',
-        'Employee profile management, attendance workflows & time-off approvals',
-        'Scalable REST APIs with PostgreSQL, Prisma ORM, and Docker deployment'
+        'Multi-tier RBAC & JSON Web Token authentication system',
+        'Attendance lifecycle, time-off approvals & organizational dashboard metrics',
+        'Modular REST API layer with PostgreSQL, Prisma ORM & Docker containerization'
       ]
     },
     {
       id: 2,
+      index: '02',
       title: 'Traveloop — AI-Powered Smart Travel Planning Platform',
       category: 'AI & Next-Gen',
-      badgeText: 'AI TRAVEL PLATFORM',
-      description: 'React-based intelligent travel planning platform featuring AI-powered personalized itinerary generation, interactive budget dashboards, and curated destination discovery.',
-      impact: 'Built dynamic map integrations, responsive UI components, and API-driven personalized travel planning flows.',
+      badgeText: 'SPEC_02 // AI TRAVEL ENGINE',
+      description: 'Intelligent trip generation and exploration platform featuring AI-driven custom itinerary synthesis, interactive budget telemetry, and location discovery.',
+      impact: 'Constructed responsive map integrations, dynamic planning workflows, and predictive recommendation pipelines.',
       tags: ['React.js', 'JavaScript', 'Node.js', 'Express.js', 'PostgreSQL', 'AI APIs'],
       demoLink: 'https://traveloop-plum.vercel.app/',
       codeLink: 'https://github.com/mounikakorrakuti1/traveloop',
       features: [
-        'AI-driven custom itinerary generation based on user preferences',
-        'Interactive map integration for real-time location and route discovery',
-        'Budget tracking dashboards and robust PostgreSQL backend workflows'
+        'AI-driven custom multi-day itinerary generation tailored to user preferences',
+        'Interactive geospatial map integration for real-time waypoint routing',
+        'Dynamic budget forecasting and PostgreSQL transactional database schema'
       ]
     },
     {
       id: 3,
+      index: '03',
       title: 'Sahakãrya — Cooperative Gig Services Platform',
       category: 'Web & Mobile',
-      badgeText: 'COOPERATIVE GIG PLATFORM',
-      description: 'Decentralized cooperative gig-services platform connecting customers with local service workers through transparent pricing, intelligent worker matching, and welfare-fund contributions.',
-      impact: 'Engineered role-based workflows and scalable backend services using REST APIs, PostgreSQL/PostGIS, Prisma, and an AI service with Docker containerization.',
+      badgeText: 'SPEC_03 // GIG PLATFORM',
+      description: 'Decentralized cooperative gig-services platform connecting customers with local service workers through transparent pricing models, intelligent dispatch matching, and worker welfare fund contributions.',
+      impact: 'Engineered scalable microservice backends with PostGIS geospatial queries, FastAPI AI service, and Docker containerization.',
       tags: ['React.js', 'React Native', 'Node.js', 'Express.js', 'TypeScript', 'Python', 'FastAPI', 'PostgreSQL', 'PostGIS', 'Prisma', 'Docker'],
       demoLink: 'https://sahakarya.vercel.app/',
       codeLink: 'https://github.com/Kouhsik33/Cooperative-Gig-Services-Platform',
       features: [
-        'Intelligent worker matching and geospatial location search using PostGIS',
-        'Real-time service booking, transparent pricing, and worker welfare fund system',
-        'FastAPI AI microservice and Express backend containerized with Docker'
+        'Intelligent dispatch matching with geospatial spatial indexing via PostGIS',
+        'Real-time job bookings, transparent ledger pricing & worker welfare fund integration',
+        'Cross-platform React/React Native clients powered by FastAPI AI microservice'
       ]
     }
   ];
@@ -222,27 +225,27 @@ function App() {
     ? allProjects
     : allProjects.filter((p) => p.category === activeFilter);
 
-  // Technical Skills from Charan's Resume
+  // Technical Competencies
   const skillCategories = [
     {
-      category: 'Frontend Development',
+      category: 'Frontend Architecture',
       icon: 'fa-solid fa-code',
-      skills: ['React.js', 'React Native', 'TypeScript', 'JavaScript (ES6+)', 'HTML5 & CSS3', 'TailwindCSS', 'Bootstrap', 'Responsive Design']
+      skills: ['React.js', 'React Native', 'TypeScript', 'JavaScript (ES6+)', 'HTML5 & CSS3', 'TailwindCSS', 'Bootstrap', 'Responsive Systems']
     },
     {
       category: 'Backend & Microservices',
       icon: 'fa-solid fa-server',
-      skills: ['Node.js', 'Express.js', 'Python', 'FastAPI', 'RESTful APIs', 'Prisma ORM', 'JWT Authentication']
+      skills: ['Node.js', 'Express.js', 'Python', 'FastAPI', 'RESTful APIs', 'Prisma ORM', 'JWT Security']
     },
     {
       category: 'AI / ML & Deep Learning',
       icon: 'fa-solid fa-brain',
-      skills: ['Machine Learning', 'Deep Learning', 'EIS Data Modeling', 'Feature Engineering', 'Nyquist Visualizations', 'Multi-Agent AI Systems']
+      skills: ['Machine Learning', 'Deep Learning', 'EIS Data Modeling', 'Feature Extraction', 'Nyquist Visualizations', 'Multi-Agent AI Systems']
     },
     {
-      category: 'Databases & Storage',
+      category: 'Databases & Spatial Storage',
       icon: 'fa-solid fa-database',
-      skills: ['PostgreSQL', 'PostGIS', 'MongoDB', 'SQL', 'Database Schema Design']
+      skills: ['PostgreSQL', 'PostGIS', 'MongoDB', 'SQL', 'Schema Architecture']
     },
     {
       category: 'Programming Languages',
@@ -250,83 +253,78 @@ function App() {
       skills: ['Python', 'JavaScript', 'TypeScript', 'C', 'C++', 'Java', 'SQL']
     },
     {
-      category: 'Tools, DevOps & Platforms',
+      category: 'DevOps, Tooling & CS Core',
       icon: 'fa-solid fa-screwdriver-wrench',
-      skills: ['Docker', 'Git & GitHub', 'Vercel', 'Postman', 'VS Code', 'Linux']
-    },
-    {
-      category: 'Computer Science Fundamentals',
-      icon: 'fa-solid fa-network-wired',
-      skills: ['Data Structures & Algorithms (DSA)', 'Object-Oriented Programming (OOP)', 'Database Management (DBMS)', 'Computer Networks (CN)']
+      skills: ['Docker', 'Git & GitHub', 'Vercel', 'Postman', 'DSA', 'OOP & DBMS', 'Computer Networks']
     }
   ];
 
-  // Internships & Experience from Charan's Resume
+  // Internships & Research
   const internships = [
     {
       id: 1,
-      period: 'Jun 2025 — Aug 2025',
+      period: 'JUN 2025 — AUG 2025',
       role: 'Deep Learning Intern',
       organization: 'AICTE IdeaLab',
-      type: 'Deep Learning Internship',
+      type: 'RESEARCH & DL INTERNSHIP',
       highlights: [
-        'Built machine learning and deep learning models for battery State of Charge (SOC) and State of Health (SOH) estimation using Electrochemical Impedance Spectroscopy (EIS) data.',
-        'Extracted key frequency-domain features and developed Nyquist spectrum visualizations to analyze complex degradation patterns across discharge cycles.',
-        'Engineered predictive regression pipelines optimizing electrochemical feature representation for real-time battery analytics.'
+        'Engineered ML and deep learning architectures for battery State of Charge (SOC) and State of Health (SOH) estimation using Electrochemical Impedance Spectroscopy (EIS) datasets.',
+        'Extracted high-order frequency-domain features and designed Nyquist spectrum visualization pipelines to evaluate degradation signatures across discharge cycles.',
+        'Developed predictive regression workflows optimizing electrochemical feature selection for accelerated battery diagnosis.'
       ]
     },
     {
       id: 2,
-      period: 'Jan 2024 — Present',
+      period: 'JAN 2024 — PRESENT',
       role: 'Full-Stack & AI/ML Fellow',
       organization: 'NxtWave Disruptive Technologies',
-      type: 'CCBP 4.0 Industry Ready Program',
+      type: 'CCBP 4.0 INDUSTRY READY PROGRAM',
       highlights: [
-        'Completed intensive industry-ready certification in Full-Stack Web Development, Data Structures & Algorithms, and AI/ML.',
-        'Solved 800+ algorithmic coding challenges across Python, C++, and JavaScript, and developed 300+ full-stack hands-on exercises and web modules.'
+        'Completed intensive industry-ready training in Full-Stack Web Development, Data Structures & Algorithms, and AI/ML paradigms.',
+        'Solved 800+ algorithmic coding challenges across Python, C++, and JavaScript, and built 300+ full-stack and frontend production exercises.'
       ]
     }
   ];
 
-  // Certifications from Charan's Resume
+  // Certifications
   const certifications = [
     {
       title: 'Industry Ready Certification in Full-Stack & AI/ML',
       issuer: 'NxtWave Disruptive Technologies',
       icon: 'fa-solid fa-certificate',
-      desc: 'Comprehensive credential covering React, Node.js, Express, PostgreSQL, SQL, Python, and Data Structures & Algorithms.'
+      desc: 'Rigorous engineering training covering React, Node.js, Express, PostgreSQL, SQL, Python, and Data Structures & Algorithms.'
     },
     {
       title: 'Deep Learning & EIS Modeling Credential',
       issuer: 'AICTE IdeaLab',
       icon: 'fa-solid fa-brain',
-      desc: 'Research and engineering credential for battery SOC/SOH estimation models and Nyquist frequency-domain feature analysis.'
+      desc: 'Credential for experimental research in electrochemical impedance feature extraction and battery degradation neural models.'
     },
     {
       title: '1st Prize Winner – Prakalp Hackathon 2026',
       issuer: 'Prakalp 2026, Eluru',
       icon: 'fa-solid fa-trophy',
-      desc: 'Recognized for engineering Critique & Improve (IDEA ARENA), a real-time multi-agent AI platform for iterative idea refinement.'
+      desc: 'Awarded 1st place for architecting Critique & Improve (IDEA ARENA), a real-time multi-agent AI system for iterative refinement.'
     },
     {
       title: 'Grand Finals Winner – AQVH 2025',
       issuer: 'Amaravati Quantum Valley Hackathon',
       icon: 'fa-solid fa-award',
-      desc: 'Secured 1st place in Grand Finals for creating an innovative quantum computing solution addressing real-world challenges.'
+      desc: 'Secured 1st place in Grand Finals for creating an innovative quantum computing solution addressing complex problem statements.'
     }
   ];
 
-  // Achievements from Charan's Resume
+  // Achievements
   const achievements = [
     {
       title: '1st Prize – Prakalp Hackathon 2026, Eluru',
-      tag: '1st Place Winner',
+      tag: '1st Place Champion',
       icon: 'fa-solid fa-trophy',
       desc: 'Won 1st place for developing Critique & Improve — IDEA ARENA, a real-time multi-agent AI platform for iterative idea refinement.'
     },
     {
       title: 'Winner – Amaravati Quantum Valley Hackathon (AQVH) 2025',
-      tag: 'Grand Finals Champion',
+      tag: 'Grand Finals Winner',
       icon: 'fa-solid fa-award',
       desc: 'Secured 1st place at the Grand Finals for building a novel quantum computing solution addressing real-world problem statements.'
     },
@@ -344,39 +342,62 @@ function App() {
     }
   ];
 
-  // Navigation Links
+  // Navigation Items with Swiss Numbering
   const navLinks = [
-    { id: 'hero', label: 'Home' },
-    { id: 'projects', label: 'Projects' },
-    { id: 'education', label: 'Education' },
-    { id: 'skills', label: 'Skills' },
-    { id: 'experience', label: 'Experience' },
-    { id: 'achievements', label: 'Achievements' },
-    { id: 'contact', label: 'Contact' }
+    { id: 'hero', num: '01', label: 'Overview' },
+    { id: 'projects', num: '02', label: 'Architecture' },
+    { id: 'education', num: '03', label: 'Education' },
+    { id: 'skills', num: '04', label: 'Capabilities' },
+    { id: 'experience', num: '05', label: 'Experience' },
+    { id: 'achievements', num: '06', label: 'Recognition' },
+    { id: 'contact', num: '07', label: 'Communicate' }
   ];
 
   return (
-    <div className="portfolio-app">
-      {/* Scroll Progress Bar at Top */}
+    <div className="portfolio-app-swiss">
+      {/* Top Scroll Progress Indicator */}
       <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }}></div>
 
-      {/* Clean Navbar */}
+      {/* Top Technical HUD System Strip */}
+      <div className="top-system-strip">
+        <div className="container">
+          <div className="system-strip-inner">
+            <div className="system-node-item">
+              <span className="live-beacon"></span>
+              <span>SYSTEM: ACTIVE // SRKR.AIML.2027</span>
+            </div>
+            <div className="system-node-item hide-on-mobile">
+              <span>LAT: 16.5448° N &nbsp;•&nbsp; LON: 81.5212° E</span>
+            </div>
+            <div className="system-node-item">
+              <span>PORTFOLIO_SPEC // v2.6 [SWISS_GRID]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Swiss Navigation Header */}
       <header className="header-nav">
         <div className="container">
           <div className="nav-container">
+            {/* Brand Logo with Geometric Swiss Square */}
             <button
               onClick={() => scrollToSection('hero')}
               className="logo-brand"
               aria-label="Charan Sai Barnikani Portfolio"
             >
-              <div className="logo-badge" title="Charan Sai Barnikani — AI/ML & Full-Stack Engineer">
-                <i className="fa-solid fa-code" style={{ fontSize: '15px', color: 'var(--text-primary)' }}></i>
+              <div className="logo-badge" title="Charan Sai Barnikani">
+                718
               </div>
-              <div className="logo-text">
-                Charan<span className="logo-dot">.</span>
+              <div>
+                <div className="logo-text">
+                  CHARAN<span className="logo-dot">.</span>
+                </div>
+                <span className="logo-sub">AIML & FULL-STACK</span>
               </div>
             </button>
 
+            {/* Navigation Menu */}
             <nav className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
               {navLinks.map((item) => (
                 <button
@@ -387,21 +408,23 @@ function App() {
                   }}
                   className={`nav-item-link ${activeSection === item.id ? 'active' : ''}`}
                 >
+                  <span className="nav-item-index">{item.num}.</span>
                   {item.label}
                 </button>
               ))}
             </nav>
 
+            {/* Action CTA */}
             <div className="nav-actions">
               <a
                 href="https://github.com/Charan-718"
                 target="_blank"
                 rel="noreferrer"
-                className="btn-outline-sm"
-                title="GitHub Profile"
+                className="btn-nav-action"
+                title="GitHub Repository"
               >
                 <i className="fa-brands fa-github"></i>
-                <span className="hide-on-mobile">GitHub</span>
+                <span className="hide-on-mobile">GITHUB</span>
               </a>
 
               <button
@@ -416,63 +439,86 @@ function App() {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
-      <main className="main-content">
+      {/* High-Velocity Marquee Spec Strip */}
+      <div className="marquee-ticker" aria-hidden="true">
+        <div className="marquee-track">
+          <span className="marquee-item">SWISS GRID ARCHITECTURE <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">FULL-STACK HRMS PLATFORM <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">DEEP LEARNING EIS BATTERY MODELING <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">3X NATIONAL HACKATHON CHAMPION <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">REACT & TYPESCRIPT <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">NODE.JS & POSTGRESQL / POSTGIS <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">800+ CODING CHALLENGES SOLVED <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">SWISS GRID ARCHITECTURE <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">FULL-STACK HRMS PLATFORM <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">DEEP LEARNING EIS BATTERY MODELING <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">3X NATIONAL HACKATHON CHAMPION <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">REACT & TYPESCRIPT <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">NODE.JS & POSTGRESQL / POSTGIS <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">800+ CODING CHALLENGES SOLVED <span className="marquee-bullet">■</span></span>
+        </div>
+      </div>
+
+      {/* MAIN BODY */}
+      <main>
         {/* ==========================================================================
-            1. HERO SECTION (Charan Sai Barnikani Profile)
+            1. HERO SECTION (SWISS MODULAR POSTER GRID)
             ========================================================================== */}
         <section id="hero" className="section-hero">
           <div className="container">
             <div className="hero-grid">
-              {/* Left Column: Bio & Value Proposition */}
+              {/* Left Column: Monumental Typographic Display */}
               <div className="hero-content">
-                <div className="status-pill">
-                  <span className="status-dot"></span>
-                  <span className="status-text">Open to Tech Internships & Software Engineering Roles</span>
+                <div className="spec-header-tag">
+                  <span className="spec-code">[SPEC_ID: 718-CHR]</span>
+                  <span>OPEN TO SOFTWARE ENGINEERING & INTERNSHIP ROLES</span>
                 </div>
 
                 <h1 className="hero-title">
-                  Charan Sai <span className="hero-name-highlight">Barnikani</span>
+                  CHARAN SAI
+                  <span className="hero-name-highlight">BARNIKANI</span>
                 </h1>
 
+                {/* Dynamic Terminal Role Indicator */}
                 <div className="hero-typed-role">
-                  <span className="role-prefix">I am a</span>
-                  <span className="role-text">{displayedText}</span>
-                  <span className="role-cursor">|</span>
+                  <span className="role-tag">[ROLE]:</span>
+                  <span>{displayedText}</span>
+                  <span className="role-cursor">█</span>
                 </div>
 
                 <p className="hero-summary">
                   Artificial Intelligence & Machine Learning undergraduate at <strong>S R K R Engineering College</strong> with a <strong>9.12 CGPA</strong>. 
-                  Passionate about engineering scalable full-stack applications with React, TypeScript, Node.js, and PostgreSQL, building predictive deep learning models, and architecting multi-agent AI systems.
+                  Focused on architecting scalable full-stack web platforms (React, TypeScript, Node.js, PostgreSQL), engineering deep learning models for electrochemical feature analysis, and multi-agent AI systems.
                 </p>
 
-                {/* Key Impact Metrics Strip */}
-                <div className="hero-metrics-strip">
-                  <div className="metric-item">
-                    <span className="metric-value">9.12</span>
-                    <span className="metric-label">CGPA / 10</span>
+                {/* 4-Column Technical Metrics Modular Grid */}
+                <div className="hero-metrics-grid">
+                  <div className="metric-cell">
+                    <span className="metric-index">[01]</span>
+                    <span className="metric-number">9.12</span>
+                    <span className="metric-label">CGPA / SRKR AIML</span>
                   </div>
-                  <div className="metric-divider"></div>
-                  <div className="metric-item">
-                    <span className="metric-value">3x</span>
-                    <span className="metric-label">Hackathon Winner</span>
+                  <div className="metric-cell">
+                    <span className="metric-index">[02]</span>
+                    <span className="metric-number">3X</span>
+                    <span className="metric-label">HACKATHON WINNER</span>
                   </div>
-                  <div className="metric-divider"></div>
-                  <div className="metric-item">
-                    <span className="metric-value">800+</span>
-                    <span className="metric-label">DSA Solved</span>
+                  <div className="metric-cell">
+                    <span className="metric-index">[03]</span>
+                    <span className="metric-number">800+</span>
+                    <span className="metric-label">DSA SOLVED</span>
                   </div>
-                  <div className="metric-divider"></div>
-                  <div className="metric-item">
-                    <span className="metric-value">3+</span>
-                    <span className="metric-label">Core Projects</span>
+                  <div className="metric-cell">
+                    <span className="metric-index">[04]</span>
+                    <span className="metric-number">03</span>
+                    <span className="metric-label">CORE PLATFORMS</span>
                   </div>
                 </div>
 
-                {/* Hero CTAs */}
+                {/* Action CTAs */}
                 <div className="hero-actions">
                   <button onClick={() => scrollToSection('projects')} className="btn-primary">
-                    <span>View Projects</span>
+                    <span>EXPLORE ARCHITECTURE</span>
                     <i className="fa-solid fa-arrow-right"></i>
                   </button>
 
@@ -482,74 +528,100 @@ function App() {
                     rel="noreferrer"
                     className="btn-secondary"
                   >
-                    <i className="fa-solid fa-code"></i>
-                    <span>LeetCode Profile</span>
+                    <i className="fa-solid fa-terminal"></i>
+                    <span>LEETCODE PROFILE</span>
                   </a>
 
                   <button onClick={copyEmailToClipboard} className="btn-outline" title="Copy Email">
                     <i className="fa-regular fa-copy"></i>
-                    <span>Copy Email</span>
+                    <span>COPY EMAIL</span>
                   </button>
                 </div>
 
-                {/* Direct Social & Technical Links */}
-                <div className="hero-social-links">
-                  <span className="social-label">Connect:</span>
-                  <a href="https://github.com/Charan-718" target="_blank" rel="noreferrer" className="social-link" title="GitHub (Charan-718)">
-                    <i className="fa-brands fa-github"></i>
-                  </a>
-                  <a href="https://www.linkedin.com/in/charan-sai-barnikani/" target="_blank" rel="noreferrer" className="social-link" title="LinkedIn (charan-sai-barnikani)">
-                    <i className="fa-brands fa-linkedin-in"></i>
-                  </a>
-                  <a href="https://leetcode.com/u/Charan_0608/" target="_blank" rel="noreferrer" className="social-link" title="LeetCode (Charan_0608)">
-                    <i className="fa-solid fa-terminal"></i>
-                  </a>
-                  <a href="mailto:charan06082004@gmail.com" className="social-link" title="Email (charan06082004@gmail.com)">
-                    <i className="fa-regular fa-envelope"></i>
-                  </a>
+                {/* Social Connect Coordinates */}
+                <div className="hero-social-strip">
+                  <span className="social-strip-label">NETWORK COORD:</span>
+                  <div className="social-links-row">
+                    <a href="https://github.com/Charan-718" target="_blank" rel="noreferrer" className="social-node-link" title="GitHub">
+                      <i className="fa-brands fa-github"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/charan-sai-barnikani/" target="_blank" rel="noreferrer" className="social-node-link" title="LinkedIn">
+                      <i className="fa-brands fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://leetcode.com/u/Charan_0608/" target="_blank" rel="noreferrer" className="social-node-link" title="LeetCode">
+                      <i className="fa-solid fa-code"></i>
+                    </a>
+                    <a href="mailto:charan06082004@gmail.com" className="social-node-link" title="Email">
+                      <i className="fa-regular fa-envelope"></i>
+                    </a>
+                  </div>
                 </div>
               </div>
 
-              {/* Right Column: Hero Photo Container */}
+              {/* Right Column: Swiss Exhibition Poster Media Frame */}
               <div className="hero-media">
-                <div className="photo-frame-container">
-                  <div className="photo-card">
-                    {/* Portrait Image with Dynamic Fallback */}
+                <div className="swiss-poster-frame">
+                  {/* Top Technical Metadata */}
+                  <div className="poster-top-bar">
+                    <span className="poster-header-code">[PRO_GRID // 01]</span>
+                    <span className="poster-header-uid">UID: CHR-718-AIML</span>
+                  </div>
+
+                  {/* Main Portrait Canvas with Diagonal Crosshair Guide & Corner Brackets */}
+                  <div className="poster-canvas-box">
+                    <div className="poster-grid-cross"></div>
+                    <div className="poster-corner-mark mark-tl"></div>
+                    <div className="poster-corner-mark mark-tr"></div>
+                    <div className="poster-corner-mark mark-bl"></div>
+                    <div className="poster-corner-mark mark-br"></div>
+                    <div className="poster-watermark-text">AIML</div>
+
                     {imageIndex < profileImages.length ? (
                       <img
                         src={profileImages[imageIndex]}
                         alt="Charan Sai Barnikani"
-                        className="hero-profile-image"
+                        className="poster-profile-img"
                         onError={() => setImageIndex((prev) => prev + 1)}
                       />
                     ) : (
-                      <div className="photo-placeholder-fallback">
-                        <div className="placeholder-avatar">
-                          <i className="fa-solid fa-user-graduate"></i>
-                        </div>
-                        <p className="placeholder-text">Charan Sai Barnikani</p>
-                        <span className="placeholder-subtext">B.Tech AIML • 9.12 CGPA</span>
+                      <div className="poster-fallback-box">
+                        <i className="fa-solid fa-user-gear poster-fallback-icon"></i>
+                        <h4 style={{ color: '#fff', fontFamily: 'var(--font-heading)' }}>CHARAN SAI BARNIKANI</h4>
+                        <span style={{ color: 'var(--vermillion)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>B.TECH AIML • 9.12 CGPA</span>
                       </div>
                     )}
-
-                    {/* Overlay Info Card */}
-                    <div className="photo-badge-overlay">
-                      <div className="photo-badge-dot"></div>
-                      <div>
-                        <div className="photo-badge-title">Charan Sai Barnikani</div>
-                        <div className="photo-badge-subtitle">B.Tech AIML • S R K R Engineering College</div>
-                      </div>
-                    </div>
-
-                    {/* Floating Exp Pill */}
-                    <div className="floating-exp-tag">
-                      <i className="fa-solid fa-award"></i>
-                      <span>CGPA: 9.12 / 10</span>
-                    </div>
                   </div>
 
-                  {/* Clean Background Frame Accent */}
-                  <div className="photo-frame-backdrop"></div>
+                  {/* Poster Specification Footer */}
+                  <div className="poster-spec-footer">
+                    <div className="poster-spec-row">
+                      <span className="poster-spec-title">CHARAN SAI BARNIKANI</span>
+                      <span className="poster-spec-val">CGPA: 9.12</span>
+                    </div>
+                    <div className="poster-spec-row">
+                      <span className="poster-subinfo">SRKR ENGINEERING COLLEGE // AIML</span>
+                      <span className="poster-subinfo">2023 — 2027</span>
+                    </div>
+
+                    <div className="poster-barcode-wrap">
+                      <div className="poster-barcode" aria-hidden="true">
+                        <span className="bar"></span>
+                        <span className="bar thick"></span>
+                        <span className="bar"></span>
+                        <span className="bar red"></span>
+                        <span className="bar"></span>
+                        <span className="bar thick"></span>
+                        <span className="bar red"></span>
+                        <span className="bar"></span>
+                        <span className="bar thick"></span>
+                        <span className="bar"></span>
+                        <span className="bar"></span>
+                        <span className="bar thick red"></span>
+                        <span className="bar"></span>
+                      </div>
+                      <span className="poster-subinfo">BARCODE // 6302695484</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -557,15 +629,19 @@ function App() {
         </section>
 
         {/* ==========================================================================
-            2. FEATURED PROJECTS SECTION
+            2. FEATURED PROJECTS SECTION (ARCHITECTURAL SPEC POSTERS)
             ========================================================================== */}
         <section id="projects" className="section-block section-alt">
           <div className="container">
-            <div className="section-header">
-              <span className="section-eyebrow">Featured Work</span>
-              <h2 className="section-title">Core Engineered Projects</h2>
+            <div className="section-header-swiss">
+              <div>
+                <span className="section-eyebrow-tag">
+                  <i className="fa-solid fa-layer-group"></i> SECTION_02 // SYSTEM BUILDS
+                </span>
+                <h2 className="section-title">ENGINEERED PLATFORMS</h2>
+              </div>
               <p className="section-desc">
-                Full-stack web applications, AI platforms, and microservices with live deployments and repositories.
+                Production full-stack web applications, AI planning architectures, and containerized microservices with live deployments.
               </p>
             </div>
 
@@ -577,45 +653,37 @@ function App() {
                   className={`filter-tab-btn ${activeFilter === cat ? 'active' : ''}`}
                   onClick={() => setActiveFilter(cat)}
                 >
-                  {cat}
+                  [{cat.toUpperCase()}]
                 </button>
               ))}
             </div>
 
-            {/* The 3 Featured Projects Grid */}
+            {/* 3 Swiss Poster Project Cards Grid */}
             <div className="projects-grid">
               {filteredProjects.map((proj) => (
-                <div key={proj.id} className="project-card">
-                  <div className="project-card-header">
-                    <span className="project-badge">{proj.badgeText}</span>
-                    <span className="project-category-label">{proj.category}</span>
+                <div key={proj.id} className="project-card-swiss">
+                  <div className="project-card-top">
+                    <span className="project-index-num">[{proj.index}]</span>
+                    <span className="project-badge-tag">{proj.badgeText}</span>
                   </div>
 
                   <div className="project-card-body">
-                    <h3 className="project-title">{proj.title}</h3>
-                    <p className="project-desc">{proj.description}</p>
+                    <span className="project-category-sub">{proj.category}</span>
+                    <h3 className="project-title-swiss">{proj.title}</h3>
+                    <p className="project-desc-swiss">{proj.description}</p>
 
-                    {proj.impact && (
-                      <div className="project-impact-box">
-                        <i className="fa-solid fa-award"></i>
-                        <span>{proj.impact}</span>
-                      </div>
-                    )}
+                    <ul className="project-features-block">
+                      {proj.features.map((feat, fIdx) => (
+                        <li key={fIdx}>
+                          <i className="fa-solid fa-angle-right"></i>
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
 
-                    {proj.features && (
-                      <ul className="project-feature-list">
-                        {proj.features.map((feat, fIdx) => (
-                          <li key={fIdx}>
-                            <i className="fa-solid fa-circle-dot"></i>
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    <div className="project-tags-wrap">
+                    <div className="project-tags-matrix">
                       {proj.tags.map((tag, tIdx) => (
-                        <span key={tIdx} className="project-tech-tag">{tag}</span>
+                        <span key={tIdx} className="tech-pill">{tag}</span>
                       ))}
                     </div>
                   </div>
@@ -625,19 +693,19 @@ function App() {
                       href={proj.demoLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="project-link-primary"
+                      className="project-action-btn btn-demo-swiss"
                     >
-                      <span>Live Demo</span>
+                      <span>LAUNCH DEMO</span>
                       <i className="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
                     <a
                       href={proj.codeLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="project-link-secondary"
+                      className="project-action-btn btn-code-swiss"
                     >
                       <i className="fa-brands fa-github"></i>
-                      <span>Source Code</span>
+                      <span>SOURCE CODE</span>
                     </a>
                   </div>
                 </div>
@@ -647,45 +715,60 @@ function App() {
         </section>
 
         {/* ==========================================================================
-            3. EDUCATION SECTION
+            3. EDUCATION & FOUNDATION
             ========================================================================== */}
         <section id="education" className="section-block">
           <div className="container">
-            <div className="section-header">
-              <span className="section-eyebrow">Academic Background</span>
-              <h2 className="section-title">Education & Foundation</h2>
+            <div className="section-header-swiss">
+              <div>
+                <span className="section-eyebrow-tag">
+                  <i className="fa-solid fa-graduation-cap"></i> SECTION_03 // FOUNDATION
+                </span>
+                <h2 className="section-title">ACADEMIC FOUNDATION</h2>
+              </div>
               <p className="section-desc">
-                Solid academic excellence and deep theoretical foundation in Artificial Intelligence and Machine Learning.
+                Rigorous degree curriculum with specialization in Artificial Intelligence, Machine Learning algorithms, and computer science foundations.
               </p>
             </div>
 
-            <div className="education-card-wrapper">
-              <div className="education-main-card">
-                <div className="education-header">
-                  <div className="edu-icon-badge">
-                    <i className="fa-solid fa-graduation-cap"></i>
+            <div className="education-swiss-card">
+              <div className="edu-grid-content">
+                <div className="edu-primary-info">
+                  <div className="edu-badge-tag">
+                    <i className="fa-solid fa-certificate"></i> B.TECH DEGREE PROGRAM
                   </div>
-                  <div className="edu-header-text">
-                    <h3 className="edu-degree">B.Tech in Artificial Intelligence and Machine Learning</h3>
-                    <div className="edu-college">S R K R Engineering College, Bhimavaram</div>
-                  </div>
-                  <div className="edu-meta-badge">
-                    <span className="edu-period">2023 — 2027</span>
-                    <span className="edu-cgpa-pill">
-                      <i className="fa-solid fa-star"></i> CGPA: 9.12 / 10
-                    </span>
+                  <h3 className="edu-degree-title">Artificial Intelligence & Machine Learning</h3>
+                  <div className="edu-institution">S R K R Engineering College, Bhimavaram</div>
+                  <div className="edu-cgpa-box">
+                    <span>ACADEMIC PERFORMANCE:</span>
+                    <span className="cgpa-highlight">9.12 CGPA / 10</span>
                   </div>
                 </div>
 
-                <div className="edu-details-body">
-                  <h4 className="edu-subheading">Core Academic & Technical Disciplines:</h4>
-                  <div className="edu-tags-grid">
-                    <span className="edu-tag"><i className="fa-solid fa-check"></i> Artificial Intelligence & Machine Learning (AI/ML)</span>
-                    <span className="edu-tag"><i className="fa-solid fa-check"></i> Deep Learning & Neural Networks</span>
-                    <span className="edu-tag"><i className="fa-solid fa-check"></i> Data Structures & Algorithms (DSA)</span>
-                    <span className="edu-tag"><i className="fa-solid fa-check"></i> Database Management Systems (DBMS)</span>
-                    <span className="edu-tag"><i className="fa-solid fa-check"></i> Object-Oriented Programming (OOP)</span>
-                    <span className="edu-tag"><i className="fa-solid fa-check"></i> Computer Networks (CN)</span>
+                <div className="edu-disciplines-list">
+                  <div className="discipline-item">
+                    <i className="fa-solid fa-microchip"></i>
+                    <span>Artificial Intelligence & ML</span>
+                  </div>
+                  <div className="discipline-item">
+                    <i className="fa-solid fa-network-wired"></i>
+                    <span>Deep Learning & Neural Nets</span>
+                  </div>
+                  <div className="discipline-item">
+                    <i className="fa-solid fa-code-merge"></i>
+                    <span>Data Structures & Algorithms</span>
+                  </div>
+                  <div className="discipline-item">
+                    <i className="fa-solid fa-database"></i>
+                    <span>Database Management (DBMS)</span>
+                  </div>
+                  <div className="discipline-item">
+                    <i className="fa-solid fa-cubes"></i>
+                    <span>Object-Oriented Programming</span>
+                  </div>
+                  <div className="discipline-item">
+                    <i className="fa-solid fa-server"></i>
+                    <span>Computer Networks (CN)</span>
                   </div>
                 </div>
               </div>
@@ -694,34 +777,35 @@ function App() {
         </section>
 
         {/* ==========================================================================
-            4. TECHNICAL SKILLS SECTION
+            4. TECHNICAL SKILLS (MODULAR MATRIX)
             ========================================================================== */}
         <section id="skills" className="section-block section-alt">
           <div className="container">
-            <div className="section-header">
-              <span className="section-eyebrow">Technical Competencies</span>
-              <h2 className="section-title">Skills & Technologies</h2>
+            <div className="section-header-swiss">
+              <div>
+                <span className="section-eyebrow-tag">
+                  <i className="fa-solid fa-sliders"></i> SECTION_04 // TOOLKIT
+                </span>
+                <h2 className="section-title">CAPABILITIES MATRIX</h2>
+              </div>
               <p className="section-desc">
-                Organized technical toolkit spanning full-stack web engineering, AI/ML models, databases, and languages.
+                Organized matrix spanning full-stack frameworks, deep learning, databases, languages, and core computer science.
               </p>
             </div>
 
-            <div className="skills-categorized-grid">
-              {skillCategories.map((group, gIdx) => (
-                <div key={gIdx} className="skill-category-card">
-                  <div className="category-header">
-                    <div className="category-icon">
-                      <i className={group.icon}></i>
+            <div className="skills-matrix-grid">
+              {skillCategories.map((cat, cIdx) => (
+                <div key={cIdx} className="skill-matrix-box">
+                  <div className="skill-box-header">
+                    <div className="skill-box-icon">
+                      <i className={cat.icon}></i>
                     </div>
-                    <h3 className="category-title">{group.category}</h3>
+                    <h3 className="skill-box-title">{cat.category}</h3>
                   </div>
 
-                  <div className="skill-tags-list">
-                    {group.skills.map((skill, sIdx) => (
-                      <div key={sIdx} className="skill-pill-item">
-                        <i className="fa-solid fa-check"></i>
-                        <span>{skill}</span>
-                      </div>
+                  <div className="skill-pills-wrap">
+                    {cat.skills.map((skill, sIdx) => (
+                      <span key={sIdx} className="skill-badge">{skill}</span>
                     ))}
                   </div>
                 </div>
@@ -731,36 +815,38 @@ function App() {
         </section>
 
         {/* ==========================================================================
-            5. INTERNSHIPS & EXPERIENCE
+            5. EXPERIENCE & RESEARCH TIMELINE
             ========================================================================== */}
         <section id="experience" className="section-block">
           <div className="container">
-            <div className="section-header">
-              <span className="section-eyebrow">Industry Experience</span>
-              <h2 className="section-title">Internships & Fellowships</h2>
+            <div className="section-header-swiss">
+              <div>
+                <span className="section-eyebrow-tag">
+                  <i className="fa-solid fa-briefcase"></i> SECTION_05 // TRAJECTORY
+                </span>
+                <h2 className="section-title">EXPERIENCE & RESEARCH</h2>
+              </div>
               <p className="section-desc">
-                Hands-on development experience across deep learning research, full-stack architectures, and industry programs.
+                Hands-on engineering across deep learning battery research, full-stack systems development, and industry fellowship.
               </p>
             </div>
 
-            <div className="timeline-container">
-              {internships.map((exp) => (
-                <div key={exp.id} className="timeline-card">
-                  <div className="timeline-meta">
-                    <span className="timeline-period">{exp.period}</span>
-                    <span className="timeline-type-badge">{exp.type}</span>
+            <div className="timeline-swiss-list">
+              {internships.map((item) => (
+                <div key={item.id} className="timeline-node-card">
+                  <div className="timeline-aside">
+                    <span className="timeline-period-tag">{item.period}</span>
+                    <span className="timeline-type-tag">{item.type}</span>
                   </div>
 
-                  <div className="timeline-content">
-                    <div className="timeline-header-row">
-                      <h3 className="timeline-role">{exp.role}</h3>
-                      <span className="timeline-company">{exp.organization}</span>
-                    </div>
+                  <div className="timeline-main">
+                    <h3 className="timeline-role-title">{item.role}</h3>
+                    <span className="timeline-org-name">{item.organization}</span>
 
-                    <ul className="timeline-bullets">
-                      {exp.highlights.map((bullet, bIdx) => (
+                    <ul className="timeline-bullets-list">
+                      {item.highlights.map((bullet, bIdx) => (
                         <li key={bIdx} className="timeline-bullet-item">
-                          <i className="fa-solid fa-circle-check"></i>
+                          <i className="fa-solid fa-circle-dot"></i>
                           <span>{bullet}</span>
                         </li>
                       ))}
@@ -773,54 +859,52 @@ function App() {
         </section>
 
         {/* ==========================================================================
-            6. ACHIEVEMENTS & CERTIFICATIONS
+            6. ACHIEVEMENTS & RECOGNITION
             ========================================================================== */}
         <section id="achievements" className="section-block section-alt">
           <div className="container">
-            <div className="section-header">
-              <span className="section-eyebrow">Recognition & Credentials</span>
-              <h2 className="section-title">Achievements & Certifications</h2>
+            <div className="section-header-swiss">
+              <div>
+                <span className="section-eyebrow-tag">
+                  <i className="fa-solid fa-trophy"></i> SECTION_06 // MILESTONES
+                </span>
+                <h2 className="section-title">RECOGNITION & HONORS</h2>
+              </div>
               <p className="section-desc">
-                National hackathon victories, innovation awards, competitive milestones, and verified credentials.
+                National hackathon victories, innovation citations, competitive milestones, and verified credentials.
               </p>
             </div>
 
             {/* Achievements Grid */}
-            <h3 className="sub-section-title">
-              <i className="fa-solid fa-trophy"></i> Key Achievements
-            </h3>
-            <div className="achievements-grid">
+            <div className="achievements-swiss-grid">
               {achievements.map((ach, aIdx) => (
-                <div key={aIdx} className="achievement-card">
-                  <div className="achievement-icon-wrap">
+                <div key={aIdx} className="achievement-swiss-box">
+                  <div className="achievement-icon-square">
                     <i className={ach.icon}></i>
                   </div>
                   <div>
-                    <span className="achievement-tag">{ach.tag}</span>
-                    <h4 className="achievement-title">{ach.title}</h4>
-                    <p className="achievement-desc">{ach.desc}</p>
+                    <span className="achievement-tag-pill">{ach.tag}</span>
+                    <h4 className="achievement-title-text">{ach.title}</h4>
+                    <p className="achievement-desc-text">{ach.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Certifications Grid */}
-            <h3 className="sub-section-title" style={{ marginTop: '3rem' }}>
-              <i className="fa-solid fa-file-shield"></i> Verified Certifications
+            {/* Certifications Sub-Grid */}
+            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: '#fff', marginBottom: '20px', textTransform: 'uppercase' }}>
+              <i className="fa-solid fa-file-shield" style={{ color: 'var(--vermillion)', marginRight: '8px' }}></i>
+              VERIFIED CREDENTIALS
             </h3>
-            <div className="certifications-grid">
+            <div className="certifications-swiss-grid">
               {certifications.map((cert, cIdx) => (
-                <div key={cIdx} className="cert-card">
-                  <div className="cert-header">
-                    <div className="cert-icon">
-                      <i className={cert.icon}></i>
-                    </div>
-                    <div>
-                      <h4 className="cert-title">{cert.title}</h4>
-                      <span className="cert-issuer">{cert.issuer}</span>
-                    </div>
+                <div key={cIdx} className="cert-swiss-card">
+                  <div className="cert-top-row">
+                    <i className={`${cert.icon} cert-icon-mini`}></i>
+                    <h4 className="cert-name">{cert.title}</h4>
                   </div>
-                  <p className="cert-desc">{cert.desc}</p>
+                  <span className="cert-issuer-tag">{cert.issuer}</span>
+                  <p className="cert-info-p">{cert.desc}</p>
                 </div>
               ))}
             </div>
@@ -828,109 +912,112 @@ function App() {
         </section>
 
         {/* ==========================================================================
-            7. CONTACT SECTION
+            7. CONTACT & COMMUNICATE SECTION
             ========================================================================== */}
         <section id="contact" className="section-block">
           <div className="container">
-            <div className="section-header">
-              <span className="section-eyebrow">Contact Charan</span>
-              <h2 className="section-title">Let's Connect & Collaborate</h2>
+            <div className="section-header-swiss">
+              <div>
+                <span className="section-eyebrow-tag">
+                  <i className="fa-solid fa-terminal"></i> SECTION_07 // COMMUNICATE
+                </span>
+                <h2 className="section-title">INITIATE CONTACT</h2>
+              </div>
               <p className="section-desc">
-                Feel free to reach out directly for internships, collaborative engineering projects, or full-time opportunities.
+                Direct communication terminal for software engineering roles, technical internships, and collaborative architecture projects.
               </p>
             </div>
 
-            <div className="contact-grid">
-              {/* Left Contact Info */}
-              <div className="contact-info-panel">
-                <div className="contact-card">
-                  <div className="contact-card-icon">
+            <div className="contact-swiss-grid">
+              {/* Left Coordinates Panel */}
+              <div className="contact-spec-panel">
+                <div className="contact-coord-card">
+                  <div className="coord-icon">
                     <i className="fa-regular fa-envelope"></i>
                   </div>
                   <div>
-                    <div className="contact-card-label">Email Address</div>
-                    <div className="contact-card-value">charan06082004@gmail.com</div>
-                    <button onClick={copyEmailToClipboard} className="btn-copy-inline">
-                      <i className="fa-regular fa-copy"></i>
-                      <span>Click to copy email</span>
+                    <div className="coord-label">PRIMARY INBOX</div>
+                    <div className="coord-val">charan06082004@gmail.com</div>
+                    <button onClick={copyEmailToClipboard} className="btn-copy-chip">
+                      <i className="fa-regular fa-copy"></i> [CLICK TO COPY]
                     </button>
                   </div>
                 </div>
 
-                <div className="contact-card">
-                  <div className="contact-card-icon">
+                <div className="contact-coord-card">
+                  <div className="coord-icon">
                     <i className="fa-solid fa-phone"></i>
                   </div>
                   <div>
-                    <div className="contact-card-label">Contact Number</div>
-                    <div className="contact-card-value">+91 6302695484</div>
-                    <button onClick={copyPhoneToClipboard} className="btn-copy-inline">
-                      <i className="fa-regular fa-copy"></i>
-                      <span>Click to copy phone</span>
+                    <div className="coord-label">TELECOMMUNICATION</div>
+                    <div className="coord-val">+91 6302695484</div>
+                    <button onClick={copyPhoneToClipboard} className="btn-copy-chip">
+                      <i className="fa-regular fa-copy"></i> [CLICK TO COPY]
                     </button>
                   </div>
                 </div>
 
-                <div className="contact-card">
-                  <div className="contact-card-icon">
-                    <i className="fa-solid fa-location-dot"></i>
+                <div className="contact-coord-card">
+                  <div className="coord-icon">
+                    <i className="fa-solid fa-location-crosshairs"></i>
                   </div>
                   <div>
-                    <div className="contact-card-label">Location</div>
-                    <div className="contact-card-value">Rajahmundry, Andhra Pradesh, 533105</div>
-                    <div className="contact-card-sub">India • Open to Relocation & Remote Roles</div>
+                    <div className="coord-label">LOCATION COORD</div>
+                    <div className="coord-val">Rajahmundry, AP, 533105</div>
+                    <div className="coord-sub">India • Open to Relocation & Remote Engagements</div>
                   </div>
                 </div>
 
-                <div className="contact-card">
-                  <div className="contact-card-icon">
-                    <i className="fa-solid fa-globe"></i>
+                <div className="contact-coord-card">
+                  <div className="coord-icon">
+                    <i className="fa-solid fa-network-wired"></i>
                   </div>
                   <div>
-                    <div className="contact-card-label">Profiles & Coding Platforms</div>
-                    <div className="social-pill-row">
-                      <a href="https://www.linkedin.com/in/charan-sai-barnikani/" target="_blank" rel="noreferrer" className="contact-social-pill">
-                        <i className="fa-brands fa-linkedin-in"></i>
-                        <span>LinkedIn</span>
+                    <div className="coord-label">PROFILES & PLATFORMS</div>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                      <a href="https://www.linkedin.com/in/charan-sai-barnikani/" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
+                        <i className="fa-brands fa-linkedin-in"></i> LinkedIn
                       </a>
-                      <a href="https://github.com/Charan-718" target="_blank" rel="noreferrer" className="contact-social-pill">
-                        <i className="fa-brands fa-github"></i>
-                        <span>GitHub</span>
+                      <a href="https://github.com/Charan-718" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
+                        <i className="fa-brands fa-github"></i> GitHub
                       </a>
-                      <a href="https://leetcode.com/u/Charan_0608/" target="_blank" rel="noreferrer" className="contact-social-pill">
-                        <i className="fa-solid fa-terminal"></i>
-                        <span>LeetCode</span>
+                      <a href="https://leetcode.com/u/Charan_0608/" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
+                        <i className="fa-solid fa-code"></i> LeetCode
                       </a>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Right Contact Form */}
-              <div className="contact-form-panel">
-                <form onSubmit={handleFormSubmit} className="contact-form">
+              {/* Right Form Terminal */}
+              <div className="contact-form-swiss">
+                <form onSubmit={handleFormSubmit}>
                   <div className="form-row">
                     <div className="form-group">
-                      <label className="form-label" htmlFor="name">Your Name <span className="req">*</span></label>
+                      <label className="form-label-swiss" htmlFor="name">
+                        YOUR NAME <span className="req-star">*</span>
+                      </label>
                       <input
                         id="name"
                         type="text"
                         required
-                        placeholder="e.g. Hiring Manager / Recruiter"
-                        className="form-control"
+                        placeholder="e.g. Hiring Lead / Recruiter"
+                        className="form-control-swiss"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       />
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" htmlFor="email">Your Email <span className="req">*</span></label>
+                      <label className="form-label-swiss" htmlFor="email">
+                        YOUR EMAIL <span className="req-star">*</span>
+                      </label>
                       <input
                         id="email"
                         type="email"
                         required
                         placeholder="e.g. recruiter@company.com"
-                        className="form-control"
+                        className="form-control-swiss"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       />
@@ -938,40 +1025,44 @@ function App() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label" htmlFor="subject">Subject</label>
+                    <label className="form-label-swiss" htmlFor="subject">
+                      SUBJECT / TOPIC
+                    </label>
                     <input
                       id="subject"
                       type="text"
-                      placeholder="e.g. Software Engineering Opportunity / Internship"
-                      className="form-control"
+                      placeholder="e.g. Software Engineering Opportunity / Collaboration"
+                      className="form-control-swiss"
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     />
                   </div>
 
-                  <div className="form-group form-group-message">
-                    <label className="form-label" htmlFor="message">Message <span className="req">*</span></label>
+                  <div className="form-group">
+                    <label className="form-label-swiss" htmlFor="message">
+                      MESSAGE TRANSMISSION <span className="req-star">*</span>
+                    </label>
                     <textarea
                       id="message"
                       required
                       rows="4"
                       placeholder="Hi Charan, we would like to discuss an engineering opportunity regarding your background in Full-Stack and AI/ML..."
-                      className="form-control textarea"
+                      className="form-control-swiss textarea-swiss"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     ></textarea>
                   </div>
 
-                  <button type="submit" className="btn-primary btn-submit" disabled={isSubmitting}>
+                  <button type="submit" className="btn-submit-swiss" disabled={isSubmitting}>
                     {isSubmitting ? (
                       <>
-                        <span>Sending...</span>
+                        <span>TRANSMITTING...</span>
                         <i className="fa-solid fa-spinner fa-spin"></i>
                       </>
                     ) : (
                       <>
-                        <span>Send Message</span>
-                        <i className="fa-solid fa-paper-plane"></i>
+                        <span>DISPATCH MESSAGE</span>
+                        <i className="fa-solid fa-arrow-right"></i>
                       </>
                     )}
                   </button>
@@ -983,39 +1074,40 @@ function App() {
       </main>
 
       {/* ==========================================================================
-          FOOTER
+          FOOTER (SWISS ARCHITECTURAL BASELINE)
           ========================================================================== */}
-      <footer className="site-footer">
+      <footer className="site-footer-swiss">
         <div className="container">
-          <div className="footer-flex">
-            <div className="footer-left">
-              <div className="footer-logo">Charan Sai Barnikani<span>.</span></div>
-              <p className="footer-tagline">B.Tech AIML • S R K R Engineering College</p>
+          <div className="footer-flex-row">
+            <div>
+              <div className="footer-logo-title">CHARAN SAI BARNIKANI</div>
+              <div className="footer-sub-text">B.TECH AIML // S R K R ENGINEERING COLLEGE // 9.12 CGPA</div>
             </div>
 
-            <div className="footer-links">
+            <div className="footer-nav-items">
               {navLinks.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className="footer-nav-link"
+                  className="footer-link-btn"
                 >
-                  {item.label}
+                  [{item.label}]
                 </button>
               ))}
             </div>
+          </div>
 
-            <div className="footer-copy">
-              © {new Date().getFullYear()} Charan Sai Barnikani.
-            </div>
+          <div className="footer-bottom-bar">
+            <span>© {new Date().getFullYear()} CHARAN SAI BARNIKANI. ALL SPECIFICATIONS RESERVED.</span>
+            <span>SYSTEM_BUILD // SWISS_GRID_v2.6</span>
           </div>
         </div>
       </footer>
 
-      {/* Toast Notification */}
+      {/* Technical HUD Toast Notification */}
       {toastMessage && (
-        <div className="toast-notification">
-          <i className="fa-solid fa-circle-check"></i>
+        <div className="toast-swiss-hud">
+          <i className="fa-solid fa-terminal"></i>
           <span>{toastMessage}</span>
         </div>
       )}
