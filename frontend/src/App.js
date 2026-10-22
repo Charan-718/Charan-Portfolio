@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
+import CharacterPlayground from './components/CharacterPlayground';
+import {
+  initGlobalButtonSounds,
+  isSoundEnabled,
+  toggleSound,
+  onSoundStateChange,
+  playClickSound,
+} from './utils/soundEffects';
 
 const ROLES = [
   'Full-Stack Developer',
@@ -14,11 +22,24 @@ function App() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [toastMessage, setToastMessage] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+  const [soundActive, setSoundActive] = useState(() => isSoundEnabled());
+  const [isCharacterArenaOpen, setIsCharacterArenaOpen] = useState(
+    () => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('arena') === 'true'
+  );
+
+  // Initialize global button click sounds (< 1s tactile feedback) and subscribe to mute/unmute
+  useEffect(() => {
+    const cleanupSounds = initGlobalButtonSounds();
+    const unsubscribe = onSoundStateChange((enabled) => setSoundActive(enabled));
+    return () => {
+      cleanupSounds();
+      unsubscribe();
+    };
+  }, []);
   // Image handling for charan_profile.png with fallbacks
   const [imageIndex, setImageIndex] = useState(0);
   const profileImages = [
-    `${process.env.PUBLIC_URL}/charan_profile.png`,
+    `${process.env.PUBLIC_URL}/charan_professional_profile.png`,
     `${process.env.PUBLIC_URL}/profile.jpg`,
     `${process.env.PUBLIC_URL}/profile.png`
   ];
@@ -146,6 +167,7 @@ function App() {
       const data = await response.json();
 
       if (response.ok && data.success !== false) {
+        playClickSound('success');
         showToast('SYS_STATUS: Transmission dispatched to Charan successfully.');
         setFormData({ name: '', email: '', subject: '', message: '' });
       } else {
@@ -353,6 +375,10 @@ function App() {
     { id: 'contact', num: '07', label: 'Contact' }
   ];
 
+  if (isCharacterArenaOpen) {
+    return <CharacterPlayground onClose={() => setIsCharacterArenaOpen(false)} />;
+  }
+
   return (
     <div className="portfolio-app-swiss">
       {/* Top Scroll Progress Indicator */}
@@ -416,6 +442,26 @@ function App() {
 
             {/* Action CTA */}
             <div className="nav-actions">
+              <button
+                onClick={() => setIsCharacterArenaOpen(true)}
+                className="btn-nav-action"
+                title="Play 3D Character Workspace"
+                style={{
+                  background: 'linear-gradient(135deg, #FF1E27 0%, #D40C14 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  boxShadow: '0 4px 14px rgba(255, 30, 39, 0.4)',
+                }}
+              >
+                <span>🎮</span>
+                <span className="hide-on-mobile">3D CHARACTER</span>
+              </button>
+
               <a
                 href="https://github.com/Charan-718"
                 target="_blank"
@@ -426,6 +472,28 @@ function App() {
                 <i className="fa-brands fa-github"></i>
                 <span className="hide-on-mobile">GITHUB</span>
               </a>
+
+              {/* Sound Controls Button */}
+              <button
+                onClick={toggleSound}
+                className="btn-nav-action"
+                title={soundActive ? 'UI Sound Effects Active (Click to Mute)' : 'UI Sound Effects Muted (Click to Enable)'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  background: soundActive ? 'rgba(255, 30, 39, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+                  border: `1px solid ${soundActive ? '#FF1E27' : 'rgba(255, 255, 255, 0.16)'}`,
+                  color: soundActive ? '#FF6B72' : '#94a3b8',
+                  fontWeight: 700,
+                  transition: 'all 0.2s ease',
+                }}
+                data-sound="switch"
+              >
+                <span>{soundActive ? '🔊' : '🔇'}</span>
+                <span className="hide-on-mobile">{soundActive ? 'AUDIO ON' : 'MUTED'}</span>
+              </button>
 
               <button
                 className="mobile-toggle-btn"
@@ -1111,6 +1179,43 @@ function App() {
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {/* FLOATING 3D CHARACTER PLAYGROUND QUICK-LAUNCH PILL */}
+      <button
+        onClick={() => setIsCharacterArenaOpen(true)}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 90,
+          background: 'linear-gradient(135deg, #FF1E27 0%, #B70A11 100%)',
+          color: '#ffffff',
+          border: '1px solid rgba(255, 255, 255, 0.25)',
+          borderRadius: '50px',
+          padding: '12px 22px',
+          fontWeight: 800,
+          fontSize: '0.92rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          cursor: 'pointer',
+          boxShadow: '0 8px 24px rgba(255, 30, 39, 0.45)',
+          transition: 'all 0.25s ease',
+          fontFamily: 'var(--font-heading)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-3px) scale(1.03)';
+          e.currentTarget.style.boxShadow = '0 12px 30px rgba(255, 30, 39, 0.6)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0) scale(1)';
+          e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 30, 39, 0.45)';
+        }}
+        aria-label="Play 3D Character Workspace"
+      >
+        <span style={{ fontSize: '1.25rem' }}>🎮</span>
+        <span>Play 3D Character</span>
+      </button>
     </div>
   );
 }
