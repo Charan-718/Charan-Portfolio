@@ -348,6 +348,15 @@ export default function Character({
         child.castShadow = true;
         child.receiveShadow = true;
 
+        if (child.material) {
+          if (child.material.isMeshStandardMaterial || child.material.isMeshPhysicalMaterial) {
+            child.material.envMapIntensity = 1.35;
+            if (child.material.roughness > 0.8) {
+              child.material.roughness = 0.65;
+            }
+          }
+        }
+
         if (!hasSkeletalAnimations && child.material) {
           const mat = child.material.clone ? child.material.clone() : child.material;
           mat.transparent = true;
@@ -1015,6 +1024,18 @@ export default function Character({
       <group ref={modelRoot} position={[0, groundOffset, 0]}>
         <primitive object={scene} />
       </group>
+
+      {/* Cinematic Local Lighting Rig (Guarantees model visibility & natural contours in any camera angle) */}
+      {/* Soft Key/Fill on Chest, Face, and Suit Lapels */}
+      <pointLight position={[0, 1.6, 1.2]} intensity={1.8} distance={4.5} color="#f8fafc" decay={2} />
+      {/* Soft Back Fill on Shoulders, Suit Back & Hair */}
+      <pointLight position={[0, 1.8, -1.2]} intensity={2.2} distance={4.5} color="#e2e8f0" decay={2} />
+      {/* Subtle Crimson Rim Bounce on Right Side matching Neon Rings */}
+      <pointLight position={[0.9, 1.2, 0]} intensity={1.6} distance={3.5} color="#FF2E36" decay={2} />
+      {/* Subtle Cyan Rim Bounce on Left Side for Cinematic Contrast */}
+      <pointLight position={[-0.9, 1.2, 0]} intensity={1.2} distance={3.5} color="#38BDF8" decay={2} />
+      {/* Soft Floor Fill for Shoes & Lower Trousers */}
+      <pointLight position={[0, 0.3, 0.4]} intensity={1.0} distance={2.5} color="#f1f5f9" decay={2} />
 
       {/* Holographic Projector Base & Scanning Laser Ray Slice (Images 1, 2, 3, 4, 5) */}
       {isHoloActive && (

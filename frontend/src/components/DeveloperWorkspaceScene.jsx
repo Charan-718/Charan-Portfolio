@@ -323,34 +323,69 @@ export default function DeveloperWorkspaceScene({ onClose }) {
   return (
     <group name="DeveloperWorkspaceEnvironment">
       {/* =========================================================================
-          1. LIGHTING SETUP — HIGH-CONTRAST CYBERPUNK / SWISS TECH LIGHTING
+          1. LIGHTING SETUP — CINEMATIC BALANCED CYBERPUNK STUDIO LIGHTING
+             Provides convincing, natural illumination so the model is clearly visible
+             with rich fabric contours, accurate skin tones, and subtle ambient bounce.
          ========================================================================= */}
-      <ambientLight intensity={0.9} color="#151722" />
+      {/* Balanced Sky/Ground Fill so shadows are never pitch-black */}
+      <hemisphereLight
+        skyColor="#94a3b8"
+        groundColor="#251216"
+        intensity={1.75}
+      />
 
-      {/* Main Overhead Studio Downlight */}
-      <spotLight
-        position={[0, 9, 4]}
-        target-position={[0, 0, 4]}
-        intensity={3.5}
-        angle={0.65}
-        penumbra={0.7}
+      {/* Clean Ambient Base to gently lift crushed blacks without washing out contrast */}
+      <ambientLight intensity={1.15} color="#cad5e8" />
+
+      {/* Primary Overhead Studio Downlight with wide soft coverage across the walking platform */}
+      <directionalLight
+        position={[0, 11, 3]}
+        intensity={2.6}
         color="#ffffff"
         castShadow
         shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.0001}
       />
 
-      {/* Red Ambient Volumetric Glow over Center Pedestal */}
-      <pointLight position={[0, 1.8, 4.2]} intensity={4.5} distance={7} color="#FF1E27" />
+      {/* Soft Focused Overhead Spotlight over the center area */}
+      <spotLight
+        position={[0, 9, 3]}
+        target-position={[0, 0, 3]}
+        intensity={3.2}
+        angle={0.8}
+        penumbra={0.85}
+        color="#f8fafc"
+      />
 
-      {/* Soft Blue Perimeter Rim Lighting */}
-      <directionalLight position={[-8, 6, -4]} intensity={0.8} color="#60a5fa" />
-      <directionalLight position={[8, 6, -4]} intensity={0.8} color="#f43f5e" />
+      {/* Camera-Side Fill Light: Directly illuminates the back of the character model from the third-person camera angle */}
+      <directionalLight
+        position={[0, 5, -6]}
+        intensity={2.2}
+        color="#f1f5f9"
+      />
+
+      {/* Screen-Side Front Key Light: Illuminates the face and front of character when facing screens */}
+      <directionalLight
+        position={[0, 4.5, 9]}
+        intensity={2.0}
+        color="#ffffff"
+      />
+
+      {/* Cinematic Edge Rim Lights (Cool Cyan on Left, Neon Red on Right) */}
+      <directionalLight position={[-7, 5, 0]} intensity={1.5} color="#38bdf8" />
+      <directionalLight position={[7, 5, 0]} intensity={2.2} color="#ff1e27" />
+
+      {/* Red Volumetric Glow over Center Pedestal */}
+      <pointLight position={[0, 2.0, 4.2]} intensity={4.2} distance={8} color="#FF1E27" decay={2} />
 
       {/* Red Floor Uplight under Projects Screen */}
-      <pointLight position={[0, 0.4, 8.2]} intensity={2.8} distance={6} color="#FF1E27" />
+      <pointLight position={[0, 0.6, 8.5]} intensity={3.0} distance={7} color="#FF1E27" decay={2} />
+
+      {/* Quick Access Kiosk Neon Accent Light */}
+      <pointLight position={[-4.8, 1.8, 0.8]} intensity={2.5} distance={4.5} color="#FF1E27" decay={2} />
 
       {/* Warm Ambient Red Accent from Table Lamp */}
-      <pointLight position={[4.2, 0.8, 2.0]} intensity={2.2} distance={3.5} color="#FF3B44" />
+      <pointLight position={[4.2, 0.8, 2.0]} intensity={2.2} distance={3.5} color="#FF3B44" decay={2} />
 
       {/* =========================================================================
           2. ENVIRONMENT FLOOR & PLATFORM (REFLECTIVE CARBON WITH CONCENTRIC RINGS)
