@@ -41,13 +41,14 @@ export default function Character({
   const { scene, animations } = useGLTF(modelUrl);
 
   // GTA Camera and Character Orientations
-  // charYaw: character body rotation (affected by A/D)
-  // camYaw: camera orbital horizontal azimuth (starts behind character at Math.PI)
-  // camPitch: camera vertical angle
-  const charYaw = useRef(0);
-  const camYaw = useRef(Math.PI); // Starts directly behind the character
-  const camPitch = useRef(0.25); // Slightly elevated view
-  const camDistance = useRef(4.5); // Camera distance in meters
+  // charYaw: character body rotation (starts facing forward at Math.PI = 180° towards user/camera as in Image 1)
+  // camYaw: camera orbital horizontal azimuth (starts at Math.PI = 180° looking into command deck from front)
+  // camPitch: camera vertical angle (starts at 0.14 slightly elevated hero view)
+  const charYaw = useRef(Math.PI); // Starts facing forward towards the user (Image 1)
+  const camYaw = useRef(Math.PI);  // Starts at front hero angle framing character and screens (Image 1)
+  const camPitch = useRef(0.14);   // Slightly elevated view showing full character and ceiling above
+  const camDistance = useRef(5.2); // Wide panoramic view matching Image 1
+  const hasUserMoved = useRef(false);
   const isPointerLocked = useRef(false);
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
@@ -585,6 +586,7 @@ export default function Character({
       // Left or right click starts drag orbit
       if (e.button === 0 || e.button === 2) {
         isDragging.current = true;
+        hasUserMoved.current = true;
         dragStart.current = { x: e.clientX, y: e.clientY };
       }
     };
@@ -740,9 +742,11 @@ export default function Character({
     // Turning model with A or D keys
     if (leftActive) {
       charYaw.current += turnRate * delta;
+      hasUserMoved.current = true;
     }
     if (rightActive) {
       charYaw.current -= turnRate * delta;
+      hasUserMoved.current = true;
     }
     root.current.rotation.y = charYaw.current;
 
@@ -753,7 +757,7 @@ export default function Character({
     const now = performance.now();
     const isActivelyUsingMouse = isDragging.current || (now - lastMouseTime.current < 650);
 
-    if (!isActivelyUsingMouse) {
+    if (!isActivelyUsingMouse && hasUserMoved.current) {
       if (hasTurnInput) {
         // Swift, smooth auto-adjust behind the model while turning with A or D keys
         camYaw.current = dampAngle(camYaw.current, rearCameraYaw, 4.2, delta);
@@ -765,14 +769,21 @@ export default function Character({
 
     // B. GTA FRONT AND BACK WALKS (W & S KEYS)
     // Moves along the character's current facing direction
-    // Forward direction in Three.js coordinates:
-    const fwdX = Math.sin(charYaw.current);
-    const fwdZ = Math.cos(charYaw.current);
-
     if (forwardActive) {
+      if (!hasUserMoved.current) {
+        hasUserMoved.current = true;
+        // On first forward move, seamlessly pivot character to face into the workspace towards screens
+        charYaw.current = 0;
+        root.current.rotation.y = 0;
+      }
+      const fwdX = Math.sin(charYaw.current);
+      const fwdZ = Math.cos(charYaw.current);
       root.current.position.x += fwdX * currentSpeed * delta;
       root.current.position.z += fwdZ * currentSpeed * delta;
     } else if (backActive) {
+      hasUserMoved.current = true;
+      const fwdX = Math.sin(charYaw.current);
+      const fwdZ = Math.cos(charYaw.current);
       // Walking backward (reverse of forward vector, calibrated pace)
       const backwardSpeed = currentSpeed * 0.7;
       root.current.position.x -= fwdX * backwardSpeed * delta;
@@ -1019,7 +1030,7 @@ export default function Character({
   });
 
   return (
-    <group ref={root} position={[0, 0, 0]}>
+    <group ref={root} position={[0, 0, 0]} rotation={[0, Math.PI, 0]}>
       {/* Ground offset ensures feet touch ground plane at Y=0 */}
       <group ref={modelRoot} position={[0, groundOffset, 0]}>
         <primitive object={scene} />

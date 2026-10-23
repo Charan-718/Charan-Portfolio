@@ -160,15 +160,33 @@ export default function DeveloperWorkspaceScene({ onClose }) {
     return createQuickAccessScreenTexture();
   }, []);
 
-  // Cleanup WebGL textures on unmount to prevent GPU memory leaks
+  // Celestial deep-space starfield visible through the high panoramic glass clerestory (Matching Image 2)
+  const starsGeometry = useMemo(() => {
+    const count = 450;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = 0.15 + Math.random() * 0.95; // In the upper dome
+      const r = 26 + Math.random() * 10;
+      positions[i * 3] = r * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 1] = 6.0 + r * Math.cos(phi);
+      positions[i * 3 + 2] = 4.2 + r * Math.sin(phi) * Math.cos(theta);
+    }
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return geom;
+  }, []);
+
+  // Cleanup WebGL textures and geometries on unmount to prevent GPU memory leaks
   useEffect(() => {
     return () => {
       projectsTextureObj?.texture?.dispose();
       welcomeTextureObj?.texture?.dispose();
       techStackTextureObj?.texture?.dispose();
       quickAccessTextureObj?.texture?.dispose();
+      starsGeometry?.dispose();
     };
-  }, [projectsTextureObj, welcomeTextureObj, techStackTextureObj, quickAccessTextureObj]);
+  }, [projectsTextureObj, welcomeTextureObj, techStackTextureObj, quickAccessTextureObj, starsGeometry]);
 
   const handleProjectsClick = (e) => {
     e.stopPropagation();
@@ -830,6 +848,149 @@ export default function DeveloperWorkspaceScene({ onClose }) {
           />
         </mesh>
       </group>
+
+      {/* =========================================================================
+          11. FUTURISTIC STARSHIP DOME CEILING & CELESTIAL CANOPY (MATCHING IMAGE 2)
+              Positioned directly above the central hologram pedestal at [0, 7.35, 4.2]
+         ========================================================================= */}
+      <group position={[0, 7.35, 4.2]}>
+        {/* A. Outer Structural Bulkhead & Bevelled Rim */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+          <ringGeometry args={[11.2, 14.2, 64]} />
+          <meshStandardMaterial color="#0a0c13" metalness={0.9} roughness={0.3} side={THREE.DoubleSide} />
+        </mesh>
+        <mesh position={[0, 0.25, 0]}>
+          <cylinderGeometry args={[13.8, 14.2, 0.45, 64, 1, true]} />
+          <meshStandardMaterial color="#08090e" metalness={0.92} roughness={0.3} side={THREE.DoubleSide} />
+        </mesh>
+
+        {/* B. Outer Glowing Neon Red Ring (Matching Image 2 outer red glow) */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+          <ringGeometry args={[10.35, 10.55, 64]} />
+          <meshBasicMaterial color="#FF1E27" side={THREE.DoubleSide} />
+        </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
+          <ringGeometry args={[10.15, 10.75, 64]} />
+          <meshBasicMaterial color="#FF1E27" transparent opacity={0.4} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+        </mesh>
+
+        {/* C. Middle Stepped Dark Metallic Soffit Deck */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.08, 0]}>
+          <ringGeometry args={[7.4, 10.15, 64]} />
+          <meshStandardMaterial color="#0f121a" metalness={0.88} roughness={0.32} side={THREE.DoubleSide} />
+        </mesh>
+
+        {/* D. Middle Red Neon Accent Ring (Matching Image 2 middle ring) */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+          <ringGeometry args={[7.15, 7.32, 64]} />
+          <meshBasicMaterial color="#FF1E27" side={THREE.DoubleSide} />
+        </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0]}>
+          <ringGeometry args={[7.0, 7.45, 64]} />
+          <meshBasicMaterial color="#FF1E27" transparent opacity={0.35} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+        </mesh>
+
+        {/* E. Inner Stepped Ring Deck */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
+          <ringGeometry args={[4.8, 7.0, 64]} />
+          <meshStandardMaterial color="#141724" metalness={0.85} roughness={0.3} side={THREE.DoubleSide} />
+        </mesh>
+
+        {/* F. Inner Brilliant Glowing White Halo Ring (Matching Image 2 inner white ring) */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
+          <ringGeometry args={[4.55, 4.75, 64]} />
+          <meshBasicMaterial color="#FFFFFF" side={THREE.DoubleSide} />
+        </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.035, 0]}>
+          <ringGeometry args={[4.35, 4.95, 64]} />
+          <meshBasicMaterial color="#38BDF8" transparent opacity={0.45} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+        </mesh>
+
+        {/* G. Central Aperture Star Pod & Hologram Emitter Core */}
+        <mesh position={[0, 0.28, 0]}>
+          <cylinderGeometry args={[3.2, 3.4, 0.4, 48]} />
+          <meshStandardMaterial color="#080a10" metalness={0.92} roughness={0.25} />
+        </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.07, 0]}>
+          <circleGeometry args={[3.15, 48]} />
+          <meshStandardMaterial color="#06070a" roughness={0.7} metalness={0.5} />
+        </mesh>
+
+        {/* Central Glowing Red Star Core Emitter Lens (Matching Image 2 center beacon) */}
+        <mesh position={[0, -0.05, 0]}>
+          <sphereGeometry args={[0.35, 24, 24]} />
+          <meshBasicMaterial color="#FF1E27" />
+        </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.06, 0]}>
+          <ringGeometry args={[0.08, 1.1, 32]} />
+          <meshBasicMaterial color="#FF4D55" transparent opacity={0.75} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+        </mesh>
+
+        {/* Concentric Fiber-Optic Micro Star Dots inside Core (Image 2 celestial aperture) */}
+        {[0.8, 1.4, 2.0, 2.6].map((radDist, ri) =>
+          [0, 45, 90, 135, 180, 225, 270, 315].map((ang, ai) => {
+            const r = (ang * Math.PI) / 180 + ri * 0.2;
+            return (
+              <mesh key={`star-dot-${ri}-${ai}`} position={[Math.cos(r) * radDist, 0.075, Math.sin(r) * radDist]}>
+                <sphereGeometry args={[0.024, 8, 8]} />
+                <meshBasicMaterial color={ai % 2 === 0 ? '#38BDF8' : '#FFFFFF'} />
+              </mesh>
+            );
+          })
+        )}
+
+        {/* Subtle Vertical Hologram Projection Light Column down to Floor Pedestal */}
+        <mesh position={[0, -3.2, 0]}>
+          <cylinderGeometry args={[0.1, 0.65, 6.2, 24, 1, true]} />
+          <meshBasicMaterial color="#FF1E27" transparent opacity={0.05} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+        </mesh>
+
+        {/* H. 12 Radial Structural Trusses / Rafter Beams (Starship Framework in Image 2) */}
+        {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg, i) => {
+          const rad = (deg * Math.PI) / 180;
+          return (
+            <group key={`ceiling-rafter-${i}`} rotation={[0, rad, 0]}>
+              {/* Metallic Girder Body spanning from inner core to outer rim */}
+              <mesh position={[0, 0.14, 7.3]}>
+                <boxGeometry args={[0.16, 0.28, 8.2]} />
+                <meshStandardMaterial color="#11141e" metalness={0.9} roughness={0.3} />
+              </mesh>
+              {/* Glowing Red Under-Beam Neon Strip */}
+              <mesh position={[0, -0.01, 7.3]}>
+                <boxGeometry args={[0.04, 0.03, 8.2]} />
+                <meshBasicMaterial color="#FF1E27" />
+              </mesh>
+            </group>
+          );
+        })}
+
+        {/* I. 6 Overhead Studio Downlight Projector Cans along the Ring */}
+        {[30, 90, 150, 210, 270, 330].map((deg, i) => {
+          const rad = (deg * Math.PI) / 180;
+          const px = Math.cos(rad) * 6.8;
+          const pz = Math.sin(rad) * 6.8;
+          return (
+            <group key={`overhead-can-${i}`} position={[px, -0.05, pz]} rotation={[0.2 * Math.sin(rad), -rad, 0.2 * Math.cos(rad)]}>
+              <mesh>
+                <cylinderGeometry args={[0.14, 0.18, 0.35, 16]} />
+                <meshStandardMaterial color="#0c0e14" metalness={0.9} roughness={0.3} />
+              </mesh>
+              <mesh position={[0, -0.18, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <circleGeometry args={[0.13, 16]} />
+                <meshBasicMaterial color="#FFFFFF" />
+              </mesh>
+            </group>
+          );
+        })}
+      </group>
+
+      {/* =========================================================================
+          12. CELESTIAL DEEP-SPACE SKY DOME WITH SPARKLING STARS & NEBULA
+              Visible through the high panoramic glass clerestory above the screens
+         ========================================================================= */}
+      <points geometry={starsGeometry}>
+        <pointsMaterial size={0.18} color="#ffffff" transparent opacity={0.85} sizeAttenuation depthWrite={false} />
+      </points>
     </group>
   );
 }

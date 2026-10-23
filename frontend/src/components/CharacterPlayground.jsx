@@ -951,7 +951,7 @@ export default function CharacterPlayground({ onClose }) {
       <KeyboardControls map={keyboardMap}>
         <Canvas
           shadows
-          camera={{ position: [0, 2.46, -4.36], fov: 45 }}
+          camera={{ position: [0, 2.1, -5.2], fov: 48 }}
           style={{ width: '100%', height: '100%', cursor: cameraMode === 'chase' ? 'grab' : 'default' }}
         >
           {/* Futuristic Cyber Developer Workspace Command Center */}
