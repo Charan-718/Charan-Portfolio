@@ -113,7 +113,7 @@ export default function CharacterPlayground({ onClose }) {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '1.6rem' }}>🎮</span>
+            <i className="fa-solid fa-gamepad" style={{ fontSize: '1.4rem', color: '#FF1E27' }}></i>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff' }}>
@@ -143,8 +143,8 @@ export default function CharacterPlayground({ onClose }) {
                     {lockArms ? 'Arms Steady (Legs Walk)' : 'Arms Free'}
                   </span>
                   {' • '}
-                  <span style={{ color: '#f59e0b', background: 'rgba(245, 158, 11, 0.16)', padding: '2px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 700 }}>
-                    ✨ Dusky Skin (Charan)
+                  <span style={{ color: '#f59e0b', background: 'rgba(245, 158, 11, 0.16)', padding: '2px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <i className="fa-solid fa-user-check"></i> Dusky Skin (Charan)
                   </span>
                 </span>
               </div>
@@ -176,7 +176,7 @@ export default function CharacterPlayground({ onClose }) {
             }}
             title="Sound Controls: click to toggle button sound effects on/off"
           >
-            <span style={{ fontSize: '1rem' }}>{soundActive ? '🔊' : '🔇'}</span>
+            <i className={soundActive ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark'} style={{ fontSize: '0.92rem' }}></i>
             <span>{soundActive ? 'Audio ON' : 'Muted'}</span>
           </button>
 
@@ -203,7 +203,9 @@ export default function CharacterPlayground({ onClose }) {
             }}
             title="Emergency Stop / Brake: halts character immediately and settles into Stand At Ease (Key: Space)"
           >
-            <span>🛑</span> Stop / Brake <kbd style={{ background: '#FF1E27', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.74rem' }}>Space</kbd>
+            <i className="fa-solid fa-hand" style={{ color: '#FF6B72' }}></i>
+            <span>Stop / Brake</span>
+            <kbd style={{ background: '#FF1E27', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.74rem' }}>Space</kbd>
           </button>
 
           {/* Replay Hologram Creation Button */}
@@ -230,7 +232,9 @@ export default function CharacterPlayground({ onClose }) {
             }}
             title="Initiate Sci-Fi Red Hologram creation / materialization sequence (Key: R)"
           >
-            <span>⚡</span> Hologram <kbd style={{ background: '#FF1E27', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.74rem' }}>R</kbd>
+            <i className="fa-solid fa-bolt" style={{ color: '#FF3840' }}></i>
+            <span>Hologram</span>
+            <kbd style={{ background: '#FF1E27', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.74rem' }}>R</kbd>
           </button>
 
           {/* Steady Arms / Leg Walk Toggle */}
@@ -247,11 +251,24 @@ export default function CharacterPlayground({ onClose }) {
               fontWeight: 700,
               fontSize: '0.85rem',
               backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
               transition: 'all 0.2s ease',
             }}
             title="When active, the upper body/hands stay locked in steady resting pose while only legs walk."
           >
-            {lockArms ? '🛡️ Arms: Steady (Legs Walk Only)' : '🏃 Arms: Free Swing'}
+            {lockArms ? (
+              <>
+                <i className="fa-solid fa-shield-halved"></i>
+                <span>Arms: Steady</span>
+              </>
+            ) : (
+              <>
+                <i className="fa-solid fa-person-walking"></i>
+                <span>Arms: Free</span>
+              </>
+            )}
           </button>
 
           {/* Camera Mode Toggle */}
@@ -268,10 +285,23 @@ export default function CharacterPlayground({ onClose }) {
               fontWeight: 700,
               fontSize: '0.85rem',
               backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
               transition: 'all 0.2s ease',
             }}
           >
-            {cameraMode === 'chase' ? '🎯 GTA 3rd-Person' : '🔄 Free Orbit'}
+            {cameraMode === 'chase' ? (
+              <>
+                <i className="fa-solid fa-crosshairs"></i>
+                <span>GTA 3rd-Person</span>
+              </>
+            ) : (
+              <>
+                <i className="fa-solid fa-arrows-rotate"></i>
+                <span>Free Orbit</span>
+              </>
+            )}
           </button>
 
           {/* Model Switcher Menu */}
@@ -308,11 +338,11 @@ export default function CharacterPlayground({ onClose }) {
               backdropFilter: 'blur(8px)',
             }}
           >
-            <option value={publicUrl + '/my-meshy-model.glb'}>📦 Meshy Character (Dusky Skin — Charan)</option>
-            <option value={publicUrl + '/my-meshy-model-backup.glb'}>📦 Meshy Character (Original Pale Skin Backup)</option>
-            <option value={publicUrl + '/models/sample_rigged_character.glb'}>✨ Vanguard Rigged Soldier (Blender/Mixamo — Steady Hands)</option>
-            <option value={publicUrl + '/models/character.glb'}>🎯 /models/character.glb (Mixamo Rigged)</option>
-            <option value="custom">📂 Upload / Drop Custom .glb...</option>
+            <option value={publicUrl + '/my-meshy-model.glb'}>Meshy Character (Dusky Skin — Charan)</option>
+            <option value={publicUrl + '/my-meshy-model-backup.glb'}>Meshy Character (Original Pale Skin Backup)</option>
+            <option value={publicUrl + '/models/sample_rigged_character.glb'}>Vanguard Rigged Soldier (Blender/Mixamo — Steady Hands)</option>
+            <option value={publicUrl + '/models/character.glb'}>/models/character.glb (Mixamo Rigged)</option>
+            <option value="custom">Upload / Drop Custom .glb...</option>
           </select>
 
           {/* Close Button to return to Portfolio */}
@@ -338,7 +368,8 @@ export default function CharacterPlayground({ onClose }) {
               onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
               onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
             >
-              ✕ Exit Workspace
+              <i className="fa-solid fa-arrow-left"></i>
+              <span>Exit Workspace</span>
             </button>
           )}
         </div>
@@ -437,7 +468,7 @@ export default function CharacterPlayground({ onClose }) {
           onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
           onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
         >
-          <span>📦</span>
+          <i className="fa-solid fa-download"></i>
           <span>Download character_for_mixamo.zip</span>
         </a>
 

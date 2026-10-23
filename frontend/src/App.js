@@ -23,9 +23,70 @@ function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [soundActive, setSoundActive] = useState(() => isSoundEnabled());
-  const [isCharacterArenaOpen, setIsCharacterArenaOpen] = useState(
-    () => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('arena') === 'true'
-  );
+  const [isCharacterArenaOpen, setIsCharacterArenaOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const searchParams = new URLSearchParams(window.location.search);
+    const arenaParam = searchParams.get('arena');
+    const hasArenaQuery = arenaParam === 'true' || arenaParam === '3d' || arenaParam === 'character';
+    const hasArenaHash = window.location.hash === '#arena' || window.location.hash === '#3d-character';
+    const storedView = localStorage.getItem('charan_portfolio_active_view');
+    return Boolean(hasArenaQuery || hasArenaHash || storedView === 'arena');
+  });
+
+  const openCharacterArena = () => {
+    setIsCharacterArenaOpen(true);
+    try {
+      localStorage.setItem('charan_portfolio_active_view', 'arena');
+      const url = new URL(window.location.href);
+      url.searchParams.set('arena', '3d');
+      window.history.pushState({ arena: true }, '', url.toString());
+    } catch (e) {}
+  };
+
+  const closeCharacterArena = () => {
+    setIsCharacterArenaOpen(false);
+    try {
+      localStorage.removeItem('charan_portfolio_active_view');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('arena');
+      if (url.hash === '#arena' || url.hash === '#3d-character') {
+        url.hash = '';
+      }
+      window.history.pushState({ arena: false }, '', url.toString());
+    } catch (e) {}
+  };
+
+  // Keep URL in sync on browser back/forward and initial load
+  useEffect(() => {
+    const handlePopState = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const arenaParam = searchParams.get('arena');
+      const shouldOpen = Boolean(
+        arenaParam === 'true' || arenaParam === '3d' || arenaParam === 'character' || window.location.hash === '#arena'
+      );
+      setIsCharacterArenaOpen(shouldOpen);
+      if (shouldOpen) {
+        localStorage.setItem('charan_portfolio_active_view', 'arena');
+      } else {
+        localStorage.removeItem('charan_portfolio_active_view');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (isCharacterArenaOpen) {
+      try {
+        localStorage.setItem('charan_portfolio_active_view', 'arena');
+        const url = new URL(window.location.href);
+        if (!url.searchParams.has('arena')) {
+          url.searchParams.set('arena', '3d');
+          window.history.replaceState({ arena: true }, '', url.toString());
+        }
+      } catch (e) {}
+    }
+  }, [isCharacterArenaOpen]);
 
   // Initialize global button click sounds (< 1s tactile feedback) and subscribe to mute/unmute
   useEffect(() => {
@@ -376,7 +437,7 @@ function App() {
   ];
 
   if (isCharacterArenaOpen) {
-    return <CharacterPlayground onClose={() => setIsCharacterArenaOpen(false)} />;
+    return <CharacterPlayground onClose={closeCharacterArena} />;
   }
 
   return (
@@ -443,7 +504,7 @@ function App() {
             {/* Action CTA */}
             <div className="nav-actions">
               <button
-                onClick={() => setIsCharacterArenaOpen(true)}
+                onClick={openCharacterArena}
                 className="btn-nav-action"
                 title="Play 3D Character Workspace"
                 style={{
@@ -458,7 +519,7 @@ function App() {
                   boxShadow: '0 4px 14px rgba(255, 30, 39, 0.4)',
                 }}
               >
-                <span>🎮</span>
+                <i className="fa-solid fa-cube"></i>
                 <span className="hide-on-mobile">3D CHARACTER</span>
               </button>
 
@@ -491,7 +552,7 @@ function App() {
                 }}
                 data-sound="switch"
               >
-                <span>{soundActive ? '🔊' : '🔇'}</span>
+                <i className={soundActive ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark'}></i>
                 <span className="hide-on-mobile">{soundActive ? 'AUDIO ON' : 'MUTED'}</span>
               </button>
 
@@ -1182,7 +1243,7 @@ function App() {
 
       {/* FLOATING 3D CHARACTER PLAYGROUND QUICK-LAUNCH PILL */}
       <button
-        onClick={() => setIsCharacterArenaOpen(true)}
+        onClick={openCharacterArena}
         style={{
           position: 'fixed',
           bottom: '24px',
@@ -1213,7 +1274,7 @@ function App() {
         }}
         aria-label="Play 3D Character Workspace"
       >
-        <span style={{ fontSize: '1.25rem' }}>🎮</span>
+        <i className="fa-solid fa-cube" style={{ fontSize: '1.15rem' }}></i>
         <span>Play 3D Character</span>
       </button>
     </div>
