@@ -947,11 +947,11 @@ export default function CharacterPlayground({ onClose }) {
         </div>
       </div>
 
-      {/* MAIN 3D CANVAS */}
+      {/* UNIFIED 3D WORKSPACE CANVAS (TRUE REAL-WORLD 3D DEPTH) */}
       <KeyboardControls map={keyboardMap}>
         <Canvas
           shadows
-          camera={{ position: [0, 3, 6], fov: 45 }}
+          camera={{ position: [0, 2.46, -4.36], fov: 45 }}
           style={{ width: '100%', height: '100%', cursor: cameraMode === 'chase' ? 'grab' : 'default' }}
         >
           {/* Futuristic Cyber Developer Workspace Command Center */}

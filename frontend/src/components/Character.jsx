@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { useGLTF, useAnimations, useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { playClickSound } from '../utils/soundEffects';
@@ -38,7 +38,6 @@ export default function Character({
 }) {
   const root = useRef();
   const modelRoot = useRef();
-  const { gl } = useThree();
   const { scene, animations } = useGLTF(modelUrl);
 
   // GTA Camera and Character Orientations
@@ -90,6 +89,12 @@ export default function Character({
   useEffect(() => {
     triggerHologram(true);
   }, [modelUrl]);
+
+  useEffect(() => {
+    const handleHoloRescan = () => triggerHologram(true);
+    window.addEventListener('charan-hologram-rescan', handleHoloRescan);
+    return () => window.removeEventListener('charan-hologram-rescan', handleHoloRescan);
+  }, []);
 
   // Stop / Brake & Stuck-Key Prevention
   const isBraked = useRef(false);
@@ -555,12 +560,20 @@ export default function Character({
   // 3. MOUSE VIEW CONTROLS (GTA THIRD-PERSON ORBITAL CAMERA)
   // Mouse rotates the camera view freely around the player without rotating the player.
   useEffect(() => {
-    const dom = gl.domElement;
-    if (!dom) return;
-
     const onPointerDown = (e) => {
+      // Don't drag orbit if interacting with button, link, input, or modal element
+      if (
+        e.target &&
+        (e.target.closest('button') ||
+          e.target.closest('a') ||
+          e.target.closest('input') ||
+          e.target.closest('select') ||
+          e.target.closest('[role="button"]'))
+      ) {
+        return;
+      }
       lastMouseTime.current = performance.now();
-      // Left or right click on 3D view starts drag orbit
+      // Left or right click starts drag orbit
       if (e.button === 0 || e.button === 2) {
         isDragging.current = true;
         dragStart.current = { x: e.clientX, y: e.clientY };
@@ -568,7 +581,7 @@ export default function Character({
     };
 
     const onPointerMove = (e) => {
-      if (document.pointerLockElement === dom) {
+      if (document.pointerLockElement) {
         lastMouseTime.current = performance.now();
         // Pointer locked (GTA full PC game mode)
         const sensitivity = 0.0028;
@@ -599,7 +612,8 @@ export default function Character({
     };
 
     const onWheel = (e) => {
-      e.preventDefault();
+      // Don't intercept scroll if inside a scrollable modal container
+      if (e.target && (e.target.closest('input') || e.target.closest('select'))) return;
       lastMouseTime.current = performance.now();
       // Zoom in and out with mouse wheel
       camDistance.current = Math.max(
@@ -609,23 +623,23 @@ export default function Character({
     };
 
     const onPointerLockChange = () => {
-      isPointerLocked.current = document.pointerLockElement === dom;
+      isPointerLocked.current = !!document.pointerLockElement;
     };
 
-    dom.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
-    dom.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('wheel', onWheel, { passive: true });
     document.addEventListener('pointerlockchange', onPointerLockChange);
 
     return () => {
-      dom.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
-      dom.removeEventListener('wheel', onWheel);
+      window.removeEventListener('wheel', onWheel);
       document.removeEventListener('pointerlockchange', onPointerLockChange);
     };
-  }, [gl]);
+  }, []);
 
   // Initial animation setup
   useEffect(() => {
@@ -756,25 +770,79 @@ export default function Character({
       root.current.position.z -= fwdZ * backwardSpeed * delta;
     }
 
-    // Command Center Arena Deck Boundary Clamping (keeps character inside room)
+    // =========================================================================
+    // REAL-WORLD PHYSICAL 3D COLLISION SYSTEM
+    // Real solid obstacles: character smoothly bypasses kiosks, pedestals, furniture & walls
+    // =========================================================================
+    const posX = root.current.position.x;
+    const posZ = root.current.position.z;
+
+    // 1. Center Hologram Globe Pedestal Collision (circular base at [0, 4.2], radius 1.5m)
+    const pedX = 0;
+    const pedZ = 4.2;
+    const distFromPed = Math.hypot(posX - pedX, posZ - pedZ);
+    const minPedDist = 1.5;
+    if (distFromPed < minPedDist && distFromPed > 0.001) {
+      const angle = Math.atan2(posZ - pedZ, posX - pedX);
+      root.current.position.x = pedX + Math.cos(angle) * minPedDist;
+      root.current.position.z = pedZ + Math.sin(angle) * minPedDist;
+    }
+
+    // 2. Quick Access Kiosk Terminal Collision (freestanding kiosk at [-5.0, 0.5], radius 1.85m)
+    // Prevents character from walking into or through the kiosk; smoothly bypasses around it!
+    const kioskX = -5.0;
+    const kioskZ = 0.5;
+    const distFromKiosk = Math.hypot(root.current.position.x - kioskX, root.current.position.z - kioskZ);
+    const minKioskDist = 1.85;
+    if (distFromKiosk < minKioskDist && distFromKiosk > 0.001) {
+      const angle = Math.atan2(root.current.position.z - kioskZ, root.current.position.x - kioskX);
+      root.current.position.x = kioskX + Math.cos(angle) * minKioskDist;
+      root.current.position.z = kioskZ + Math.sin(angle) * minKioskDist;
+    }
+
+    // 3. Modern Lounge Furniture Collision (corner lounge at [4.5, 2.2], radius 1.65m)
+    const loungeX = 4.5;
+    const loungeZ = 2.2;
+    const distFromLounge = Math.hypot(root.current.position.x - loungeX, root.current.position.z - loungeZ);
+    const minLoungeDist = 1.65;
+    if (distFromLounge < minLoungeDist && distFromLounge > 0.001) {
+      const angle = Math.atan2(root.current.position.z - loungeZ, root.current.position.x - loungeX);
+      root.current.position.x = loungeX + Math.cos(angle) * minLoungeDist;
+      root.current.position.z = loungeZ + Math.sin(angle) * minLoungeDist;
+    }
+
+    // 4. Potted Office Plant Collision (plant pot at [-5.2, 3.4], radius 1.35m)
+    const plantX = -5.2;
+    const plantZ = 3.4;
+    const distFromPlant = Math.hypot(root.current.position.x - plantX, root.current.position.z - plantZ);
+    const minPlantDist = 1.35;
+    if (distFromPlant < minPlantDist && distFromPlant > 0.001) {
+      const angle = Math.atan2(root.current.position.z - plantZ, root.current.position.x - plantX);
+      root.current.position.x = plantX + Math.cos(angle) * minPlantDist;
+      root.current.position.z = plantZ + Math.sin(angle) * minPlantDist;
+    }
+
+    // 5. Command Center Platform Deck Perimeter & Wall Screen Clamping
+    // Deck is centered at [0, 4.0]. Radius 7.5m keeps character safely on the platform deck
+    // in front of all wall-mounted screens (Screen 7 at z=11.2, Screen 8 at x=-8.8, Screen 9 at x=8.8)
+    // so the character can walk up to any wall screen, inspect it, and bypass along the perimeter!
     const deckCenterX = 0;
     const deckCenterZ = 4.0;
     const distFromCenter = Math.hypot(root.current.position.x - deckCenterX, root.current.position.z - deckCenterZ);
-    const maxDeckRadius = 12.2;
-    if (distFromCenter > maxDeckRadius) {
+    const maxDeckRadius = 7.5;
+    if (distFromCenter > maxDeckRadius && distFromCenter > 0.001) {
       const angle = Math.atan2(root.current.position.z - deckCenterZ, root.current.position.x - deckCenterX);
       root.current.position.x = deckCenterX + Math.cos(angle) * maxDeckRadius;
       root.current.position.z = deckCenterZ + Math.sin(angle) * maxDeckRadius;
     }
 
-    // Center Hologram Pedestal Collision (smooth push-out so character can walk around pedestal)
-    const pedX = 0;
-    const pedZ = 4.2;
-    const distFromPed = Math.hypot(root.current.position.x - pedX, root.current.position.z - pedZ);
-    if (distFromPed < 1.35) {
-      const angle = Math.atan2(root.current.position.z - pedZ, root.current.position.x - pedX);
-      root.current.position.x = pedX + Math.cos(angle) * 1.35;
-      root.current.position.z = pedZ + Math.sin(angle) * 1.35;
+    // Forward clamping: keeps character 3.4m in front of Main Featured Projects screen at z=11.2
+    if (root.current.position.z > 7.8) {
+      root.current.position.z = 7.8;
+    }
+    // Backward clamping: keeps character on platform boundary
+    if (root.current.position.z < -2.2) {
+      root.current.position.z = -2.2;
     }
 
     // C. ANIMATION CROSSFADING & STRIDE SYNCHRONIZATION

@@ -1,8 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { playClickSound } from '../utils/soundEffects';
+import {
+  createProjectsScreenTexture,
+  createWelcomeScreenTexture,
+  createTechStackScreenTexture,
+  createQuickAccessScreenTexture,
+} from './workspaceScreenTextures';
 
 export const workspaceProjects = [
   {
@@ -114,7 +119,7 @@ export const workspaceProjects = [
 export default function DeveloperWorkspaceScene({ onClose }) {
   const publicUrl = process.env.PUBLIC_URL || '';
   const [currentPage, setCurrentPage] = useState(0); // 0 = First 4 projects, 1 = Next 4 projects
-  const [hoveredCard, setHoveredCard] = useState(null);
+  const [, setTick] = useState(0);
 
   // References for animated 3D elements
   const globeRef = useRef();
@@ -136,13 +141,183 @@ export default function DeveloperWorkspaceScene({ onClose }) {
     }
   });
 
-  const displayedProjects = workspaceProjects.slice(currentPage * 4, currentPage * 4 + 4);
+  // 100% WebGL Canvas Textures for physical 3D screens (zero DOM overlays, perfect depth buffer occlusion)
+  const projectsTextureObj = useMemo(() => {
+    return createProjectsScreenTexture(currentPage, workspaceProjects, publicUrl, () => {
+      setTick((t) => t + 1);
+    });
+  }, [currentPage, publicUrl]);
 
-  const handleOpenProject = (url, title) => {
-    playClickSound('click');
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+  const welcomeTextureObj = useMemo(() => {
+    return createWelcomeScreenTexture();
+  }, []);
+
+  const techStackTextureObj = useMemo(() => {
+    return createTechStackScreenTexture();
+  }, []);
+
+  const quickAccessTextureObj = useMemo(() => {
+    return createQuickAccessScreenTexture();
+  }, []);
+
+  // Cleanup WebGL textures on unmount to prevent GPU memory leaks
+  useEffect(() => {
+    return () => {
+      projectsTextureObj?.texture?.dispose();
+      welcomeTextureObj?.texture?.dispose();
+      techStackTextureObj?.texture?.dispose();
+      quickAccessTextureObj?.texture?.dispose();
+    };
+  }, [projectsTextureObj, welcomeTextureObj, techStackTextureObj, quickAccessTextureObj]);
+
+  const handleProjectsClick = (e) => {
+    e.stopPropagation();
+    if (!e.uv) return;
+    const canvasX = e.uv.x * 2048;
+    const canvasY = (1 - e.uv.y) * 1088;
+
+    // Header pagination controls
+    if (canvasY >= 35 && canvasY <= 110) {
+      if (canvasX >= 1580 && canvasX <= 1750) {
+        if (currentPage > 0) {
+          playClickSound('switch');
+          setCurrentPage(0);
+        }
+        return;
+      }
+      if (canvasX >= 1880 && canvasX <= 2010) {
+        if (currentPage < 1) {
+          playClickSound('switch');
+          setCurrentPage(1);
+        }
+        return;
+      }
     }
+
+    // Project cards click handling
+    const displayed = workspaceProjects.slice(currentPage * 4, currentPage * 4 + 4);
+    const cardPositions = [
+      { x: 52, y: 142, w: 950, h: 420 },
+      { x: 1046, y: 142, w: 950, h: 420 },
+      { x: 52, y: 588, w: 950, h: 420 },
+      { x: 1046, y: 588, w: 950, h: 420 },
+    ];
+
+    for (let i = 0; i < displayed.length; i++) {
+      const { x, y, w, h } = cardPositions[i];
+      if (canvasX >= x && canvasX <= x + w && canvasY >= y && canvasY <= y + h) {
+        const proj = displayed[i];
+        const rightX = x + 476;
+        const btn1Y = y + 236;
+
+        // GitHub Repo button
+        if (canvasX >= rightX + 224 && canvasX <= rightX + 410 && canvasY >= btn1Y && canvasY <= btn1Y + 54) {
+          playClickSound('click');
+          window.open(`https://github.com/${proj.repo}`, '_blank', 'noopener,noreferrer');
+          return;
+        }
+
+        // Live Application URL or general card click
+        playClickSound('click');
+        window.open(proj.liveUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
+    }
+  };
+
+  const handleProjectsPointerMove = (e) => {
+    e.stopPropagation();
+    if (!e.uv) return;
+    const canvasX = e.uv.x * 2048;
+    const canvasY = (1 - e.uv.y) * 1088;
+
+    let isClickable = false;
+    if (canvasY >= 35 && canvasY <= 110) {
+      if ((canvasX >= 1580 && canvasX <= 1750) || (canvasX >= 1880 && canvasX <= 2010)) {
+        isClickable = true;
+      }
+    } else if (canvasY >= 142 && canvasY <= 1008) {
+      if ((canvasX >= 52 && canvasX <= 1002) || (canvasX >= 1046 && canvasX <= 1996)) {
+        isClickable = true;
+      }
+    }
+
+    document.body.style.cursor = isClickable ? 'pointer' : 'auto';
+  };
+
+  const handleWelcomeClick = (e) => {
+    e.stopPropagation();
+    if (!e.uv) return;
+    const canvasX = e.uv.x * 1024;
+    const canvasY = (1 - e.uv.y) * 880;
+
+    // Stat card 1: Public Repositories (x: 40..490, y: 370..550)
+    if (canvasX >= 40 && canvasX <= 490 && canvasY >= 370 && canvasY <= 550) {
+      playClickSound('click');
+      window.open('https://github.com/Charan-718', '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Stat card 2: Live Deployments (x: 534..984, y: 370..550)
+    if (canvasX >= 534 && canvasX <= 984 && canvasY >= 370 && canvasY <= 550) {
+      playClickSound('click');
+      window.open('https://github.com/Charan-718?tab=repositories', '_blank', 'noopener,noreferrer');
+      return;
+    }
+  };
+
+  const handleWelcomePointerMove = (e) => {
+    e.stopPropagation();
+    if (!e.uv) return;
+    const canvasX = e.uv.x * 1024;
+    const canvasY = (1 - e.uv.y) * 880;
+    const isClickable =
+      canvasY >= 370 &&
+      canvasY <= 550 &&
+      ((canvasX >= 40 && canvasX <= 490) || (canvasX >= 534 && canvasX <= 984));
+    document.body.style.cursor = isClickable ? 'pointer' : 'auto';
+  };
+
+  const handleQuickAccessClick = (e) => {
+    e.stopPropagation();
+    if (!e.uv) return;
+    const canvasY = (1 - e.uv.y) * 630;
+
+    if (canvasY >= 130 && canvasY <= 265) {
+      // 1. Switch Projects Page
+      playClickSound('switch');
+      setCurrentPage((p) => (p === 0 ? 1 : 0));
+    } else if (canvasY >= 285 && canvasY <= 420) {
+      // 2. GitHub Profile
+      playClickSound('click');
+      window.open('https://github.com/Charan-718', '_blank', 'noopener,noreferrer');
+    } else if (canvasY >= 440 && canvasY <= 575) {
+      // 3. Trigger Hologram Re-Scan
+      playClickSound('hologram');
+      window.dispatchEvent(new CustomEvent('charan-hologram-rescan'));
+    }
+  };
+
+  const handleQuickAccessPointerMove = (e) => {
+    e.stopPropagation();
+    if (!e.uv) return;
+    const canvasY = (1 - e.uv.y) * 630;
+    let hovered = -1;
+    if (canvasY >= 130 && canvasY <= 265) hovered = 0;
+    else if (canvasY >= 285 && canvasY <= 420) hovered = 1;
+    else if (canvasY >= 440 && canvasY <= 575) hovered = 2;
+
+    if (quickAccessTextureObj?.redraw) {
+      quickAccessTextureObj.redraw(hovered);
+    }
+    document.body.style.cursor = hovered !== -1 ? 'pointer' : 'auto';
+  };
+
+  const handleQuickAccessPointerOut = () => {
+    if (quickAccessTextureObj?.redraw) {
+      quickAccessTextureObj.redraw(-1);
+    }
+    document.body.style.cursor = 'auto';
   };
 
   return (
@@ -474,21 +649,19 @@ export default function DeveloperWorkspaceScene({ onClose }) {
           7. MAIN CENTER DISPLAY — "FEATURED PROJECTS" (NETLIFY / VERCEL STYLE)
              Positioned directly in front of character at [0, 2.7, 9.2]
          ========================================================================= */}
-      <group position={[0, 2.75, 9.2]} rotation={[0, Math.PI, 0]}>
-        {/* Physical 3D Floating Bezel Frame */}
-        <mesh position={[0, 0, -0.06]} receiveShadow castShadow>
-          <planeGeometry args={[9.4, 5.0]} />
+      <group position={[0, 4.35, 11.2]} rotation={[0.08, Math.PI, 0]}>
+        {/* Physical 3D Solid Monitor Casing (Like a Real-World Display) */}
+        <mesh position={[0, 0, -0.1]} receiveShadow castShadow>
+          <boxGeometry args={[9.5, 5.1, 0.2]} />
           <meshStandardMaterial
-            color="#080a10"
-            roughness={0.2}
+            color="#0b0d14"
+            roughness={0.25}
             metalness={0.9}
-            transparent
-            opacity={0.96}
           />
         </mesh>
 
         {/* Outer Red Glowing Bezel Edge */}
-        <mesh position={[0, 0, -0.05]}>
+        <mesh position={[0, 0, -0.01]}>
           <ringGeometry args={[4.7, 4.74, 4]} />
           <meshBasicMaterial color="#FF1E27" transparent opacity={0.8} />
         </mesh>
@@ -496,845 +669,154 @@ export default function DeveloperWorkspaceScene({ onClose }) {
         {/* Red Neon Corner Accents */}
         {[-4.65, 4.65].map((x, xi) =>
           [-2.45, 2.45].map((y, yi) => (
-            <mesh key={`${xi}-${yi}`} position={[x, y, -0.04]}>
+            <mesh key={`${xi}-${yi}`} position={[x, y, 0.01]}>
               <planeGeometry args={[0.4, 0.4]} />
               <meshBasicMaterial color="#FF1E27" />
             </mesh>
           ))
         )}
 
-        {/* 3D Glass Screen Surface */}
-        <mesh position={[0, 0, -0.02]}>
-          <planeGeometry args={[9.2, 4.8]} />
-          <meshStandardMaterial
-            color="#0e1017"
-            roughness={0.15}
-            metalness={0.5}
-            transparent
-            opacity={0.65}
-          />
-        </mesh>
-
-        {/* Drei <Html> Overlay with Crisp Netlify/Vercel Hero Cards */}
-        <Html
-          transform
-          distanceFactor={7.2}
+        {/* True 3D WebGL Screen Surface (Zero DOM overlays, respects hardware depth buffer) */}
+        <mesh
           position={[0, 0, 0.02]}
-          style={{
-            width: '1180px',
-            userSelect: 'none',
-            fontFamily: "'Space Grotesk', system-ui, -apple-system, sans-serif",
-            color: '#FFFFFF',
-            pointerEvents: 'auto',
+          onClick={handleProjectsClick}
+          onPointerMove={handleProjectsPointerMove}
+          onPointerOut={() => {
+            document.body.style.cursor = 'auto';
           }}
         >
-          <div
-            style={{
-              background: 'rgba(11, 13, 19, 0.94)',
-              border: '2px solid rgba(255, 30, 39, 0.55)',
-              borderRadius: '16px',
-              padding: '24px 28px',
-              boxShadow: '0 0 50px rgba(255, 30, 39, 0.25), 0 25px 60px rgba(0, 0, 0, 0.85)',
-              backdropFilter: 'blur(16px)',
-            }}
-          >
-            {/* Header Strip */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
-                paddingBottom: '14px',
-                marginBottom: '20px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    background: '#FF1E27',
-                    boxShadow: '0 0 14px #FF1E27, 0 0 22px #FF1E27',
-                    animation: 'pulse 1.5s infinite',
-                  }}
-                />
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: '1.45rem',
-                    fontWeight: 900,
-                    letterSpacing: '0.06em',
-                    color: '#FFFFFF',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  FEATURED PROJECTS <span style={{ color: '#FF1E27' }}>{'//'} LIVE WORKSPACE</span>
-                </h2>
-                <span
-                  style={{
-                    background: 'rgba(255, 30, 39, 0.15)',
-                    color: '#FF6B72',
-                    padding: '3px 10px',
-                    borderRadius: '4px',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.08em',
-                    fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                    border: '1px solid rgba(255, 30, 39, 0.35)',
-                  }}
-                >
-                  CLICK TO VISIT REAL-TIME SITES
-                </span>
-              </div>
-
-              {/* Page Toggle Switcher */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    playClickSound('switch');
-                    setCurrentPage((prev) => (prev === 0 ? 1 : 0));
-                  }}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    border: '1px solid rgba(255, 255, 255, 0.22)',
-                    color: '#FFFFFF',
-                    padding: '6px 14px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#FF1E27';
-                    e.currentTarget.style.borderColor = '#FF1E27';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.22)';
-                  }}
-                >
-                  <span>PAGE {currentPage + 1} OF 2</span>
-                  <i className="fa-solid fa-arrows-rotate"></i>
-                </button>
-              </div>
-            </div>
-
-            {/* Project Cards Grid — 4 Cards per page (Netlify / Vercel Showcase Format) */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '18px',
-              }}
-            >
-              {displayedProjects.map((proj) => {
-                const isHovered = hoveredCard === proj.id;
-                return (
-                  <div
-                    key={proj.id}
-                    onClick={() => handleOpenProject(proj.liveUrl, proj.title)}
-                    onMouseEnter={() => {
-                      setHoveredCard(proj.id);
-                      playClickSound('hover');
-                    }}
-                    onMouseLeave={() => setHoveredCard(null)}
-                    style={{
-                      background: isHovered ? 'rgba(26, 29, 42, 0.98)' : 'rgba(16, 18, 26, 0.95)',
-                      border: isHovered
-                        ? '2px solid #FF1E27'
-                        : '1px solid rgba(255, 255, 255, 0.14)',
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      cursor: 'pointer',
-                      transform: isHovered ? 'translateY(-6px) scale(1.02)' : 'translateY(0)',
-                      boxShadow: isHovered
-                        ? '0 12px 30px rgba(0, 0, 0, 0.7), 0 0 24px rgba(255, 30, 39, 0.45)'
-                        : '0 6px 18px rgba(0, 0, 0, 0.5)',
-                      transition: 'all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
-                    title={`Click to open ${proj.title} in new tab`}
-                  >
-                    {/* Top Hero-Section Thumbnail Container (Like Netlify / Vercel Cards) */}
-                    <div
-                      style={{
-                        position: 'relative',
-                        width: '100%',
-                        height: '145px',
-                        background: '#090a0f',
-                        overflow: 'hidden',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                      }}
-                    >
-                      <img
-                        src={publicUrl + proj.thumbnail}
-                        alt={proj.title}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          objectPosition: 'top center',
-                          transform: isHovered ? 'scale(1.06)' : 'scale(1)',
-                          transition: 'transform 0.3s ease',
-                        }}
-                      />
-
-                      {/* Netlify/Vercel Host Badge */}
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: '8px',
-                          left: '8px',
-                          background: 'rgba(0, 0, 0, 0.78)',
-                          backdropFilter: 'blur(6px)',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          borderRadius: '4px',
-                          padding: '3px 8px',
-                          fontSize: '0.65rem',
-                          fontWeight: 800,
-                          color: '#FFFFFF',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '5px',
-                        }}
-                      >
-                        <i className="fa-solid fa-cloud" style={{ color: proj.accentColor }}></i>
-                        <span>{proj.hostBadge}</span>
-                      </div>
-
-                      {/* Live Indicator Pill */}
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: '8px',
-                          right: '8px',
-                          background: 'rgba(34, 197, 94, 0.2)',
-                          border: '1px solid #22c55e',
-                          borderRadius: '4px',
-                          padding: '3px 7px',
-                          fontSize: '0.62rem',
-                          fontWeight: 800,
-                          color: '#4ade80',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '50%',
-                            background: '#22c55e',
-                          }}
-                        />
-                        <span>LIVE</span>
-                      </div>
-
-                      {/* Hover Overlay with "LAUNCH LIVE SITE" */}
-                      <div
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          background: 'rgba(255, 30, 39, 0.25)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          opacity: isHovered ? 1 : 0,
-                          transition: 'opacity 0.18s ease',
-                          pointerEvents: 'none',
-                        }}
-                      >
-                        <div
-                          style={{
-                            background: '#FF1E27',
-                            color: '#FFFFFF',
-                            padding: '6px 14px',
-                            borderRadius: '6px',
-                            fontSize: '0.75rem',
-                            fontWeight: 800,
-                            letterSpacing: '0.04em',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.6)',
-                          }}
-                        >
-                          <span>OPEN LIVE SITE</span>
-                          <i className="fa-solid fa-arrow-up-right-from-square"></i>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Card Content Footer (Title, Category, Repo link) */}
-                    <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <div
-                        style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 800,
-                          color: proj.accentColor,
-                          letterSpacing: '0.06em',
-                          fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                        }}
-                      >
-                        {proj.category}
-                      </div>
-
-                      <h4
-                        style={{
-                          margin: 0,
-                          fontSize: '0.96rem',
-                          fontWeight: 800,
-                          color: '#FFFFFF',
-                          lineHeight: 1.25,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
-                        {proj.title}
-                      </h4>
-
-                      <div
-                        style={{
-                          fontSize: '0.72rem',
-                          color: '#94a3b8',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          marginTop: '2px',
-                        }}
-                      >
-                        <i className="fa-brands fa-github" style={{ fontSize: '0.8rem' }}></i>
-                        <span style={{ fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)" }}>
-                          {proj.repo}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Bottom Footer Tip */}
-            <div
-              style={{
-                marginTop: '16px',
-                paddingTop: '12px',
-                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: '0.72rem',
-                color: '#94a3b8',
-              }}
-            >
-              <span>
-                <strong style={{ color: '#fff' }}>Interactive 3D Workspace:</strong> Walk up to any terminal or click a project thumbnail to launch.
-              </span>
-              <span style={{ color: '#FF6B72' }}>
-                SHOWING {currentPage * 4 + 1}–{currentPage * 4 + displayedProjects.length} OF {workspaceProjects.length} HOSTED APPS
-              </span>
-            </div>
-          </div>
-        </Html>
+          <planeGeometry args={[9.4, 5.0]} />
+          <meshStandardMaterial
+            map={projectsTextureObj.texture}
+            emissiveMap={projectsTextureObj.texture}
+            emissive="#ffffff"
+            emissiveIntensity={0.7}
+            roughness={0.2}
+            metalness={0.05}
+          />
+        </mesh>
       </group>
 
       {/* =========================================================================
           8. LEFT CURVED SCREEN — "WELCOME & REPOSITORIES TELEMETRY"
              Positioned at [-6.5, 2.7, 7.8], angled inward towards center
          ========================================================================= */}
-      <group position={[-6.8, 2.75, 7.8]} rotation={[0, Math.PI - 0.42, 0]}>
-        {/* Physical 3D Floating Bezel Frame */}
-        <mesh position={[0, 0, -0.06]} receiveShadow castShadow>
-          <planeGeometry args={[5.8, 5.0]} />
-          <meshStandardMaterial color="#080a10" roughness={0.2} metalness={0.9} />
+      <group position={[-8.8, 3.4, 7.5]} rotation={[0.06, Math.PI - 0.65, 0]}>
+        {/* Physical 3D Solid Monitor Casing (Like a Real-World Display) */}
+        <mesh position={[0, 0, -0.1]} receiveShadow castShadow>
+          <boxGeometry args={[5.9, 5.1, 0.2]} />
+          <meshStandardMaterial color="#0b0d14" roughness={0.25} metalness={0.9} />
         </mesh>
-        <mesh position={[0, 0, -0.05]}>
+        <mesh position={[0, 0, -0.01]}>
           <ringGeometry args={[2.8, 2.84, 4]} />
           <meshBasicMaterial color="#FF1E27" transparent opacity={0.6} />
         </mesh>
 
-        <Html
-          transform
-          distanceFactor={7.2}
+        {/* True 3D WebGL Screen Surface */}
+        <mesh
           position={[0, 0, 0.02]}
-          style={{
-            width: '680px',
-            userSelect: 'none',
-            fontFamily: "'Space Grotesk', system-ui, -apple-system, sans-serif",
-            color: '#FFFFFF',
-            pointerEvents: 'auto',
+          onClick={handleWelcomeClick}
+          onPointerMove={handleWelcomePointerMove}
+          onPointerOut={() => {
+            document.body.style.cursor = 'auto';
           }}
         >
-          <div
-            style={{
-              background: 'rgba(11, 13, 19, 0.94)',
-              border: '2px solid rgba(255, 30, 39, 0.45)',
-              borderRadius: '16px',
-              padding: '28px',
-              boxShadow: '0 0 45px rgba(255, 30, 39, 0.2), 0 25px 60px rgba(0, 0, 0, 0.85)',
-              backdropFilter: 'blur(16px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: '0.72rem',
-                  fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                  color: '#FF6B72',
-                  letterSpacing: '0.12em',
-                  marginBottom: '6px',
-                }}
-              >
-                CHARAN-718 // DEVELOPER SUITE
-              </div>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: '1.75rem',
-                  fontWeight: 900,
-                  lineHeight: 1.15,
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                Welcome to my <br />
-                <span style={{ color: '#FF1E27' }}>Developer Workspace.</span>
-              </h1>
-              <p
-                style={{
-                  margin: '10px 0 0 0',
-                  color: '#94a3b8',
-                  fontSize: '0.95rem',
-                  lineHeight: 1.45,
-                }}
-              >
-                Explore my projects, explore innovation. Real-time digital twins,
-                enterprise HRMS platforms, and machine learning pipelines.
-              </p>
-            </div>
-
-            {/* Terminal Prompt Animation */}
-            <div
-              style={{
-                background: 'rgba(0, 0, 0, 0.65)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                fontSize: '0.85rem',
-                color: '#FF6B72',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <span style={{ color: '#FF1E27' }}>$</span>
-              <span>explore my work_</span>
-            </div>
-
-            {/* Real Stats Cards (Matching Image 1) */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '14px',
-              }}
-            >
-              <div
-                style={{
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '10px',
-                  padding: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '14px',
-                }}
-              >
-                <div
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '8px',
-                    background: 'rgba(255, 30, 39, 0.15)',
-                    border: '1px solid rgba(255, 30, 39, 0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#FF1E27',
-                    fontSize: '1.2rem',
-                  }}
-                >
-                  <i className="fa-brands fa-github"></i>
-                </div>
-                <div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>32</div>
-                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>Public Repositories</div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '10px',
-                  padding: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '14px',
-                }}
-              >
-                <div
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '8px',
-                    background: 'rgba(34, 197, 94, 0.15)',
-                    border: '1px solid rgba(34, 197, 94, 0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#22c55e',
-                    fontSize: '1.15rem',
-                  }}
-                >
-                  <i className="fa-solid fa-globe"></i>
-                </div>
-                <div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>18+</div>
-                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>Live Deployments</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Html>
+          <planeGeometry args={[5.8, 5.0]} />
+          <meshStandardMaterial
+            map={welcomeTextureObj.texture}
+            emissiveMap={welcomeTextureObj.texture}
+            emissive="#ffffff"
+            emissiveIntensity={0.65}
+            roughness={0.2}
+            metalness={0.05}
+          />
+        </mesh>
       </group>
 
       {/* =========================================================================
           9. RIGHT CURVED SCREEN — "TECH STACK & CORE MATRIX"
              Positioned at [6.8, 2.75, 7.8], angled inward towards center
          ========================================================================= */}
-      <group position={[6.8, 2.75, 7.8]} rotation={[0, Math.PI + 0.42, 0]}>
-        {/* Physical 3D Floating Bezel Frame */}
-        <mesh position={[0, 0, -0.06]} receiveShadow castShadow>
-          <planeGeometry args={[5.8, 5.0]} />
-          <meshStandardMaterial color="#080a10" roughness={0.2} metalness={0.9} />
+      <group position={[8.8, 3.4, 7.5]} rotation={[0.06, Math.PI + 0.65, 0]}>
+        {/* Physical 3D Solid Monitor Casing (Like a Real-World Display) */}
+        <mesh position={[0, 0, -0.1]} receiveShadow castShadow>
+          <boxGeometry args={[5.9, 5.1, 0.2]} />
+          <meshStandardMaterial color="#0b0d14" roughness={0.25} metalness={0.9} />
         </mesh>
-        <mesh position={[0, 0, -0.05]}>
+        <mesh position={[0, 0, -0.01]}>
           <ringGeometry args={[2.8, 2.84, 4]} />
           <meshBasicMaterial color="#FF1E27" transparent opacity={0.6} />
         </mesh>
 
-        <Html
-          transform
-          distanceFactor={7.2}
-          position={[0, 0, 0.02]}
-          style={{
-            width: '680px',
-            userSelect: 'none',
-            fontFamily: "'Space Grotesk', system-ui, -apple-system, sans-serif",
-            color: '#FFFFFF',
-            pointerEvents: 'auto',
-          }}
-        >
-          <div
-            style={{
-              background: 'rgba(11, 13, 19, 0.94)',
-              border: '2px solid rgba(255, 30, 39, 0.45)',
-              borderRadius: '16px',
-              padding: '28px',
-              boxShadow: '0 0 45px rgba(255, 30, 39, 0.2), 0 25px 60px rgba(0, 0, 0, 0.85)',
-              backdropFilter: 'blur(16px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '18px',
-            }}
-          >
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span
-                style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  background: '#FF1E27',
-                  boxShadow: '0 0 10px #FF1E27',
-                }}
-              />
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: '1.35rem',
-                  fontWeight: 900,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                TECH STACK
-              </h2>
-            </div>
-
-            {/* Tech Badges Grid */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '10px',
-              }}
-            >
-              {[
-                { name: 'React', icon: 'fa-brands fa-react', color: '#61DAFB' },
-                { name: 'TypeScript', icon: 'fa-solid fa-code', color: '#3178C6' },
-                { name: 'Node.js', icon: 'fa-brands fa-node-js', color: '#68A063' },
-                { name: 'Python', icon: 'fa-brands fa-python', color: '#FFD43B' },
-                { name: 'PostgreSQL', icon: 'fa-solid fa-database', color: '#336791' },
-                { name: 'Docker', icon: 'fa-brands fa-docker', color: '#2496ED' },
-                { name: 'FastAPI', icon: 'fa-solid fa-bolt', color: '#009688' },
-                { name: 'Qiskit', icon: 'fa-solid fa-atom', color: '#8A2BE2' },
-                { name: 'Prisma', icon: 'fa-solid fa-gem', color: '#2D3748' },
-                { name: 'TailwindCSS', icon: 'fa-solid fa-wind', color: '#38BDF8' },
-                { name: 'Three.js', icon: 'fa-solid fa-cube', color: '#FF1E27' },
-                { name: 'Express', icon: 'fa-solid fa-server', color: '#FFFFFF' },
-              ].map((tech, i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    borderRadius: '8px',
-                    padding: '10px 8px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '6px',
-                    textAlign: 'center',
-                  }}
-                >
-                  <i className={tech.icon} style={{ color: tech.color, fontSize: '1.25rem' }}></i>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#e2e8f0' }}>{tech.name}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Philosophy Banner (Matching Image 1) */}
-            <div
-              style={{
-                marginTop: '6px',
-                background: 'rgba(255, 30, 39, 0.1)',
-                border: '1px solid rgba(255, 30, 39, 0.35)',
-                borderRadius: '8px',
-                padding: '14px',
-                textAlign: 'center',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: '0.95rem',
-                  fontWeight: 900,
-                  letterSpacing: '0.08em',
-                  color: '#FFFFFF',
-                  textTransform: 'uppercase',
-                }}
-              >
-                “Build • Innovate • Inspire”
-              </div>
-            </div>
-          </div>
-        </Html>
+        {/* True 3D WebGL Screen Surface */}
+        <mesh position={[0, 0, 0.02]}>
+          <planeGeometry args={[5.8, 5.0]} />
+          <meshStandardMaterial
+            map={techStackTextureObj.texture}
+            emissiveMap={techStackTextureObj.texture}
+            emissive="#ffffff"
+            emissiveIntensity={0.65}
+            roughness={0.2}
+            metalness={0.05}
+          />
+        </mesh>
       </group>
 
       {/* =========================================================================
           10. FOREGROUND "QUICK ACCESS" KIOSK (MATCHING IMAGE 1 BOTTOM-LEFT)
              Positioned at [-3.4, 0.75, 2.4], angled at character
          ========================================================================= */}
-      <group position={[-3.4, 0.75, 2.4]} rotation={[-0.28, Math.PI - 0.45, 0]}>
-        {/* Physical Console Angled Wedge Stand */}
-        <mesh position={[0, -0.32, -0.08]} receiveShadow castShadow>
-          <boxGeometry args={[2.5, 0.65, 0.3]} />
-          <meshStandardMaterial color="#0e1017" roughness={0.3} metalness={0.8} />
+      <group position={[-5.0, 1.25, 0.5]} rotation={[-0.22, Math.PI - 0.85, 0]}>
+        {/* Physical 3D Freestanding Kiosk Base on Floor */}
+        <mesh position={[0, -1.2, -0.05]} receiveShadow castShadow>
+          <cylinderGeometry args={[0.7, 0.85, 0.1, 24]} />
+          <meshStandardMaterial color="#0c0e14" metalness={0.9} roughness={0.3} />
+        </mesh>
+        {/* Vertical Pedestal Pillar Column */}
+        <mesh position={[0, -0.65, -0.05]} receiveShadow castShadow>
+          <boxGeometry args={[0.45, 1.0, 0.35]} />
+          <meshStandardMaterial color="#14161f" metalness={0.85} roughness={0.3} />
+        </mesh>
+        {/* Glowing Red Neon Strip on Pillar */}
+        <mesh position={[0, -0.65, 0.14]}>
+          <boxGeometry args={[0.06, 0.9, 0.02]} />
+          <meshBasicMaterial color="#FF1E27" />
         </mesh>
 
-        {/* Screen Bezel */}
-        <mesh position={[0, 0, -0.04]} receiveShadow castShadow>
-          <planeGeometry args={[2.6, 1.6]} />
-          <meshStandardMaterial color="#080a10" roughness={0.2} metalness={0.9} />
+        {/* Angled Console Desktop Shelf */}
+        <mesh position={[0, -0.18, 0.05]} rotation={[0.3, 0, 0]} receiveShadow castShadow>
+          <boxGeometry args={[2.7, 0.1, 0.7]} />
+          <meshStandardMaterial color="#0e1017" roughness={0.25} metalness={0.85} />
         </mesh>
 
-        <mesh position={[0, 0, -0.03]}>
+        {/* Solid 3D Screen Enclosure Box (Prevents seeing through from back) */}
+        <mesh position={[0, 0, -0.08]} receiveShadow castShadow>
+          <boxGeometry args={[2.65, 1.65, 0.15]} />
+          <meshStandardMaterial color="#080a10" roughness={0.25} metalness={0.9} />
+        </mesh>
+
+        <mesh position={[0, 0, 0.001]}>
           <ringGeometry args={[1.25, 1.28, 4]} />
           <meshBasicMaterial color="#FF1E27" />
         </mesh>
 
-        <Html
-          transform
-          distanceFactor={3.8}
+        {/* True 3D WebGL Screen Surface */}
+        <mesh
           position={[0, 0, 0.02]}
-          style={{
-            width: '420px',
-            userSelect: 'none',
-            fontFamily: "'Space Grotesk', system-ui, -apple-system, sans-serif",
-            color: '#FFFFFF',
-            pointerEvents: 'auto',
-          }}
+          onClick={handleQuickAccessClick}
+          onPointerMove={handleQuickAccessPointerMove}
+          onPointerOut={handleQuickAccessPointerOut}
         >
-          <div
-            style={{
-              background: 'rgba(11, 13, 19, 0.95)',
-              border: '2px solid #FF1E27',
-              borderRadius: '12px',
-              padding: '16px',
-              boxShadow: '0 0 30px rgba(255, 30, 39, 0.4), 0 16px 40px rgba(0, 0, 0, 0.8)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 900,
-                color: '#FF1E27',
-                letterSpacing: '0.08em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              <span
-                style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: '#FF1E27',
-                }}
-              />
-              <span>QUICK ACCESS CONSOLE</span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  playClickSound('switch');
-                  setCurrentPage((p) => (p === 0 ? 1 : 0));
-                }}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#FFFFFF',
-                  padding: '10px 14px',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '0.82rem',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#FF1E27';
-                  e.currentTarget.style.borderColor = '#FF1E27';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fa-solid fa-layer-group"></i>
-                  <span>Switch Projects Page</span>
-                </div>
-                <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.7rem' }}></i>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  playClickSound('click');
-                  window.open('https://github.com/Charan-718', '_blank', 'noopener,noreferrer');
-                }}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#FFFFFF',
-                  padding: '10px 14px',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '0.82rem',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#FF1E27';
-                  e.currentTarget.style.borderColor = '#FF1E27';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fa-brands fa-github"></i>
-                  <span>GitHub Profile</span>
-                </div>
-                <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.7rem' }}></i>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  playClickSound('hologram');
-                  window.dispatchEvent(new CustomEvent('character-materialize'));
-                }}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#FFFFFF',
-                  padding: '10px 14px',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '0.82rem',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#FF1E27';
-                  e.currentTarget.style.borderColor = '#FF1E27';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fa-solid fa-bolt"></i>
-                  <span>Trigger Hologram Re-Scan</span>
-                </div>
-                <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.7rem' }}></i>
-              </button>
-            </div>
-          </div>
-        </Html>
+          <planeGeometry args={[2.6, 1.6]} />
+          <meshStandardMaterial
+            map={quickAccessTextureObj.texture}
+            emissiveMap={quickAccessTextureObj.texture}
+            emissive="#ffffff"
+            emissiveIntensity={0.75}
+            roughness={0.2}
+            metalness={0.05}
+          />
+        </mesh>
       </group>
     </group>
   );
