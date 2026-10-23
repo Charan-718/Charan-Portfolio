@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { KeyboardControls, OrbitControls } from '@react-three/drei';
 import Character from './Character';
+import DeveloperWorkspaceScene from './DeveloperWorkspaceScene';
 import { isSoundEnabled, toggleSound, onSoundStateChange, playClickSound } from '../utils/soundEffects';
 
 const keyboardMap = [
@@ -953,36 +954,8 @@ export default function CharacterPlayground({ onClose }) {
           camera={{ position: [0, 3, 6], fov: 45 }}
           style={{ width: '100%', height: '100%', cursor: cameraMode === 'chase' ? 'grab' : 'default' }}
         >
-          {/* Lighting */}
-          <ambientLight intensity={1.2} />
-          <directionalLight
-            position={[5, 10, 6]}
-            intensity={2.2}
-            castShadow
-            shadow-mapSize={[2048, 2048]}
-            shadow-camera-near={0.5}
-            shadow-camera-far={40}
-            shadow-camera-left={-10}
-            shadow-camera-right={10}
-            shadow-camera-top={10}
-            shadow-camera-bottom={-10}
-          />
-          <directionalLight position={[-5, 5, -5]} intensity={0.6} color="#93c5fd" />
-
-          {/* Ground Arena Floor */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
-            <planeGeometry args={[250, 250]} />
-            <meshStandardMaterial color="#14151a" roughness={0.7} metalness={0.1} />
-          </mesh>
-
-          {/* Grid Helper with Red Accent */}
-          <gridHelper args={[250, 100, '#FF1E27', '#222533']} position={[0, 0.001, 0]} />
-
-          {/* Outer ring marker */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
-            <ringGeometry args={[12, 12.15, 64]} />
-            <meshBasicMaterial color="#FF1E27" transparent opacity={0.4} />
-          </mesh>
+          {/* Futuristic Cyber Developer Workspace Command Center */}
+          <DeveloperWorkspaceScene onClose={onClose} />
 
           {/* Playable Character with GTA Locomotion & Steady Hands */}
           <Suspense fallback={null}>

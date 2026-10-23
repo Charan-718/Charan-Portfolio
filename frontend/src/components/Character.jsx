@@ -756,6 +756,27 @@ export default function Character({
       root.current.position.z -= fwdZ * backwardSpeed * delta;
     }
 
+    // Command Center Arena Deck Boundary Clamping (keeps character inside room)
+    const deckCenterX = 0;
+    const deckCenterZ = 4.0;
+    const distFromCenter = Math.hypot(root.current.position.x - deckCenterX, root.current.position.z - deckCenterZ);
+    const maxDeckRadius = 12.2;
+    if (distFromCenter > maxDeckRadius) {
+      const angle = Math.atan2(root.current.position.z - deckCenterZ, root.current.position.x - deckCenterX);
+      root.current.position.x = deckCenterX + Math.cos(angle) * maxDeckRadius;
+      root.current.position.z = deckCenterZ + Math.sin(angle) * maxDeckRadius;
+    }
+
+    // Center Hologram Pedestal Collision (smooth push-out so character can walk around pedestal)
+    const pedX = 0;
+    const pedZ = 4.2;
+    const distFromPed = Math.hypot(root.current.position.x - pedX, root.current.position.z - pedZ);
+    if (distFromPed < 1.35) {
+      const angle = Math.atan2(root.current.position.z - pedZ, root.current.position.x - pedX);
+      root.current.position.x = pedX + Math.cos(angle) * 1.35;
+      root.current.position.z = pedZ + Math.sin(angle) * 1.35;
+    }
+
     // C. ANIMATION CROSSFADING & STRIDE SYNCHRONIZATION
     if (hasSkeletalAnimations && actions) {
       let targetClipName = clips.idle;
