@@ -16,6 +16,114 @@ const ROLES = [
   'React, Node.js & Python Engineer'
 ];
 
+function InitialBlankCurtain({ onComplete, maskId = 'heroCutoutMask' }) {
+  const [isSweeping, setIsSweeping] = useState(false);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('charan_intro_shown', 'true');
+    } catch (e) {}
+
+    // Hold completely fixed for 2.0 seconds
+    const holdTimer = setTimeout(() => {
+      setIsSweeping(true);
+    }, 2000);
+
+    // After 1.2s constant-speed zoom, unmount overlay cleanly
+    const finishTimer = setTimeout(() => {
+      if (onComplete) onComplete();
+    }, 3200);
+
+    return () => {
+      clearTimeout(holdTimer);
+      clearTimeout(finishTimer);
+    };
+  }, [onComplete]);
+
+  return (
+    <div
+      className={`initial-blank-curtain ${isSweeping ? 'sweep-active' : ''}`}
+      aria-hidden="true"
+    >
+      <div className="initial-curtain-gpu-stage">
+        <svg
+          className="initial-cutout-svg"
+          viewBox="0 0 1920 1080"
+          preserveAspectRatio="xMidYMid slice"
+        >
+          <defs>
+            <mask id={maskId}>
+              {/* White reveals the solid black curtain */}
+              <rect x="0" y="0" width="1920" height="1080" fill="#FFFFFF" />
+              {/* Black cuts out transparent text so the hero section underneath is visible */}
+              <text
+                x="960"
+                y="480"
+                textAnchor="middle"
+                className="cutout-text-line-1"
+                fill="#000000"
+                fontSize="155"
+                fontWeight="900"
+              >
+                CHARAN
+              </text>
+              <text
+                x="960"
+                y="630"
+                textAnchor="middle"
+                className="cutout-text-line-2"
+                fill="#000000"
+                fontSize="155"
+                fontWeight="900"
+              >
+                PORTFOLIO
+              </text>
+            </mask>
+          </defs>
+
+          {/* Black curtain with masked transparent text cutout */}
+          <rect
+            x="0"
+            y="0"
+            width="1920"
+            height="1080"
+            fill="#000000"
+            mask={`url(#${maskId})`}
+          />
+
+          {/* Crisp outline strokes around the transparent text cutout */}
+          <text
+            x="960"
+            y="480"
+            textAnchor="middle"
+            className="cutout-stroke-line-1"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="2.5"
+            fontSize="155"
+            fontWeight="900"
+          >
+            CHARAN
+          </text>
+          <text
+            x="960"
+            y="630"
+            textAnchor="middle"
+            className="cutout-stroke-line-2"
+            fill="none"
+            stroke="#FF1E27"
+            strokeWidth="2.5"
+            fontSize="155"
+            fontWeight="900"
+          >
+            PORTFOLIO
+          </text>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('hero');
@@ -23,6 +131,17 @@ function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [soundActive, setSoundActive] = useState(() => isSoundEnabled());
+  // Initial 2-second black screen hold & cinematic transparent cutout zoom (only on initial load, never on reloads)
+  const [showInitialIntro, setShowInitialIntro] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      if (sessionStorage.getItem('charan_intro_shown')) {
+        return false; // Skip completely on all reloads!
+      }
+    } catch (e) {}
+    return true;
+  });
+
   const [isCharacterArenaOpen, setIsCharacterArenaOpen] = useState(() => {
     if (typeof window === 'undefined') return false;
     const searchParams = new URLSearchParams(window.location.search);
@@ -249,13 +368,17 @@ function App() {
     }
   };
 
-  // Projects from Charan's Resume
+  // Projects from Charan's Portfolio
   const allProjects = [
+    // -------------------------------------------------------------------------
+    // EXISTING CARDS (PRESERVED INTACT)
+    // -------------------------------------------------------------------------
     {
       id: 1,
       index: '01',
       title: 'DayFlow — Full-Stack HRMS & Workforce Platform',
       category: 'Web Development',
+      filterGroup: 'Web Development',
       badgeText: 'SPEC_01 // HRMS & RBAC',
       description: 'Enterprise full-stack Human Resource Management System engineered for workforce administration, real-time attendance tracking, time-off approvals, and organizational analytics.',
       impact: 'Architected role-based access control (RBAC), JWT security layer, modular REST endpoints, and Docker deployment.',
@@ -273,6 +396,7 @@ function App() {
       index: '02',
       title: 'Traveloop — AI-Powered Smart Travel Planning Platform',
       category: 'AI & Next-Gen',
+      filterGroup: 'AI & Machine Learning',
       badgeText: 'SPEC_02 // AI TRAVEL ENGINE',
       description: 'Intelligent trip generation and exploration platform featuring AI-driven custom itinerary synthesis, interactive budget telemetry, and location discovery.',
       impact: 'Constructed responsive map integrations, dynamic planning workflows, and predictive recommendation pipelines.',
@@ -290,6 +414,7 @@ function App() {
       index: '03',
       title: 'Sahakãrya — Cooperative Gig Services Platform',
       category: 'Web & Mobile',
+      filterGroup: 'Mobile & IoT',
       badgeText: 'SPEC_03 // GIG PLATFORM',
       description: 'Decentralized cooperative gig-services platform connecting customers with local service workers through transparent pricing models, intelligent dispatch matching, and worker welfare fund contributions.',
       impact: 'Engineered scalable microservice backends with PostGIS geospatial queries, FastAPI AI service, and Docker containerization.',
@@ -301,12 +426,578 @@ function App() {
         'Real-time job bookings, transparent ledger pricing & worker welfare fund integration',
         'Cross-platform React/React Native clients powered by FastAPI AI microservice'
       ]
+    },
+
+    // -------------------------------------------------------------------------
+    // REMAINING PROJECTS WITH CONFIGURED DEMO URLS
+    // -------------------------------------------------------------------------
+    {
+      id: 'chatbot',
+      index: '04',
+      spec: 'SPEC_05 // CONVERSATIONAL AI',
+      badgeText: 'SPEC_05 // CONVERSATIONAL AI',
+      category: 'AI APPLICATIONS',
+      filterGroup: 'AI & Machine Learning',
+      title: 'Chatbot — AI Conversational Assistant',
+      description: 'A chat-based AI application that provides an interface for conversational interaction and AI-powered responses.',
+      features: [
+        'Interactive conversational interface',
+        'AI API integration',
+        'Conversation workflows and response handling'
+      ],
+      tags: ['JavaScript', 'AI APIs', 'Web Development'],
+      demoLink: 'https://quantum-chatbot-green.vercel.app/',
+      codeLink: 'https://github.com/Charan-718/Chatbot'
+    },
+    {
+      id: 'critique-improve',
+      index: '05',
+      spec: 'SPEC_06 // AI CONTENT REVIEW',
+      badgeText: 'SPEC_06 // AI CONTENT REVIEW',
+      category: 'AI & WEB DEVELOPMENT',
+      filterGroup: 'AI & Machine Learning',
+      title: 'Critique and Improve',
+      description: 'A web application focused on reviewing user-provided content and helping improve its quality.',
+      features: [
+        'Content input and review workflow',
+        'Improvement-oriented feedback experience',
+        'Interactive web application interface'
+      ],
+      tags: ['Web Development', 'JavaScript', 'AI Integration'],
+      demoLink: 'https://critique-and-improve.vercel.app',
+      codeLink: 'https://github.com/Charan-718/critique-and-improve'
+    },
+    {
+      id: 'error-404',
+      index: '06',
+      spec: 'SPEC_09 // WEB EXPERIENCE',
+      badgeText: 'SPEC_09 // WEB EXPERIENCE',
+      category: 'WEB DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Error-404 — Web Experience',
+      description: 'A deployed web project whose specific purpose and core functionality should be confirmed from its source code.',
+      features: [
+        'Browser-accessible web experience',
+        'Project-specific interface and interactions',
+        'Implementation details to be verified'
+      ],
+      tags: ['Web Development', 'Frontend'],
+      demoLink: 'https://error-404-1c95.onrender.com',
+      codeLink: 'https://github.com/Charan-718/Error-404'
+    },
+    {
+      id: 'extinct-era',
+      index: '07',
+      spec: 'SPEC_10 // INTERACTIVE EXPERIENCE',
+      badgeText: 'SPEC_10 // INTERACTIVE EXPERIENCE',
+      category: 'FRONTEND DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Extinct Era — Dinosaur Experience',
+      description: 'A dinosaur-themed web experience built around an immersive landing page and visual presentation.',
+      features: [
+        'Dinosaur-themed visual storytelling',
+        'Dedicated landing page',
+        'Browser-based interactive experience'
+      ],
+      tags: ['HTML', 'CSS', 'JavaScript'],
+      demoLink: 'https://charan-718.github.io/Extinct-Era/dino_landing_page.html',
+      codeLink: 'https://github.com/Charan-718/Extinct-Era'
+    },
+    {
+      id: 'eyesight-adjuster',
+      index: '08',
+      spec: 'SPEC_11 // VISUAL ACCESSIBILITY',
+      badgeText: 'SPEC_11 // VISUAL ACCESSIBILITY',
+      category: 'ACCESSIBILITY & WEB',
+      filterGroup: 'Web Development',
+      title: 'EyeSight Adjuster',
+      description: 'A visual-adjustment project intended to explore ways of modifying the on-screen viewing experience.',
+      features: [
+        'Visual adjustment experience',
+        'Interactive interface',
+        'Specific adjustment options to be verified'
+      ],
+      tags: ['JavaScript', 'HTML', 'CSS', 'Accessibility'],
+      demoLink: 'https://charan-718.github.io/EyeSight-Adjuster/',
+      codeLink: 'https://github.com/Charan-718/EyeSight-Adjuster'
+    },
+    {
+      id: 'flam',
+      index: '09',
+      spec: 'SPEC_12 // WEB APPLICATION',
+      badgeText: 'SPEC_12 // WEB APPLICATION',
+      category: 'WEB DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Flam Assignment',
+      description: 'A deployed web project created as part of an assignment, with functionality to be confirmed from the repository.',
+      features: [
+        'Assignment-specific application workflow',
+        'Web interface and user interaction',
+        'Implementation details to be verified'
+      ],
+      tags: ['Web Development'],
+      demoLink: 'https://flam-assignment-e9d9.onrender.com/',
+      codeLink: 'https://github.com/Charan-718/Flam-Assignment'
+    },
+    {
+      id: 'freshmart',
+      index: '10',
+      spec: 'SPEC_13 // DIGITAL COMMERCE',
+      badgeText: 'SPEC_13 // DIGITAL COMMERCE',
+      category: 'WEB DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'FreshMart — Grocery Platform',
+      description: 'A grocery-oriented web project designed around an online shopping experience.',
+      features: [
+        'Grocery-focused web interface',
+        'Product discovery experience',
+        'Cart and checkout functionality to be verified'
+      ],
+      tags: ['Web Development', 'JavaScript', 'E-commerce'],
+      demoLink: 'https://freshmart-fsd.netlify.app/',
+      codeLink: 'https://github.com/Charan-718/FreshMart'
+    },
+    {
+      id: 'greenova',
+      index: '11',
+      spec: 'SPEC_14 // SUSTAINABILITY',
+      badgeText: 'SPEC_14 // SUSTAINABILITY',
+      category: 'WEB DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Greenova — Sustainability Platform',
+      description: 'A sustainability-oriented web project focused on environmentally themed digital experiences.',
+      features: [
+        'Sustainability-focused presentation',
+        'Web-based user experience',
+        'Core features to be confirmed from the README'
+      ],
+      tags: ['Web Development', 'Frontend', 'Sustainability'],
+      demoLink: 'https://greenova-csp.netlify.app',
+      codeLink: 'https://github.com/Charan-718/Greenova'
+    },
+    {
+      id: 'learnloop',
+      index: '12',
+      spec: 'SPEC_16 // DIGITAL LEARNING',
+      badgeText: 'SPEC_16 // DIGITAL LEARNING',
+      category: 'EDTECH & WEB',
+      filterGroup: 'Web Development',
+      title: 'LearnLoop — Learning Platform',
+      description: 'An education-oriented web project designed to provide a digital learning experience.',
+      features: [
+        'Learning-focused user interface',
+        'Educational content experience',
+        'Course and progress functionality to be verified'
+      ],
+      tags: ['Web Development', 'EdTech'],
+      demoLink: 'https://charan-718.github.io/LearnLoop/',
+      codeLink: 'https://github.com/Charan-718/LearnLoop'
+    },
+    {
+      id: 'medi-report',
+      index: '13',
+      spec: 'SPEC_17 // HEALTHCARE TECHNOLOGY',
+      badgeText: 'SPEC_17 // HEALTHCARE TECHNOLOGY',
+      category: 'WEB DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Medi-Report — Medical Reporting Project',
+      description: 'A healthcare-oriented reporting application whose report generation and data-processing features need README verification.',
+      features: [
+        'Medical-reporting-oriented workflow',
+        'Web-based application experience',
+        'Report processing capabilities to be confirmed'
+      ],
+      tags: ['Web Development', 'Healthcare Technology'],
+      demoLink: 'https://medi-report.netlify.app',
+      codeLink: 'https://github.com/Charan-718/Medi-Report'
+    },
+    {
+      id: 'mini-erp',
+      index: '14',
+      spec: 'SPEC_18 // BUSINESS OPERATIONS',
+      badgeText: 'SPEC_18 // BUSINESS OPERATIONS',
+      category: 'FULL-STACK DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Mini-ERP — Business Management Platform',
+      description: 'A business-management application intended to organize operational workflows through a centralized web interface.',
+      features: [
+        'Business-oriented application workflows',
+        'Centralized operational interface',
+        'Specific ERP modules to be confirmed'
+      ],
+      tags: ['React', 'Web Development', 'Business Software'],
+      demoLink: 'https://mini-erp-furnexa.netlify.app',
+      codeLink: 'https://github.com/Charan-718/Mini-ERP'
+    },
+    {
+      id: 'outbox',
+      index: '15',
+      spec: 'SPEC_21 // WEB APPLICATION',
+      badgeText: 'SPEC_21 // WEB APPLICATION',
+      category: 'WEB DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Outbox Assignment',
+      description: 'A deployed assignment project. Its main purpose and implementation details should be confirmed from the repository.',
+      features: [
+        'Assignment-specific workflow',
+        'Browser-based application interface',
+        'Core functionality to be verified'
+      ],
+      tags: ['Web Development'],
+      demoLink: 'https://outbox-assignment-plum.vercel.app',
+      codeLink: 'https://github.com/Charan-718/Outbox-Assignment'
+    },
+    {
+      id: 'prakalp',
+      index: '16',
+      spec: 'SPEC_22 // WEB INTERFACE',
+      badgeText: 'SPEC_22 // WEB INTERFACE',
+      category: 'FRONTEND DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Prakalp Frontend',
+      description: 'A frontend project deployed through GitHub Pages. Its specific application domain and features require README verification.',
+      features: [
+        'Browser-based frontend',
+        'Project-specific interface',
+        'Detailed functionality to be confirmed'
+      ],
+      tags: ['Frontend Development', 'Web Technologies'],
+      demoLink: 'https://charan-718.github.io/PrakalpFrontend/',
+      codeLink: 'https://github.com/Charan-718/PrakalpFrontend'
+    },
+    {
+      id: 'pranathi-portfolio',
+      index: '17',
+      spec: 'SPEC_23 // PERSONAL PORTFOLIO',
+      badgeText: 'SPEC_23 // PERSONAL PORTFOLIO',
+      category: 'WEB DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Pranathi Portfolio',
+      description: 'A personal portfolio website created to present an individual\'s profile, work, and professional information.',
+      features: [
+        'Personal profile presentation',
+        'Portfolio-oriented layout',
+        'Project and professional information display'
+      ],
+      tags: ['Web Development', 'Frontend', 'UI/UX'],
+      demoLink: 'https://pranathi-portfolio-alpha.vercel.app',
+      codeLink: 'https://github.com/Charan-718/Pranathi-Portfolio'
+    },
+    {
+      id: 'quantum-chatbot',
+      index: '18',
+      spec: 'SPEC_25 // AI ASSISTANT',
+      badgeText: 'SPEC_25 // AI ASSISTANT',
+      category: 'AI & QUANTUM COMPUTING',
+      filterGroup: 'Quantum Computing',
+      title: 'Quantum Chatbot',
+      description: 'A conversational AI project associated with quantum-computing interests. Its precise relationship to the Chatbot repository should be verified.',
+      features: [
+        'Conversational AI interface',
+        'AI-powered response workflow',
+        'Quantum-specific capabilities to be confirmed'
+      ],
+      tags: ['AI', 'JavaScript', 'Quantum Computing'],
+      demoLink: 'https://quantum-chatbot-green.vercel.app/',
+      codeLink: 'https://github.com/Charan-718/Quantum-Chatbot'
+    },
+    {
+      id: 'quantum-keydistribution',
+      index: '19',
+      spec: 'SPEC_26 // QUANTUM CRYPTOGRAPHY',
+      badgeText: 'SPEC_26 // QUANTUM CRYPTOGRAPHY',
+      category: 'QUANTUM COMPUTING',
+      filterGroup: 'Quantum Computing',
+      title: 'Quantum Key Distribution',
+      description: 'A quantum-computing project exploring quantum key distribution and concepts related to secure communication.',
+      features: [
+        'Quantum communication concepts',
+        'Key-distribution workflow',
+        'Specific protocol and simulation details to be verified'
+      ],
+      tags: ['Quantum Computing', 'Cryptography', 'Python'],
+      demoLink: 'https://charan-718.github.io/Quantum-Keydistribution/',
+      codeLink: 'https://github.com/Charan-718/Quantum-Keydistribution'
+    },
+    {
+      id: 'schrodinger-cat',
+      index: '20',
+      spec: 'SPEC_28 // QUANTUM CONCEPTS',
+      badgeText: 'SPEC_28 // QUANTUM CONCEPTS',
+      category: 'QUANTUM COMPUTING',
+      filterGroup: 'Quantum Computing',
+      title: 'Schrödinger Cat',
+      description: 'A quantum-themed web project centered on the Schrödinger\'s cat thought experiment.',
+      features: [
+        'Quantum-mechanics-inspired concept',
+        'Browser-based presentation',
+        'Specific interactive elements to be confirmed'
+      ],
+      tags: ['HTML', 'CSS', 'JavaScript', 'Quantum Concepts'],
+      demoLink: 'https://charan-718.github.io/Schrodinger-Cat/',
+      codeLink: 'https://github.com/Charan-718/Schrodinger-Cat'
+    },
+    {
+      id: 'skyline',
+      index: '21',
+      spec: 'SPEC_29 // DEVELOPER TOOLING',
+      badgeText: 'SPEC_29 // DEVELOPER TOOLING',
+      category: 'SOFTWARE ENGINEERING',
+      filterGroup: 'Web Development',
+      title: 'Skyline',
+      description: 'A software project with a deployed web experience. Its precise purpose and core functionality should be derived from the repository README.',
+      features: [
+        'Project-specific development workflow',
+        'Deployed web experience',
+        'Core features to be verified'
+      ],
+      tags: ['Web Development', 'Software Engineering'],
+      demoLink: 'https://skyline-chi-orcin.vercel.app',
+      codeLink: 'https://github.com/Charan-718/skyline'
+    },
+
+    // -------------------------------------------------------------------------
+    // PROJECTS WITH DEMO URL NULL / NOT CONFIGURED (PLACED AT THE LAST)
+    // -------------------------------------------------------------------------
+    {
+      id: 'amazon-ml',
+      index: '22',
+      spec: 'SPEC_01 // ENTITY RESOLUTION',
+      badgeText: 'SPEC_01 // ENTITY RESOLUTION',
+      category: 'MACHINE LEARNING',
+      filterGroup: 'AI & Machine Learning',
+      title: 'Amazon ML Challenge — Business Entity Resolution',
+      description: 'A large-scale entity matching pipeline designed to identify duplicate business records across datasets using candidate retrieval, structural features, and machine learning.',
+      features: [
+        'Hybrid lexical and semantic retrieval for candidate generation',
+        'Entity matching with address, name, and structural similarity features',
+        'DuckDB-based blocking and XGBoost scoring pipeline'
+      ],
+      tags: ['Python', 'XGBoost', 'DuckDB', 'FAISS', 'MiniLM', 'Pandas'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/Amazon-ML-Challenge-2026'
+    },
+    {
+      id: 'ble-gatt',
+      index: '23',
+      spec: 'SPEC_02 // BLUETOOTH CONNECTIVITY',
+      badgeText: 'SPEC_02 // BLUETOOTH CONNECTIVITY',
+      category: 'MOBILE & IOT',
+      filterGroup: 'Mobile & IoT',
+      title: 'BLE GATT App',
+      description: 'A Bluetooth Low Energy application project centered on GATT-based device communication.',
+      features: [
+        'Bluetooth Low Energy communication workflows',
+        'GATT service and characteristic interaction',
+        'Device connectivity functionality to be confirmed from the README'
+      ],
+      tags: ['BLE', 'GATT', 'Mobile Development'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/BLE-GATT-App'
+    },
+    {
+      id: 'ble-gatt-2',
+      index: '24',
+      spec: 'SPEC_03 // BLUETOOTH CONNECTIVITY',
+      badgeText: 'SPEC_03 // BLUETOOTH CONNECTIVITY',
+      category: 'MOBILE & IOT',
+      filterGroup: 'Mobile & IoT',
+      title: 'BLE GATT App 2',
+      description: 'A second Bluetooth Low Energy application repository for device communication workflows.',
+      features: [
+        'BLE connectivity and communication',
+        'GATT service interaction',
+        'Implementation differences from the first version need verification'
+      ],
+      tags: ['BLE', 'GATT', 'Mobile Development'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/BLE-GATT-App-2'
+    },
+    {
+      id: 'portfolio',
+      index: '25',
+      spec: 'SPEC_04 // PERSONAL BRAND',
+      badgeText: 'SPEC_04 // PERSONAL BRAND',
+      category: 'FRONTEND DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Charan Portfolio — Developer Portfolio',
+      description: 'A personal portfolio website for presenting software projects, technical skills, and development experience.',
+      features: [
+        'Project showcase and technical profile',
+        'Repository and deployment links',
+        'Visual presentation of development work'
+      ],
+      tags: ['Web Development', 'Frontend', 'UI/UX'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/Charan-Portfolio'
+    },
+    {
+      id: 'day-trix',
+      index: '26',
+      spec: 'SPEC_07 // PRODUCTIVITY',
+      badgeText: 'SPEC_07 // PRODUCTIVITY',
+      category: 'WEB DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Day-Trix — Productivity Project',
+      description: 'A productivity-oriented project. Its specific workflow and capabilities should be confirmed against the repository README.',
+      features: [
+        'Project-specific productivity workflow',
+        'Application interface and interaction',
+        'Core functionality to be verified'
+      ],
+      tags: ['Web Development'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/Day-Trix'
+    },
+    {
+      id: 'idea-lab',
+      index: '27',
+      spec: 'SPEC_15 // EXPERIMENTAL PROJECT',
+      badgeText: 'SPEC_15 // EXPERIMENTAL PROJECT',
+      category: 'SOFTWARE DEVELOPMENT',
+      filterGroup: 'Digital Twin & Systems',
+      title: 'Idea Lab — Innovation Project',
+      description: 'An experimental project repository. Its purpose, target users, and implemented functionality need source verification.',
+      features: [
+        'Project-specific concept and workflow',
+        'Implementation to be reviewed',
+        'Core capabilities to be confirmed'
+      ],
+      tags: ['Software Development'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/Idea-Lab'
+    },
+    {
+      id: 'ml-xplore',
+      index: '28',
+      spec: 'SPEC_19 // MACHINE LEARNING',
+      badgeText: 'SPEC_19 // MACHINE LEARNING',
+      category: 'AI & DATA SCIENCE',
+      filterGroup: 'AI & Machine Learning',
+      title: 'ML Xplore 6115',
+      description: 'A machine-learning-oriented project repository. The specific model, dataset, and application objective require source verification.',
+      features: [
+        'Machine-learning project workflow',
+        'Model and dataset to be identified',
+        'Evaluation methodology to be confirmed'
+      ],
+      tags: ['Machine Learning', 'Python'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/ML-Xplore-6115'
+    },
+    {
+      id: 'my-app',
+      index: '29',
+      spec: 'SPEC_20 // APPLICATION DEVELOPMENT',
+      badgeText: 'SPEC_20 // APPLICATION DEVELOPMENT',
+      category: 'SOFTWARE DEVELOPMENT',
+      filterGroup: 'Mobile & IoT',
+      title: 'My App — Application Project',
+      description: 'An application repository whose intended use and implemented capabilities need confirmation from the source.',
+      features: [
+        'Application-specific workflow',
+        'User interface and interactions',
+        'Core implementation to be reviewed'
+      ],
+      tags: ['Application Development'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/My-App'
+    },
+    {
+      id: 'qkrishi',
+      index: '30',
+      spec: 'SPEC_24 // AGRITECH',
+      badgeText: 'SPEC_24 // AGRITECH',
+      category: 'WEB DEVELOPMENT',
+      filterGroup: 'Web Development',
+      title: 'Qkrishi Assignment',
+      description: 'An assignment repository associated with the Qkrishi name. Its precise objective and implemented features need source verification.',
+      features: [
+        'Assignment-specific implementation',
+        'Application workflow to be reviewed',
+        'Technical details to be confirmed'
+      ],
+      tags: ['Software Development'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/Qkrishi-Assignment'
+    },
+    {
+      id: 'quantumcodehub',
+      index: '31',
+      spec: 'SPEC_27 // AUTONOMOUS QUANTUM RESEARCH',
+      badgeText: 'SPEC_27 // AUTONOMOUS QUANTUM RESEARCH',
+      category: 'QUANTUM AI & RESEARCH',
+      filterGroup: 'Quantum Computing',
+      title: 'QuantumCodeHub — Autonomous Quantum Research Platform',
+      description: 'An AI-assisted quantum research platform combining quantum-programming support, technical documentation retrieval, and language-model-based assistance.',
+      features: [
+        'Quantum programming and Qiskit-focused workflows',
+        'Retrieval-augmented generation over technical documentation',
+        'Local Granite model integration with a FastAPI-backed service'
+      ],
+      tags: ['Python', 'Qiskit', 'FastAPI', 'Granite 8B', 'RAG', 'ChromaDB'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/QuantumCodeHub'
+    },
+    {
+      id: 'slot-parking',
+      index: '32',
+      spec: 'SPEC_30 // SMART PARKING',
+      badgeText: 'SPEC_30 // SMART PARKING',
+      category: 'SOFTWARE DEVELOPMENT',
+      filterGroup: 'Digital Twin & Systems',
+      title: 'Slot Parking System',
+      description: 'A parking-system project focused on managing parking slots and related workflows.',
+      features: [
+        'Parking-slot management concept',
+        'Parking availability workflow',
+        'Booking and allocation features to be confirmed'
+      ],
+      tags: ['Software Development', 'Database Systems'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/Slot-Parking-System'
+    },
+    {
+      id: 'twinaero',
+      index: '33',
+      spec: 'SPEC_31 // AEROSPACE DIGITAL TWIN',
+      badgeText: 'SPEC_31 // AEROSPACE DIGITAL TWIN',
+      category: 'AI & PREDICTIVE MAINTENANCE',
+      filterGroup: 'Digital Twin & Systems',
+      title: 'TwinAero — Aerospace Engine Digital Twin',
+      description: 'A digital-twin project concept for aerospace-engine health monitoring and predictive maintenance using engine sensor data and remaining useful life estimation.',
+      features: [
+        'NASA C-MAPSS FD004-based engine degradation analysis',
+        'Remaining Useful Life prediction and condition monitoring',
+        'Engine health visualization and maintenance insights'
+      ],
+      tags: ['Python', 'Machine Learning', 'NASA C-MAPSS', 'Predictive Maintenance', 'Digital Twin', 'Data Visualization'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/TwinAreo'
+    },
+    {
+      id: 'twinops-tactix',
+      index: '34',
+      spec: 'SPEC_32 // DIGITAL TWIN OPERATIONS',
+      badgeText: 'SPEC_32 // DIGITAL TWIN OPERATIONS',
+      category: 'DIGITAL TWIN & OPERATIONS',
+      filterGroup: 'Digital Twin & Systems',
+      title: 'TwinOps Tactix',
+      description: 'A digital-twin and operations-oriented project. Its target system, simulation model, and implemented capabilities require README verification.',
+      features: [
+        'Operations-focused project concept',
+        'Digital-twin functionality to be confirmed',
+        'Simulation and monitoring capabilities to be verified'
+      ],
+      tags: ['Digital Twin', 'Simulation', 'Software Development'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718/TwinOps-Tactix'
     }
   ];
 
   const filteredProjects = activeFilter === 'All'
     ? allProjects
-    : allProjects.filter((p) => p.category === activeFilter);
+    : allProjects.filter((p) => p.category === activeFilter || p.filterGroup === activeFilter);
 
   // Technical Competencies
   const skillCategories = [
@@ -437,11 +1128,28 @@ function App() {
   ];
 
   if (isCharacterArenaOpen) {
-    return <CharacterPlayground onClose={closeCharacterArena} />;
+    return (
+      <>
+        {showInitialIntro && (
+          <InitialBlankCurtain
+            onComplete={() => setShowInitialIntro(false)}
+            maskId="characterCutoutMask"
+          />
+        )}
+        <CharacterPlayground onClose={closeCharacterArena} />
+      </>
+    );
   }
 
   return (
     <div className="portfolio-app-swiss">
+      {/* Initial 2-Second Black Blank Screen & Transparent Cutout Zoom Reveal */}
+      {showInitialIntro && (
+        <InitialBlankCurtain
+          onComplete={() => setShowInitialIntro(false)}
+          maskId="heroCutoutMask"
+        />
+      )}
       {/* Top Scroll Progress Indicator */}
       <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }}></div>
 
@@ -505,22 +1213,18 @@ function App() {
             <div className="nav-actions">
               <button
                 onClick={openCharacterArena}
-                className="btn-nav-action"
+                className="btn-nav-action btn-nav-icon-only"
                 title="Play 3D Character Workspace"
                 style={{
                   background: 'linear-gradient(135deg, #FF1E27 0%, #D40C14 100%)',
                   color: '#ffffff',
                   border: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
                   cursor: 'pointer',
-                  fontWeight: 700,
                   boxShadow: '0 4px 14px rgba(255, 30, 39, 0.4)',
                 }}
+                aria-label="Play 3D Character Workspace"
               >
                 <i className="fa-solid fa-cube"></i>
-                <span className="hide-on-mobile">3D CHARACTER</span>
               </button>
 
               <a
@@ -537,23 +1241,19 @@ function App() {
               {/* Sound Controls Button */}
               <button
                 onClick={toggleSound}
-                className="btn-nav-action"
+                className="btn-nav-action btn-nav-icon-only"
                 title={soundActive ? 'UI Sound Effects Active (Click to Mute)' : 'UI Sound Effects Muted (Click to Enable)'}
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
                   cursor: 'pointer',
                   background: soundActive ? 'rgba(255, 30, 39, 0.12)' : 'rgba(255, 255, 255, 0.05)',
                   border: `1px solid ${soundActive ? '#FF1E27' : 'rgba(255, 255, 255, 0.16)'}`,
                   color: soundActive ? '#FF6B72' : '#94a3b8',
-                  fontWeight: 700,
                   transition: 'all 0.2s ease',
                 }}
                 data-sound="switch"
+                aria-label={soundActive ? 'Mute Sound' : 'Enable Sound'}
               >
                 <i className={soundActive ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark'}></i>
-                <span className="hide-on-mobile">{soundActive ? 'AUDIO ON' : 'MUTED'}</span>
               </button>
 
               <button
@@ -776,7 +1476,7 @@ function App() {
 
             {/* Category Filter Tabs */}
             <div className="filter-tab-bar">
-              {['All', 'Web Development', 'AI & Next-Gen', 'Web & Mobile'].map((cat) => (
+              {['All', 'Web Development', 'AI & Machine Learning', 'Quantum Computing', 'Digital Twin & Systems', 'Mobile & IoT'].map((cat) => (
                 <button
                   key={cat}
                   className={`filter-tab-btn ${activeFilter === cat ? 'active' : ''}`}
@@ -787,7 +1487,7 @@ function App() {
               ))}
             </div>
 
-            {/* 3 Swiss Poster Project Cards Grid */}
+            {/* Swiss Poster Project Cards Grid */}
             <div className="projects-grid">
               {filteredProjects.map((proj) => (
                 <div key={proj.id} className="project-card-swiss">
@@ -818,15 +1518,25 @@ function App() {
                   </div>
 
                   <div className="project-card-footer">
-                    <a
-                      href={proj.demoLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="project-action-btn btn-demo-swiss"
-                    >
-                      <span>LAUNCH DEMO</span>
-                      <i className="fa-solid fa-arrow-up-right-from-square"></i>
-                    </a>
+                    {proj.demoLink ? (
+                      <a
+                        href={proj.demoLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="project-action-btn btn-demo-swiss"
+                      >
+                        <span>LAUNCH DEMO</span>
+                        <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                      </a>
+                    ) : (
+                      <span
+                        className="project-action-btn btn-demo-disabled"
+                        title="Live demonstration not configured for this repository"
+                      >
+                        <span>NOT CONFIGURED</span>
+                        <i className="fa-solid fa-ban"></i>
+                      </span>
+                    )}
                     <a
                       href={proj.codeLink}
                       target="_blank"

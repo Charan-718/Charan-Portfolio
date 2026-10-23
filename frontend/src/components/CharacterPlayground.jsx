@@ -30,6 +30,18 @@ export default function CharacterPlayground({ onClose }) {
     stop: false,
   });
 
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        setSettingsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
   useEffect(() => {
     return onSoundStateChange(setSoundActive);
   }, []);
@@ -122,7 +134,7 @@ export default function CharacterPlayground({ onClose }) {
     }
   };
 
-  const renderKeycap = (keyChar, sublabel, actionName, width = 58) => {
+  const renderKeycap = (keyChar, actionName, width = 58) => {
     const isActive = !!pressedKeys[actionName];
     return (
       <button
@@ -145,55 +157,51 @@ export default function CharacterPlayground({ onClose }) {
           position: 'relative',
           width: `${width}px`,
           height: '60px',
-          borderRadius: '12px',
-          border: isActive ? '2.5px solid #FF1E27' : '2.5px solid #000000',
-          background: isActive
-            ? 'linear-gradient(180deg, #FF2E36 0%, #D80C14 75%, #A1050B 100%)'
-            : 'linear-gradient(180deg, #FFFFFF 0%, #F5F7FB 75%, #DCE2EC 100%)',
+          borderRadius: '13px',
+          border: '2.5px solid #000000',
+          background: isActive ? '#8A0307' : '#D1D5DB',
           boxShadow: isActive
-            ? '0 0 18px rgba(255, 30, 39, 0.85), 0 2px 0 #7A0206'
-            : '0 5px 0 #000000, 0 8px 16px rgba(0, 0, 0, 0.55)',
+            ? '0 1px 0 #000000, 0 0 18px rgba(255, 30, 39, 0.95)'
+            : '0 4px 0 #000000, 0 8px 14px rgba(0, 0, 0, 0.55)',
           transform: isActive ? 'translateY(3px)' : 'translateY(0)',
           cursor: 'pointer',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
           padding: 0,
           userSelect: 'none',
           touchAction: 'manipulation',
-          transition: 'transform 0.06s ease, box-shadow 0.06s ease, background 0.08s ease',
+          transition: 'transform 0.05s ease, box-shadow 0.05s ease, background 0.06s ease',
           outline: 'none',
           overflow: 'hidden',
+          display: 'block',
         }}
-        title={`Click or hold ${keyChar} to ${sublabel.toLowerCase()}`}
+        title={`Click or hold ${keyChar}`}
       >
-        {/* Inner key face tray matching the drawing */}
+        {/* Inner top key face matching Image 2 */}
         <div
           style={{
             position: 'absolute',
             top: '3px',
-            left: '4px',
-            right: '4px',
-            bottom: '14px',
-            borderRadius: '7px',
-            border: isActive ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid rgba(0, 0, 0, 0.08)',
+            left: '3px',
+            right: '3px',
+            height: '42px',
+            borderRadius: '9px',
+            border: '2px solid #000000',
             background: isActive
-              ? 'linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.05) 100%)'
-              : 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
+              ? 'linear-gradient(180deg, #FF2E36 0%, #D80C14 100%)'
+              : '#FFFFFF',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             pointerEvents: 'none',
+            transition: 'background 0.06s ease',
           }}
         >
           <span
             style={{
               fontFamily: "'Space Grotesk', system-ui, -apple-system, sans-serif",
-              fontSize: '1.5rem',
+              fontSize: '1.65rem',
               fontWeight: 900,
               lineHeight: 1,
-              color: isActive ? '#FFFFFF' : '#0B0D13',
+              color: isActive ? '#FFFFFF' : '#000000',
               letterSpacing: '-0.02em',
             }}
           >
@@ -201,22 +209,141 @@ export default function CharacterPlayground({ onClose }) {
           </span>
         </div>
 
-        {/* Lower beveled chin sublabel */}
-        <span
+        {/* Diagonal corner bevel lines from reference illustration */}
+        <div
           style={{
             position: 'absolute',
-            bottom: '2px',
-            fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-            fontSize: '0.52rem',
-            fontWeight: 800,
-            letterSpacing: '0.04em',
-            color: isActive ? '#FFFFFF' : '#475569',
-            textTransform: 'uppercase',
+            bottom: '4px',
+            left: '3px',
+            width: '9px',
+            height: '2px',
+            background: '#000000',
+            transform: 'rotate(45deg)',
+            transformOrigin: 'top left',
             pointerEvents: 'none',
           }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '4px',
+            right: '3px',
+            width: '9px',
+            height: '2px',
+            background: '#000000',
+            transform: 'rotate(-45deg)',
+            transformOrigin: 'top right',
+            pointerEvents: 'none',
+          }}
+        />
+      </button>
+    );
+  };
+
+  const renderModifierKeycap = (label, actionName, width = 120) => {
+    const isActive = !!pressedKeys[actionName];
+    return (
+      <button
+        type="button"
+        onPointerDown={(e) => {
+          e.preventDefault();
+          sendKeyAction(actionName, true);
+        }}
+        onPointerUp={(e) => {
+          e.preventDefault();
+          sendKeyAction(actionName, false);
+        }}
+        onPointerLeave={() => {
+          if (pressedKeys[actionName]) sendKeyAction(actionName, false);
+        }}
+        onPointerCancel={() => {
+          if (pressedKeys[actionName]) sendKeyAction(actionName, false);
+        }}
+        style={{
+          position: 'relative',
+          width: `${width}px`,
+          height: '42px',
+          borderRadius: '10px',
+          border: '2.5px solid #000000',
+          background: isActive ? '#8A0307' : '#D1D5DB',
+          boxShadow: isActive
+            ? '0 1px 0 #000000, 0 0 16px rgba(255, 30, 39, 0.95)'
+            : '0 4px 0 #000000, 0 6px 12px rgba(0, 0, 0, 0.55)',
+          transform: isActive ? 'translateY(3px)' : 'translateY(0)',
+          cursor: 'pointer',
+          padding: 0,
+          userSelect: 'none',
+          touchAction: 'manipulation',
+          transition: 'transform 0.05s ease, box-shadow 0.05s ease, background 0.06s ease',
+          outline: 'none',
+          overflow: 'hidden',
+          display: 'block',
+        }}
+        title={`Click or hold ${label}`}
+      >
+        {/* Inner top key face in same color as WASD */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '3px',
+            left: '3px',
+            right: '3px',
+            height: '27px',
+            borderRadius: '6px',
+            border: '2px solid #000000',
+            background: isActive
+              ? 'linear-gradient(180deg, #FF2E36 0%, #D80C14 100%)'
+              : '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            pointerEvents: 'none',
+            transition: 'background 0.06s ease',
+          }}
         >
-          {sublabel}
-        </span>
+          <span
+            style={{
+              fontFamily: "'Space Grotesk', system-ui, sans-serif",
+              fontSize: '0.78rem',
+              fontWeight: 900,
+              lineHeight: 1,
+              color: isActive ? '#FFFFFF' : '#000000',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {label}
+          </span>
+        </div>
+
+        {/* Diagonal corner bevel lines */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '3px',
+            left: '3px',
+            width: '8px',
+            height: '2px',
+            background: '#000000',
+            transform: 'rotate(45deg)',
+            transformOrigin: 'top left',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '3px',
+            right: '3px',
+            width: '8px',
+            height: '2px',
+            background: '#000000',
+            transform: 'rotate(-45deg)',
+            transformOrigin: 'top right',
+            pointerEvents: 'none',
+          }}
+        />
       </button>
     );
   };
@@ -246,318 +373,98 @@ export default function CharacterPlayground({ onClose }) {
         onChange={(e) => {
           if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
         }}
-      />
-
-      {/* TOP HEADER HUD */}
+      />      {/* TOP HEADER HUD - CLEAN & UNCLUTTERED */}
       <div
         style={{
           position: 'absolute',
-          top: 20,
-          left: 24,
-          right: 24,
+          top: 24,
+          left: 28,
+          right: 28,
           zIndex: 30,
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           pointerEvents: 'none',
         }}
       >
-        {/* Title and Rig Status - Swiss Modular Card */}
-        <div
-          style={{
-            background: 'rgba(12, 13, 19, 0.95)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255, 255, 255, 0.14)',
-            borderTop: '2px solid #FF1E27',
-            borderRadius: '10px',
-            padding: '14px 20px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)',
-            pointerEvents: 'auto',
-            maxWidth: '620px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div
-              style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '8px',
-                background: 'rgba(255, 30, 39, 0.12)',
-                border: '1px solid rgba(255, 30, 39, 0.35)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <i className="fa-solid fa-gamepad" style={{ fontSize: '1.25rem', color: '#FF1E27' }}></i>
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff' }}>
-                  Charan 3D Character Arena — GTA Mode
-                </h2>
-                <span
-                  style={{
-                    fontSize: '0.74rem',
-                    background: '#1a1c27',
-                    border: '1px solid rgba(255, 255, 255, 0.16)',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                  }}
-                >
-                  {modelLabel}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    width: 7,
-                    height: 7,
-                    borderRadius: '50%',
-                    background: '#FF1E27',
-                    boxShadow: '0 0 8px #FF1E27',
-                  }}
-                />
-                <span style={{ fontSize: '0.8rem', color: '#e2e8f0', fontWeight: 600 }}>
-                  {telemetry.hasAnimations ? (
-                    <>
-                      Rigged: <strong style={{ color: '#FF6B72' }}>"{telemetry.activeClip}"</strong>
-                    </>
-                  ) : (
-                    <>
-                      Procedural Rig: <strong style={{ color: '#FF6B72' }}>Legs Walk</strong>
-                    </>
-                  )}
-                  {' • '}
-                  <span style={{ color: '#ffffff' }}>
-                    {lockArms ? 'Arms Steady' : 'Arms Free'}
-                  </span>
-                  {' • '}
-                  <span
-                    style={{
-                      color: '#ffffff',
-                      background: 'rgba(255, 30, 39, 0.14)',
-                      border: '1px solid rgba(255, 30, 39, 0.35)',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                    }}
-                  >
-                    <i className="fa-solid fa-user-check" style={{ color: '#FF1E27' }}></i> Dusky Skin (Charan)
-                  </span>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Controls & Model Switcher - Swiss Red/Black/White */}
-        <div style={{ display: 'flex', gap: '10px', pointerEvents: 'auto', flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
-          {/* Sound Audio Mute / Unmute Toggle */}
+        {/* Top Left: Standalone Symbols Only (No Card, No Text) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', pointerEvents: 'auto' }}>
+          {/* Settings Symbol */}
           <button
-            onClick={() => toggleSound()}
+            type="button"
+            onClick={() => setSettingsOpen(true)}
             data-sound="switch"
+            aria-label="Settings"
+            title="Arena Settings & Controls (Key: Esc)"
             style={{
-              background: soundActive ? 'rgba(255, 30, 39, 0.18)' : 'rgba(12, 13, 19, 0.92)',
-              border: `1px solid ${soundActive ? '#FF1E27' : 'rgba(255, 255, 255, 0.18)'}`,
-              color: soundActive ? '#FFFFFF' : '#94a3b8',
-              padding: '10px 14px',
-              borderRadius: '8px',
+              background: 'transparent',
+              border: 'none',
+              padding: '6px',
               cursor: 'pointer',
-              fontWeight: 800,
-              fontSize: '0.84rem',
-              backdropFilter: 'blur(8px)',
+              color: settingsOpen ? '#FF1E27' : '#FFFFFF',
+              fontSize: '1.45rem',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.2s ease',
-              boxShadow: soundActive ? '0 0 14px rgba(255, 30, 39, 0.35)' : 'none',
+              justifyContent: 'center',
+              transition: 'transform 0.18s ease, filter 0.18s ease, color 0.18s ease',
+              outline: 'none',
+              filter: settingsOpen ? 'drop-shadow(0 0 12px #FF1E27)' : 'drop-shadow(0 2px 8px rgba(0,0,0,0.7))',
             }}
-            title="Sound Controls: click to toggle button sound effects on/off"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.2) rotate(45deg)';
+              e.currentTarget.style.color = '#FF1E27';
+              e.currentTarget.style.filter = 'drop-shadow(0 0 14px #FF1E27)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+              e.currentTarget.style.color = settingsOpen ? '#FF1E27' : '#FFFFFF';
+              e.currentTarget.style.filter = settingsOpen ? 'drop-shadow(0 0 12px #FF1E27)' : 'drop-shadow(0 2px 8px rgba(0,0,0,0.7))';
+            }}
           >
-            <i className={soundActive ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark'} style={{ fontSize: '0.92rem', color: soundActive ? '#FF1E27' : '#94a3b8' }}></i>
-            <span>{soundActive ? 'Audio ON' : 'Muted'}</span>
+            <i className="fa-solid fa-gear"></i>
           </button>
 
-          {/* Emergency Stop / Brake Button */}
+          {/* Hologram Symbol */}
           <button
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('character-stop'));
-            }}
-            data-sound="brake"
-            style={{
-              background: 'rgba(255, 30, 39, 0.18)',
-              border: '1px solid #FF1E27',
-              color: '#FFFFFF',
-              padding: '10px 16px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 800,
-              fontSize: '0.84rem',
-              backdropFilter: 'blur(8px)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 0 12px rgba(255, 30, 39, 0.25)',
-            }}
-            title="Emergency Stop / Brake: halts character immediately and settles into Stand At Ease (Key: Space)"
-          >
-            <i className="fa-solid fa-hand" style={{ color: '#FF6B72' }}></i>
-            <span>Stop / Brake</span>
-            <kbd style={{ background: '#FF1E27', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 900 }}>Space</kbd>
-          </button>
-
-          {/* Replay Hologram Creation Button */}
-          <button
+            type="button"
             onClick={() => {
               window.dispatchEvent(new CustomEvent('character-materialize'));
             }}
             data-sound="hologram"
+            aria-label="Replay Hologram"
+            title="Replay Red Hologram Sequence (Key: R)"
             style={{
-              background: 'rgba(255, 30, 39, 0.18)',
-              border: '1px solid #FF1E27',
-              color: '#FFFFFF',
-              padding: '10px 16px',
-              borderRadius: '8px',
+              background: 'transparent',
+              border: 'none',
+              padding: '6px',
               cursor: 'pointer',
-              fontWeight: 800,
-              fontSize: '0.84rem',
-              backdropFilter: 'blur(8px)',
+              color: '#FF1E27',
+              fontSize: '1.45rem',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 0 14px rgba(255, 30, 39, 0.3)',
-              transition: 'all 0.2s ease',
-            }}
-            title="Initiate Sci-Fi Red Hologram creation / materialization sequence (Key: R)"
-          >
-            <i className="fa-solid fa-bolt" style={{ color: '#FF1E27' }}></i>
-            <span>Hologram</span>
-            <kbd style={{ background: '#FF1E27', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 900 }}>R</kbd>
-          </button>
-
-          {/* Steady Arms / Leg Walk Toggle */}
-          <button
-            onClick={() => setLockArms(!lockArms)}
-            data-sound="switch"
-            style={{
-              background: lockArms ? 'rgba(255, 30, 39, 0.18)' : 'rgba(12, 13, 19, 0.92)',
-              border: `1px solid ${lockArms ? '#FF1E27' : 'rgba(255, 255, 255, 0.18)'}`,
-              color: lockArms ? '#FFFFFF' : '#94a3b8',
-              padding: '10px 16px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 700,
-              fontSize: '0.84rem',
-              backdropFilter: 'blur(8px)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.2s ease',
-              boxShadow: lockArms ? '0 0 12px rgba(255, 30, 39, 0.25)' : 'none',
-            }}
-            title="When active, the upper body/hands stay locked in steady resting pose while only legs walk."
-          >
-            {lockArms ? (
-              <>
-                <i className="fa-solid fa-shield-halved" style={{ color: '#FF1E27' }}></i>
-                <span>Arms: Steady</span>
-              </>
-            ) : (
-              <>
-                <i className="fa-solid fa-person-walking"></i>
-                <span>Arms: Free</span>
-              </>
-            )}
-          </button>
-
-          {/* Camera Mode Toggle */}
-          <button
-            onClick={() => setCameraMode(cameraMode === 'chase' ? 'free' : 'chase')}
-            data-sound="switch"
-            style={{
-              background: 'rgba(12, 13, 19, 0.92)',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
-              color: '#FFFFFF',
-              padding: '10px 16px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 700,
-              fontSize: '0.84rem',
-              backdropFilter: 'blur(8px)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            {cameraMode === 'chase' ? (
-              <>
-                <i className="fa-solid fa-crosshairs" style={{ color: '#FF1E27' }}></i>
-                <span>GTA 3rd-Person</span>
-              </>
-            ) : (
-              <>
-                <i className="fa-solid fa-arrows-rotate"></i>
-                <span>Free Orbit</span>
-              </>
-            )}
-          </button>
-
-          {/* Model Switcher Menu */}
-          <select
-            value={activeModel}
-            data-sound="pop"
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === 'custom') {
-                fileInputRef.current?.click();
-              } else {
-                setActiveModel(val);
-                setModelLabel(
-                  val.includes('sample_rigged_character.glb')
-                    ? 'Vanguard Rigged Soldier (Blender/Mixamo)'
-                    : val.includes('my-meshy-model-backup.glb')
-                    ? 'Meshy Character (Original Pale Skin Backup)'
-                    : val.includes('my-meshy-model.glb')
-                    ? 'Meshy Character (Dusky Skin — Charan)'
-                    : 'character.glb'
-                );
-              }
-            }}
-            style={{
-              background: 'rgba(12, 13, 19, 0.95)',
-              border: '1px solid rgba(255, 255, 255, 0.22)',
-              color: '#FFFFFF',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              fontWeight: 700,
-              fontSize: '0.84rem',
-              cursor: 'pointer',
+              justifyContent: 'center',
+              transition: 'transform 0.18s ease, filter 0.18s ease, color 0.18s ease',
               outline: 'none',
-              backdropFilter: 'blur(8px)',
+              filter: 'drop-shadow(0 2px 8px rgba(255, 30, 39, 0.45))',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.22)';
+              e.currentTarget.style.filter = 'drop-shadow(0 0 16px #FF1E27)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.filter = 'drop-shadow(0 2px 8px rgba(255, 30, 39, 0.45))';
             }}
           >
-            <option value={publicUrl + '/my-meshy-model.glb'}>Meshy Character (Dusky Skin — Charan)</option>
-            <option value={publicUrl + '/my-meshy-model-backup.glb'}>Meshy Character (Original Pale Skin Backup)</option>
-            <option value={publicUrl + '/models/sample_rigged_character.glb'}>Vanguard Rigged Soldier (Blender/Mixamo — Steady Hands)</option>
-            <option value={publicUrl + '/models/character.glb'}>/models/character.glb (Mixamo Rigged)</option>
-            <option value="custom">Upload / Drop Custom .glb...</option>
-          </select>
+            <i className="fa-solid fa-bolt"></i>
+          </button>
+        </div>
 
-          {/* Close Button to return to Portfolio */}
-          {onClose && (
+        {/* Top Right: Exit Workspace Button */}
+        {onClose && (
+          <div style={{ pointerEvents: 'auto' }}>
             <button
+              type="button"
               onClick={onClose}
               data-sound="pop"
               style={{
@@ -571,261 +478,449 @@ export default function CharacterPlayground({ onClose }) {
                 fontSize: '0.85rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '7px',
                 boxShadow: '0 4px 16px rgba(255, 30, 39, 0.4)',
                 transition: 'all 0.2s ease',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+              title="Return to Portfolio Overview"
             >
               <i className="fa-solid fa-arrow-left"></i>
               <span>Exit Workspace</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
+      {/* IN-GAME SETTINGS MODAL POPUP */}
+      {settingsOpen && (
+        <div
+          onClick={() => setSettingsOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            background: 'rgba(0, 0, 0, 0.78)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            animation: 'fadeIn 0.18s ease-out',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '640px',
+              maxHeight: '88vh',
+              overflowY: 'auto',
+              background: 'rgba(12, 13, 19, 0.98)',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
+              borderTop: '3px solid #FF1E27',
+              borderRadius: '12px',
+              padding: '24px 28px',
+              boxShadow: '0 24px 70px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 30, 39, 0.25)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '8px',
+                    background: 'rgba(255, 30, 39, 0.15)',
+                    border: '1px solid rgba(255, 30, 39, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <i className="fa-solid fa-gear" style={{ color: '#FF1E27', fontSize: '1.15rem' }}></i>
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.01em' }}>
+                    ARENA SETTINGS & CONTROLS
+                  </h3>
+                  <span style={{ fontSize: '0.68rem', fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", color: '#FF6B72', letterSpacing: '0.08em' }}>
+                    SYS // GAME_CONFIGURATION_MENU
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.14)',
+                  color: '#ffffff',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.15s ease',
+                }}
+                title="Close Settings (Esc)"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
 
-      {/* BOTTOM LEFT: INTERACTIVE WASD SWISS CONTROLLER */}
+            {/* Section 1: Character & Rigging Status */}
+            <div
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                padding: '12px 16px',
+              }}
+            >
+              <div style={{ fontSize: '0.7rem', fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", color: '#94a3b8', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.06em' }}>
+                ACTIVE AVATAR SPECIFICATION
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#ffffff' }}>
+                  {modelLabel}
+                </span>
+                <span
+                  style={{
+                    color: '#ffffff',
+                    background: 'rgba(255, 30, 39, 0.16)',
+                    border: '1px solid rgba(255, 30, 39, 0.4)',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                  }}
+                >
+                  <i className="fa-solid fa-user-check" style={{ color: '#FF1E27' }}></i> Dusky Skin (Charan)
+                </span>
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '6px' }}>
+                Status:{' '}
+                {telemetry.hasAnimations ? (
+                  <strong style={{ color: '#FF6B72' }}>Rigged Animation "{telemetry.activeClip}"</strong>
+                ) : (
+                  <strong style={{ color: '#FF6B72' }}>Procedural Walking Rig Active (Symmetric Calibrated Leg Stride)</strong>
+                )}
+              </div>
+            </div>
+
+            {/* Section 2: Audio & Sound Controls */}
+            <div>
+              <div style={{ fontSize: '0.72rem', fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", color: '#FF1E27', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.06em' }}>
+                AUDIO & HAPTICS
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(20, 22, 32, 0.8)', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff' }}>Tactile Button Sound FX</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Play subtle feedback clicks on actions</div>
+                </div>
+                <button
+                  onClick={() => toggleSound()}
+                  data-sound="switch"
+                  title={soundActive ? 'Audio ON (Click to Mute)' : 'Muted (Click to Unmute)'}
+                  style={{
+                    background: soundActive ? 'linear-gradient(135deg, #FF1E27 0%, #C40A12 100%)' : 'rgba(255, 255, 255, 0.08)',
+                    border: `1px solid ${soundActive ? '#FF1E27' : 'rgba(255, 255, 255, 0.2)'}`,
+                    color: '#ffffff',
+                    width: '36px',
+                    height: '36px',
+                    padding: 0,
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.92rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                  aria-label={soundActive ? 'Mute Sound' : 'Enable Sound'}
+                >
+                  <i className={soundActive ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark'}></i>
+                </button>
+              </div>
+            </div>
+
+            {/* Section 3: Locomotion & Camera Modes */}
+            <div>
+              <div style={{ fontSize: '0.72rem', fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", color: '#FF1E27', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.06em' }}>
+                LOCOMOTION & CAMERA MODES
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
+                {/* Camera Mode Toggle */}
+                <div style={{ background: 'rgba(20, 22, 32, 0.8)', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff' }}>Camera System</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Toggle rear-chase follow vs free rotation</div>
+                  <button
+                    onClick={() => setCameraMode(cameraMode === 'chase' ? 'free' : 'chase')}
+                    data-sound="switch"
+                    style={{
+                      background: cameraMode === 'chase' ? 'rgba(255, 30, 39, 0.18)' : 'rgba(255, 255, 255, 0.08)',
+                      border: `1px solid ${cameraMode === 'chase' ? '#FF1E27' : 'rgba(255, 255, 255, 0.18)'}`,
+                      color: '#ffffff',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: 800,
+                      fontSize: '0.8rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <i className={cameraMode === 'chase' ? 'fa-solid fa-crosshairs' : 'fa-solid fa-arrows-rotate'} style={{ color: '#FF1E27' }}></i>
+                    <span>{cameraMode === 'chase' ? 'GTA 3rd-Person Follow' : 'Free Orbit View'}</span>
+                  </button>
+                </div>
+
+                {/* Arms Rigging Toggle */}
+                <div style={{ background: 'rgba(20, 22, 32, 0.8)', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff' }}>Arms Rigging Stance</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Steady resting hands vs full skeletal swing</div>
+                  <button
+                    onClick={() => setLockArms(!lockArms)}
+                    data-sound="switch"
+                    style={{
+                      background: lockArms ? 'rgba(255, 30, 39, 0.18)' : 'rgba(255, 255, 255, 0.08)',
+                      border: `1px solid ${lockArms ? '#FF1E27' : 'rgba(255, 255, 255, 0.18)'}`,
+                      color: '#ffffff',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: 800,
+                      fontSize: '0.8rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <i className={lockArms ? 'fa-solid fa-shield-halved' : 'fa-solid fa-person-walking'} style={{ color: '#FF1E27' }}></i>
+                    <span>{lockArms ? 'Arms: Steady (GTA Locomotion)' : 'Arms: Free'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 4: 3D Character Model Switcher */}
+            <div>
+              <div style={{ fontSize: '0.72rem', fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", color: '#FF1E27', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.06em' }}>
+                3D CHARACTER MODEL SELECTOR
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <select
+                  value={activeModel}
+                  data-sound="pop"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'custom') {
+                      fileInputRef.current?.click();
+                    } else {
+                      setActiveModel(val);
+                      setModelLabel(
+                        val.includes('sample_rigged_character.glb')
+                          ? 'Vanguard Rigged Soldier (Blender/Mixamo)'
+                          : val.includes('my-meshy-model-backup.glb')
+                          ? 'Meshy Character (Original Pale Skin Backup)'
+                          : val.includes('my-meshy-model.glb')
+                          ? 'Meshy Character (Dusky Skin — Charan)'
+                          : 'character.glb'
+                      );
+                    }
+                  }}
+                  style={{
+                    background: 'rgba(20, 22, 32, 0.95)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#FFFFFF',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    width: '100%',
+                  }}
+                >
+                  <option value={publicUrl + '/my-meshy-model.glb'}>Meshy Character (Dusky Skin — Charan)</option>
+                  <option value={publicUrl + '/my-meshy-model-backup.glb'}>Meshy Character (Original Pale Skin Backup)</option>
+                  <option value={publicUrl + '/models/sample_rigged_character.glb'}>Vanguard Rigged Soldier (Blender/Mixamo — Steady Hands)</option>
+                  <option value={publicUrl + '/models/character.glb'}>/models/character.glb (Mixamo Rigged)</option>
+                  <option value="custom">Upload / Drop Custom .glb...</option>
+                </select>
+
+                <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      flex: 1,
+                      background: 'rgba(255, 255, 255, 0.06)',
+                      border: '1px dashed rgba(255, 255, 255, 0.25)',
+                      color: '#ffffff',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <i className="fa-solid fa-cloud-arrow-up" style={{ color: '#FF1E27' }}></i>
+                    <span>Upload Custom .glb / .gltf</span>
+                  </button>
+
+                  <a
+                    href={publicUrl + '/character_for_mixamo.zip'}
+                    download="character_for_mixamo.zip"
+                    data-sound="pop"
+                    style={{
+                      flex: 1,
+                      background: 'rgba(255, 30, 39, 0.14)',
+                      border: '1px solid rgba(255, 30, 39, 0.35)',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <i className="fa-solid fa-download" style={{ color: '#FF1E27' }}></i>
+                    <span>Download Model Zip</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 5: Keyboard Shortcuts Reference */}
+            <div
+              style={{
+                background: 'rgba(0, 0, 0, 0.4)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                padding: '12px 14px',
+              }}
+            >
+              <div style={{ fontSize: '0.7rem', fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.06em' }}>
+                CONTROLS CHEATSHEET
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '0.75rem' }}>
+                <div><kbd style={{ background: '#FF1E27', color: '#fff', padding: '1px 5px', borderRadius: '3px', fontWeight: 900 }}>W / S</kbd> Walk Front / Back</div>
+                <div><kbd style={{ background: '#252736', color: '#fff', padding: '1px 5px', borderRadius: '3px', fontWeight: 900 }}>A / D</kbd> Rotate Model</div>
+                <div><kbd style={{ background: '#252736', color: '#fff', padding: '1px 5px', borderRadius: '3px', fontWeight: 900 }}>SHIFT</kbd> Sprint Run</div>
+                <div><kbd style={{ background: '#FF1E27', color: '#fff', padding: '1px 5px', borderRadius: '3px', fontWeight: 900 }}>SPACE</kbd> Stop / Brake</div>
+                <div><kbd style={{ background: '#FF1E27', color: '#fff', padding: '1px 5px', borderRadius: '3px', fontWeight: 900 }}>R</kbd> Replay Hologram</div>
+                <div><kbd style={{ background: '#252736', color: '#fff', padding: '1px 5px', borderRadius: '3px', fontWeight: 900 }}>MOUSE</kbd> Aim / Orbit View</div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(false)}
+                data-sound="pop"
+                style={{
+                  background: 'linear-gradient(135deg, #FF1E27 0%, #C40A12 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  padding: '9px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 14px rgba(255, 30, 39, 0.4)',
+                }}
+              >
+                <span>Close Settings</span>
+                <kbd style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '1px 5px', borderRadius: '3px', fontSize: '0.68rem' }}>ESC</kbd>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* BOTTOM LEFT: FLOATING WASD & ACTION CONTROLS (NO CARD BACKGROUND) */}
       <div
         style={{
           position: 'absolute',
           bottom: 24,
           left: 24,
           zIndex: 30,
-          background: 'rgba(12, 13, 19, 0.95)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255, 255, 255, 0.14)',
-          borderTop: '2px solid #FF1E27',
-          borderRadius: '12px',
-          padding: '16px 20px',
-          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.6)',
           pointerEvents: 'auto',
           userSelect: 'none',
-          maxWidth: '390px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
         }}
       >
-        {/* Swiss Card Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '10px', marginBottom: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span
-              style={{
-                display: 'inline-block',
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                background: '#FF1E27',
-                boxShadow: '0 0 8px #FF1E27',
-              }}
-            />
-            <span style={{ fontSize: '0.72rem', fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", fontWeight: 800, textTransform: 'uppercase', color: '#FF1E27', letterSpacing: '0.08em' }}>
-              SYS // WASD_CONTROLLER
-            </span>
-          </div>
-          <span style={{ fontSize: '0.68rem', background: 'rgba(255, 30, 39, 0.12)', border: '1px solid rgba(255, 30, 39, 0.3)', color: '#FF6B72', padding: '1px 8px', borderRadius: '3px', fontWeight: 800, fontFamily: 'monospace' }}>
-            INTERACTIVE
-          </span>
-        </div>
-
-        {/* Controller Body: WASD Inverted-T Pad & Action Column */}
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          {/* WASD Inverted-T Pad matching user illustration */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '14px' }}>
+          {/* WASD Inverted-T Pad matching Image 2 */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
             {/* Top Key: W */}
             <div>
-              {renderKeycap('W', 'Walk', 'forward', 58)}
+              {renderKeycap('W', 'forward', 58)}
             </div>
             {/* Bottom Keys: A, S, D */}
             <div style={{ display: 'flex', gap: '6px' }}>
-              {renderKeycap('A', 'Left', 'left', 58)}
-              {renderKeycap('S', 'Back', 'back', 58)}
-              {renderKeycap('D', 'Right', 'right', 58)}
+              {renderKeycap('A', 'left', 58)}
+              {renderKeycap('S', 'back', 58)}
+              {renderKeycap('D', 'right', 58)}
             </div>
           </div>
 
-          {/* Action Modifiers Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-            {/* Space Brake Keycap */}
-            <button
-              type="button"
-              onPointerDown={(e) => {
-                e.preventDefault();
-                sendKeyAction('stop', true);
-              }}
-              onPointerUp={(e) => {
-                e.preventDefault();
-                sendKeyAction('stop', false);
-              }}
-              onPointerLeave={() => {
-                if (pressedKeys.stop) sendKeyAction('stop', false);
-              }}
-              onPointerCancel={() => {
-                if (pressedKeys.stop) sendKeyAction('stop', false);
-              }}
-              style={{
-                height: '40px',
-                borderRadius: '8px',
-                border: pressedKeys.stop ? '2px solid #FF1E27' : '2px solid #000000',
-                background: pressedKeys.stop
-                  ? 'linear-gradient(180deg, #FF2E36 0%, #D80C14 75%, #A1050B 100%)'
-                  : 'linear-gradient(180deg, #1C1E26 0%, #12131A 100%)',
-                color: '#ffffff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 10px',
-                fontSize: '0.74rem',
-                fontWeight: 800,
-                letterSpacing: '0.04em',
-                transform: pressedKeys.stop ? 'translateY(2px)' : 'translateY(0)',
-                boxShadow: pressedKeys.stop
-                  ? '0 0 16px rgba(255, 30, 39, 0.85), 0 1px 0 #7A0206'
-                  : '0 3px 0 #000000, 0 6px 12px rgba(0, 0, 0, 0.4)',
-                transition: 'transform 0.06s ease, box-shadow 0.06s ease, background 0.08s ease',
-                userSelect: 'none',
-                touchAction: 'manipulation',
-                outline: 'none',
-              }}
-              title="Click or press Space for emergency brake & Stand At Ease"
-            >
-              <kbd style={{ background: '#FF1E27', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '0.68rem', fontWeight: 900, border: '1px solid #000' }}>SPACE</kbd>
-              <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: pressedKeys.stop ? '#FFFFFF' : '#F1F4F9' }}>Brake / Ease</span>
-            </button>
-
-            {/* Shift Sprint Keycap */}
-            <button
-              type="button"
-              onPointerDown={(e) => {
-                e.preventDefault();
-                sendKeyAction('run', true);
-              }}
-              onPointerUp={(e) => {
-                e.preventDefault();
-                sendKeyAction('run', false);
-              }}
-              onPointerLeave={() => {
-                if (pressedKeys.run) sendKeyAction('run', false);
-              }}
-              onPointerCancel={() => {
-                if (pressedKeys.run) sendKeyAction('run', false);
-              }}
-              style={{
-                height: '40px',
-                borderRadius: '8px',
-                border: pressedKeys.run ? '2px solid #FF1E27' : '2px solid #000000',
-                background: pressedKeys.run
-                  ? 'linear-gradient(180deg, #FF2E36 0%, #D80C14 75%, #A1050B 100%)'
-                  : 'linear-gradient(180deg, #1C1E26 0%, #12131A 100%)',
-                color: '#ffffff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 10px',
-                fontSize: '0.74rem',
-                fontWeight: 800,
-                letterSpacing: '0.04em',
-                transform: pressedKeys.run ? 'translateY(2px)' : 'translateY(0)',
-                boxShadow: pressedKeys.run
-                  ? '0 0 16px rgba(255, 30, 39, 0.85), 0 1px 0 #7A0206'
-                  : '0 3px 0 #000000, 0 6px 12px rgba(0, 0, 0, 0.4)',
-                transition: 'transform 0.06s ease, box-shadow 0.06s ease, background 0.08s ease',
-                userSelect: 'none',
-                touchAction: 'manipulation',
-                outline: 'none',
-              }}
-              title="Click or hold Shift for Sprint speed"
-            >
-              <kbd style={{ background: '#2B2E3D', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '0.68rem', fontWeight: 900, border: '1px solid #000' }}>SHIFT</kbd>
-              <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: pressedKeys.run ? '#FFFFFF' : '#CBD5E1' }}>Sprint Run</span>
-            </button>
-
-            {/* R Hologram Keycap */}
-            <button
-              type="button"
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent('character-materialize'));
-              }}
-              data-sound="hologram"
-              style={{
-                height: '40px',
-                borderRadius: '8px',
-                border: '2px solid #000000',
-                background: 'linear-gradient(180deg, #241416 0%, #170A0B 100%)',
-                color: '#ffffff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 10px',
-                fontSize: '0.74rem',
-                fontWeight: 800,
-                letterSpacing: '0.04em',
-                boxShadow: '0 3px 0 #000000, 0 6px 12px rgba(0, 0, 0, 0.4)',
-                transition: 'all 0.12s ease',
-                userSelect: 'none',
-                outline: 'none',
-              }}
-              title="Click or press R to replay red hologram materialization"
-            >
-              <kbd style={{ background: '#FF1E27', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '0.68rem', fontWeight: 900, border: '1px solid #000' }}>R</kbd>
-              <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: '#FF8A90' }}>Hologram</span>
-            </button>
+          {/* Action Modifiers: SPACE & SHIFT in identical mechanical keycap style and color */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {renderModifierKeycap('SPACE', 'stop', 114)}
+            {renderModifierKeycap('SHIFT', 'run', 114)}
           </div>
         </div>
 
-        {/* Footer Swiss Meta Readout */}
-        <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.66rem', fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", color: '#94a3b8' }}>
+        {/* Minimal Floating Hint */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', textShadow: '0 2px 6px rgba(0,0,0,0.95)' }}>
+          <span style={{ fontSize: '0.62rem', fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", color: '#cbd5e1', letterSpacing: '0.04em' }}>
             CLICK TO MOVE OR USE WASD KEYBOARD
           </span>
-          <span style={{ fontSize: '0.66rem', color: '#FF6B72', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
+          <span style={{ fontSize: '0.62rem', color: '#FF6B72', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
             <i className="fa-solid fa-computer-mouse"></i> AIM VIEW
           </span>
         </div>
       </div>
 
-      {/* BOTTOM RIGHT: TELEMETRY & DOWNLOAD LINK */}
+      {/* BOTTOM RIGHT: TELEMETRY BAR */}
       <div
         style={{
           position: 'absolute',
           bottom: 24,
           right: 24,
           zIndex: 30,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: '10px',
+          pointerEvents: 'auto',
         }}
       >
-        {/* Ready Mixamo Zip Download Banner */}
-        <a
-          href={publicUrl + '/character_for_mixamo.zip'}
-          download="character_for_mixamo.zip"
-          data-sound="pop"
-          title="Download the prepared character OBJ, MTL, and texture archive ready to auto-rig on mixamo.com"
-          style={{
-            background: 'linear-gradient(135deg, #FF1E27 0%, #D40C14 100%)',
-            color: '#fff',
-            textDecoration: 'none',
-            padding: '10px 18px',
-            borderRadius: '8px',
-            fontWeight: 800,
-            fontSize: '0.85rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 16px rgba(255, 30, 39, 0.4)',
-            transition: 'transform 0.2s ease',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
-        >
-          <i className="fa-solid fa-download"></i>
-          <span>Download character_for_mixamo.zip</span>
-        </a>
-
         {/* Telemetry Panel - Swiss Modular Card */}
         <div
           style={{
