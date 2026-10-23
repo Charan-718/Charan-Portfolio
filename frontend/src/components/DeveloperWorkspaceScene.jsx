@@ -116,21 +116,350 @@ export const workspaceProjects = [
   },
 ];
 
+// =============================================================================
+// MICRO-DETAIL 1: ATMOSPHERIC CYBER EMBER PARTICLES (VOLUMETRIC DECK ATMOSPHERE)
+// =============================================================================
+function CyberAtmosphericMotes({ count = 90 }) {
+  const motesRef = useRef();
+  const [positions, phases] = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const ph = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 22; // X: -11 to 11
+      pos[i * 3 + 1] = 0.5 + Math.random() * 5.6; // Y: 0.5 to 6.1
+      pos[i * 3 + 2] = -3 + Math.random() * 15; // Z: -3 to 12
+      ph[i] = Math.random() * Math.PI * 2;
+    }
+    return [pos, ph];
+  }, [count]);
+
+  const geom = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return g;
+  }, [positions]);
+
+  useFrame((state) => {
+    if (!motesRef.current) return;
+    const t = state.clock.getElapsedTime();
+    const posAttr = motesRef.current.geometry.attributes.position;
+    const arr = posAttr.array;
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      arr[idx + 1] += Math.sin(t * 1.2 + phases[i]) * 0.0025;
+      arr[idx] += Math.cos(t * 0.7 + phases[i]) * 0.0018;
+    }
+    posAttr.needsUpdate = true;
+  });
+
+  return (
+    <points ref={motesRef} geometry={geom}>
+      <pointsMaterial
+        size={0.08}
+        color="#FF3B44"
+        transparent
+        opacity={0.65}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
+    </points>
+  );
+}
+
+// =============================================================================
+// MICRO-DETAIL 2: FLOOR LASER CONDUITS & PULSING DATA PACKETS
+// =============================================================================
+function CyberFloorConduits() {
+  const packetRef = useRef();
+
+  useFrame((state) => {
+    if (packetRef.current) {
+      const p = (state.clock.getElapsedTime() * 0.45) % 1.0;
+      // Animate packet along path toward projects screen [0, 4.2] -> [0, 9.8]
+      packetRef.current.position.z = 4.2 + p * 5.6;
+    }
+  });
+
+  return (
+    <group position={[0, 0.004, 0]}>
+      {/* 1. Pedestal to Featured Projects Screen */}
+      <mesh position={[0, 0, 7.0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.04, 5.6]} />
+        <meshBasicMaterial color="#FF1E27" transparent opacity={0.65} side={THREE.DoubleSide} />
+      </mesh>
+      {/* Traveling Data Packet */}
+      <mesh ref={packetRef} position={[0, 0.006, 7.0]}>
+        <sphereGeometry args={[0.06, 12, 12]} />
+        <meshBasicMaterial color="#FFFFFF" />
+      </mesh>
+
+      {/* 2. Pedestal to Tech Stack Screen */}
+      <mesh position={[3.8, 0, 5.6]} rotation={[-Math.PI / 2, 0, -0.62]}>
+        <planeGeometry args={[0.04, 7.6]} />
+        <meshBasicMaterial color="#FF1E27" transparent opacity={0.45} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* 3. Pedestal to Quick Access Kiosk */}
+      <mesh position={[-2.4, 0, 2.5]} rotation={[-Math.PI / 2, 0, 0.98]}>
+        <planeGeometry args={[0.04, 5.8]} />
+        <meshBasicMaterial color="#FF1E27" transparent opacity={0.45} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* 4. Pedestal to Cyber Pylon */}
+      <mesh position={[-2.6, 0, 3.8]} rotation={[-Math.PI / 2, 0, 1.72]}>
+        <planeGeometry args={[0.04, 5.2]} />
+        <meshBasicMaterial color="#FF1E27" transparent opacity={0.5} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+}
+
+// =============================================================================
+// MICRO-DETAIL 3: HIGH-TECH CYBER COMMAND DATA PYLON & QUANTUM POWER COLUMN
+// Replaces the green potted plant with a sleek sci-fi terminal matching the crimson palette
+// =============================================================================
+function CyberCommandPylon({ onInteract }) {
+  const coreRef = useRef();
+  const ringARef = useRef();
+  const ringBRef = useRef();
+  const [pulse, setPulse] = useState(false);
+
+  useFrame((state, delta) => {
+    if (coreRef.current) {
+      coreRef.current.rotation.y += delta * 1.5;
+      coreRef.current.rotation.x += delta * 0.7;
+      coreRef.current.position.y = 1.05 + Math.sin(state.clock.getElapsedTime() * 2.8) * 0.035;
+    }
+    if (ringARef.current) {
+      ringARef.current.rotation.z += delta * 1.8;
+      ringARef.current.rotation.x += delta * 0.9;
+    }
+    if (ringBRef.current) {
+      ringBRef.current.rotation.z -= delta * 1.5;
+      ringBRef.current.rotation.y += delta * 1.1;
+    }
+  });
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    playClickSound('hologram');
+    setPulse(true);
+    setTimeout(() => setPulse(false), 900);
+    if (onInteract) onInteract();
+  };
+
+  return (
+    <group
+      position={[-5.2, 0, 3.4]}
+      rotation={[0, 0.45, 0]}
+      onClick={handleClick}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        document.body.style.cursor = 'pointer';
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = 'auto';
+      }}
+    >
+      {/* Heavy Octagonal High-Tech Base Chassis */}
+      <mesh position={[0, 0.08, 0]} receiveShadow castShadow>
+        <cylinderGeometry args={[0.55, 0.65, 0.16, 8]} />
+        <meshStandardMaterial color="#0c0e14" roughness={0.25} metalness={0.9} />
+      </mesh>
+
+      {/* Glowing Red Floor Base Ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
+        <ringGeometry args={[0.66, 0.72, 32]} />
+        <meshBasicMaterial color="#FF1E27" side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* Interactive Floor Shockwave Ripple when clicked */}
+      {pulse && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+          <ringGeometry args={[0.7, 1.4, 32]} />
+          <meshBasicMaterial
+            color="#FF3B44"
+            transparent
+            opacity={0.65}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+
+      {/* Lower Pillar with Heat-Sink Slots */}
+      <mesh position={[0, 0.38, 0]} receiveShadow castShadow>
+        <cylinderGeometry args={[0.42, 0.52, 0.44, 24]} />
+        <meshStandardMaterial color="#10131d" roughness={0.3} metalness={0.85} />
+      </mesh>
+      {/* 4 Red Heatsink LED Strips */}
+      {[0, 90, 180, 270].map((deg, i) => {
+        const rad = (deg * Math.PI) / 180;
+        return (
+          <mesh key={i} position={[Math.sin(rad) * 0.44, 0.38, Math.cos(rad) * 0.44]} rotation={[0, -rad, 0]}>
+            <boxGeometry args={[0.04, 0.32, 0.03]} />
+            <meshBasicMaterial color="#FF1E27" />
+          </mesh>
+        );
+      })}
+
+      {/* Middle Telemetry Collar & Status Indicator */}
+      <mesh position={[0, 0.64, 0]}>
+        <cylinderGeometry args={[0.46, 0.46, 0.08, 24]} />
+        <meshStandardMaterial color="#090a10" roughness={0.2} metalness={0.92} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.68, 0]}>
+        <ringGeometry args={[0.42, 0.45, 32]} />
+        <meshBasicMaterial color="#FF1E27" side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* High-Tech Transparent Containment Chamber Glass */}
+      <mesh position={[0, 1.05, 0]}>
+        <cylinderGeometry args={[0.38, 0.38, 0.72, 24, 1, true]} />
+        <meshStandardMaterial
+          color="#0b101c"
+          roughness={0.1}
+          metalness={0.95}
+          transparent
+          opacity={0.32}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Chamber Vertical Support Struts */}
+      {[0, 120, 240].map((deg, i) => {
+        const rad = (deg * Math.PI) / 180;
+        return (
+          <mesh key={`strut-${i}`} position={[Math.sin(rad) * 0.38, 1.05, Math.cos(rad) * 0.38]}>
+            <boxGeometry args={[0.035, 0.72, 0.035]} />
+            <meshStandardMaterial color="#161926" roughness={0.3} metalness={0.88} />
+          </mesh>
+        );
+      })}
+
+      {/* Floating Rotating Faceted Quantum Core */}
+      <group ref={coreRef} position={[0, 1.05, 0]}>
+        <mesh>
+          <octahedronGeometry args={[0.22, 1]} />
+          <meshBasicMaterial color="#FF1E27" wireframe transparent opacity={0.85} blending={THREE.AdditiveBlending} />
+        </mesh>
+        <mesh>
+          <octahedronGeometry args={[0.14, 0]} />
+          <meshBasicMaterial color="#FFA3A7" transparent opacity={0.9} blending={THREE.AdditiveBlending} />
+        </mesh>
+      </group>
+
+      {/* Counter-Rotating Holographic Rings inside chamber */}
+      <mesh ref={ringARef} position={[0, 1.05, 0]}>
+        <ringGeometry args={[0.26, 0.28, 32]} />
+        <meshBasicMaterial color="#FF1E27" transparent opacity={0.7} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
+      </mesh>
+      <mesh ref={ringBRef} position={[0, 1.05, 0]} rotation={[0.6, 0, 0.4]}>
+        <ringGeometry args={[0.3, 0.32, 32]} />
+        <meshBasicMaterial color="#FF5259" transparent opacity={0.6} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
+      </mesh>
+
+      {/* Chamber Upper Cap & Projector Aperture */}
+      <mesh position={[0, 1.45, 0]}>
+        <cylinderGeometry args={[0.42, 0.44, 0.08, 24]} />
+        <meshStandardMaterial color="#090a10" roughness={0.2} metalness={0.92} />
+      </mesh>
+      <mesh position={[0, 1.54, 0]}>
+        <cylinderGeometry args={[0.18, 0.26, 0.1, 16]} />
+        <meshStandardMaterial color="#151824" roughness={0.3} metalness={0.85} />
+      </mesh>
+      {/* Top Beacon Glow */}
+      <mesh position={[0, 1.62, 0]}>
+        <sphereGeometry args={[0.06, 16, 16]} />
+        <meshBasicMaterial color="#FF1E27" />
+      </mesh>
+
+      {/* Subtle Upward Holographic Laser Stream */}
+      <mesh position={[0, 3.2, 0]}>
+        <cylinderGeometry args={[0.02, 0.08, 3.2, 16, 1, true]} />
+        <meshBasicMaterial color="#FF1E27" transparent opacity={0.15} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+
+      {/* Status Screen Telemetry Plate on Front */}
+      <group position={[0, 0.65, 0.47]} rotation={[-0.3, 0, 0]}>
+        <mesh>
+          <planeGeometry args={[0.44, 0.22]} />
+          <meshBasicMaterial color="#0b0d14" />
+        </mesh>
+        <mesh position={[0, 0, 0.005]}>
+          <planeGeometry args={[0.42, 0.2]} />
+          <meshBasicMaterial color="#FF1E27" transparent opacity={0.2} blending={THREE.AdditiveBlending} />
+        </mesh>
+        {/* Tiny Status LEDs */}
+        {[-0.14, 0, 0.14].map((lx, li) => (
+          <mesh key={li} position={[lx, 0.05, 0.01]}>
+            <circleGeometry args={[0.018, 12]} />
+            <meshBasicMaterial color={li === 0 ? '#FF1E27' : '#FFFFFF'} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
 export default function DeveloperWorkspaceScene({ onClose }) {
   const publicUrl = process.env.PUBLIC_URL || '';
   const [currentPage, setCurrentPage] = useState(0); // 0 = First 4 projects, 1 = Next 4 projects
   const [, setTick] = useState(0);
 
+  // Lighting Mode (Default to High Clarity Studio Diffuse Lighting)
+  const [isStudioBright, setIsStudioBright] = useState(true);
+
+  // Central Hologram State: 0 = Planetary Net, 1 = Quantum Tesseract, 2 = AI Neural Core
+  const [holoMode, setHoloMode] = useState(0);
+  const [strobeState, setStrobeState] = useState(false);
+
   // References for animated 3D elements
   const globeRef = useRef();
   const ringRef1 = useRef();
   const ringRef2 = useRef();
+  const tesseractOuterRef = useRef();
+  const tesseractInnerRef = useRef();
+  const neuralCoreRef = useRef();
+  const beaconRef = useRef();
+
+  useEffect(() => {
+    const handleToggleLighting = (e) => {
+      if (e.detail && typeof e.detail.studio === 'boolean') {
+        setIsStudioBright(e.detail.studio);
+      } else {
+        setIsStudioBright((prev) => !prev);
+      }
+    };
+    window.addEventListener('charan-toggle-lighting', handleToggleLighting);
+    return () => window.removeEventListener('charan-toggle-lighting', handleToggleLighting);
+  }, []);
 
   useFrame((state, delta) => {
-    if (globeRef.current) {
-      globeRef.current.rotation.y += delta * 0.45;
-      globeRef.current.position.y = 1.15 + Math.sin(state.clock.getElapsedTime() * 1.8) * 0.04;
+    const t = state.clock.getElapsedTime();
+
+    // 1. Central Hologram Multimode Animations
+    if (holoMode === 0) {
+      if (globeRef.current) {
+        globeRef.current.rotation.y += delta * 0.45;
+        globeRef.current.position.y = 1.15 + Math.sin(t * 1.8) * 0.04;
+      }
+    } else if (holoMode === 1) {
+      if (tesseractOuterRef.current) {
+        tesseractOuterRef.current.rotation.y += delta * 0.7;
+        tesseractOuterRef.current.rotation.x += delta * 0.4;
+      }
+      if (tesseractInnerRef.current) {
+        tesseractInnerRef.current.rotation.y -= delta * 0.9;
+        tesseractInnerRef.current.rotation.z += delta * 0.5;
+      }
+    } else if (holoMode === 2) {
+      if (neuralCoreRef.current) {
+        neuralCoreRef.current.rotation.y += delta * 0.6;
+        neuralCoreRef.current.position.y = 1.15 + Math.sin(t * 2.2) * 0.04;
+      }
     }
+
     if (ringRef1.current) {
       ringRef1.current.rotation.z += delta * 0.35;
       ringRef1.current.rotation.x += delta * 0.2;
@@ -139,7 +468,25 @@ export default function DeveloperWorkspaceScene({ onClose }) {
       ringRef2.current.rotation.z -= delta * 0.28;
       ringRef2.current.rotation.y += delta * 0.25;
     }
+
+    // 2. Dome Ceiling Central Star Beacon Pulse
+    if (beaconRef.current) {
+      const s = 1.0 + Math.sin(t * 2.5) * 0.12;
+      beaconRef.current.scale.set(s, s, s);
+    }
+
+    // 3. Radial Truss Navigation Strobes
+    const isStrobe = Math.floor(t * 1.5) % 3 === 0;
+    if (isStrobe !== strobeState) {
+      setStrobeState(isStrobe);
+    }
   });
+
+  const handlePedestalClick = (e) => {
+    e.stopPropagation();
+    playClickSound('hologram');
+    setHoloMode((m) => (m + 1) % 3);
+  };
 
   // 100% WebGL Canvas Textures for physical 3D screens (zero DOM overlays, perfect depth buffer occlusion)
   const projectsTextureObj = useMemo(() => {
@@ -341,33 +688,36 @@ export default function DeveloperWorkspaceScene({ onClose }) {
   return (
     <group name="DeveloperWorkspaceEnvironment">
       {/* =========================================================================
-          1. LIGHTING SETUP — NATURAL, REALISTIC DIFFUSE ILLUMINATION
-             Clean, balanced diffuse lighting that ensures the character is clearly
-             visible in the dark environment with natural matte cloth & skin textures,
-             without any artificial metallic shine, plastic glints, or harsh specular hot spots.
+          1. LIGHTING SETUP — HIGH CLARITY STUDIO & BALANCED DIFFUSE ILLUMINATION
+             Ensures the 3D character and environment are clearly visible, with crisp
+             clothing folds, natural skin tones, and rich contrast without any metallic glare.
          ========================================================================= */}
-      {/* Pure Diffuse Ambient Light (Uniformly illuminates textures with ZERO specular shine) */}
-      <ambientLight intensity={1.4} color="#ffffff" />
+      {/* Pure Diffuse Ambient Light (Evenly illuminates clothing, skin, and meshes with ZERO specular glare) */}
+      <ambientLight intensity={isStudioBright ? 2.4 : 1.7} color="#ffffff" />
 
-      {/* Soft Natural Hemisphere Fill (Gentle vertical gradient from ceiling to floor) */}
-      <hemisphereLight skyColor="#ffffff" groundColor="#222222" intensity={0.6} />
+      {/* Soft Natural Hemisphere Fill (Lifts character legs, torso, and clothing from below) */}
+      <hemisphereLight skyColor="#ffffff" groundColor="#4a363b" intensity={isStudioBright ? 1.2 : 0.8} />
 
       {/* Single Soft Overhead Directional Key Light (Provides natural gravity shadows) */}
       <directionalLight
-        position={[0, 8, 3]}
-        intensity={1.0}
+        position={[0, 9, 3]}
+        intensity={isStudioBright ? 1.6 : 1.1}
         color="#ffffff"
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0001}
       />
 
-      {/* Gentle Camera-Side Fill Light (Ensures character back is clearly visible without specular glare) */}
+      {/* Camera-Perspective Fill Light (Directly illuminates character back & shoulders in 3rd person) */}
       <directionalLight
-        position={[0, 3, -6]}
-        intensity={0.5}
+        position={[0, 4, -8]}
+        intensity={isStudioBright ? 1.4 : 0.9}
         color="#ffffff"
       />
+
+      {/* Lateral Studio Fill Lights (Left & Right soft diffuse fill) */}
+      <directionalLight position={[-7, 4, 0]} intensity={isStudioBright ? 0.9 : 0.5} color="#fff2f2" />
+      <directionalLight position={[7, 4, 0]} intensity={isStudioBright ? 0.9 : 0.5} color="#fff2f2" />
 
       {/* Soft Environmental Neon Accents (Localized to the pedestal, screens, and furniture) */}
       {/* Red Volumetric Glow over Center Hologram Pedestal */}
@@ -448,9 +798,19 @@ export default function DeveloperWorkspaceScene({ onClose }) {
       ))}
 
       {/* =========================================================================
-          3. CENTER HOLOGRAPHIC GLOBE & PEDESTAL (MATCHING IMAGE 1 & 2)
+          3. CENTER HOLOGRAPHIC DISPLAY & PEDESTAL (INTERACTIVE CLICK TO CYCLE MODES)
          ========================================================================= */}
-      <group position={[0, 0, 4.2]}>
+      <group
+        position={[0, 0, 4.2]}
+        onClick={handlePedestalClick}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          document.body.style.cursor = 'pointer';
+        }}
+        onPointerOut={() => {
+          document.body.style.cursor = 'auto';
+        }}
+      >
         {/* Tiered Technological Pedestal Base */}
         <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
           <cylinderGeometry args={[1.2, 1.45, 0.24, 32]} />
@@ -486,32 +846,85 @@ export default function DeveloperWorkspaceScene({ onClose }) {
           />
         </mesh>
 
-        {/* Rotating 3D Holographic Globe */}
-        <group ref={globeRef} position={[0, 1.15, 0]}>
-          {/* Outer Wireframe Globe */}
-          <mesh>
-            <sphereGeometry args={[0.55, 20, 20]} />
-            <meshBasicMaterial
-              color="#FF1E27"
-              wireframe
-              transparent
-              opacity={0.7}
-              blending={THREE.AdditiveBlending}
-            />
-          </mesh>
+        {/* Multi-Mode 3D Holographic System */}
+        <group position={[0, 1.15, 0]}>
+          {/* Mode 0: Global Planetary Network */}
+          {holoMode === 0 && (
+            <group ref={globeRef}>
+              <mesh>
+                <sphereGeometry args={[0.55, 20, 20]} />
+                <meshBasicMaterial
+                  color="#FF1E27"
+                  wireframe
+                  transparent
+                  opacity={0.7}
+                  blending={THREE.AdditiveBlending}
+                />
+              </mesh>
+              <mesh>
+                <sphereGeometry args={[0.22, 16, 16]} />
+                <meshBasicMaterial
+                  color="#FF5259"
+                  transparent
+                  opacity={0.85}
+                  blending={THREE.AdditiveBlending}
+                />
+              </mesh>
+              {[0, 120, 240].map((deg, i) => {
+                const rad = (deg * Math.PI) / 180;
+                return (
+                  <mesh key={i} position={[Math.sin(rad) * 0.76, Math.sin(rad * 2) * 0.22, Math.cos(rad) * 0.76]}>
+                    <sphereGeometry args={[0.035, 8, 8]} />
+                    <meshBasicMaterial color="#FFFFFF" />
+                  </mesh>
+                );
+              })}
+            </group>
+          )}
 
-          {/* Inner Glowing Core */}
-          <mesh>
-            <sphereGeometry args={[0.22, 16, 16]} />
-            <meshBasicMaterial
-              color="#FF5259"
-              transparent
-              opacity={0.85}
-              blending={THREE.AdditiveBlending}
-            />
-          </mesh>
+          {/* Mode 1: Quantum Tesseract (4D Hypercube) */}
+          {holoMode === 1 && (
+            <group>
+              <mesh ref={tesseractOuterRef}>
+                <boxGeometry args={[0.76, 0.76, 0.76]} />
+                <meshBasicMaterial color="#FF1E27" wireframe transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+              </mesh>
+              <mesh ref={tesseractInnerRef}>
+                <boxGeometry args={[0.42, 0.42, 0.42]} />
+                <meshBasicMaterial color="#FFFFFF" wireframe transparent opacity={0.9} blending={THREE.AdditiveBlending} />
+              </mesh>
+              <mesh>
+                <sphereGeometry args={[0.15, 16, 16]} />
+                <meshBasicMaterial color="#FF3B44" transparent opacity={0.85} blending={THREE.AdditiveBlending} />
+              </mesh>
+            </group>
+          )}
 
-          {/* Rotating Holographic Orbital Rings */}
+          {/* Mode 2: AI Neural Cluster & Synaptic Network */}
+          {holoMode === 2 && (
+            <group ref={neuralCoreRef}>
+              <mesh>
+                <octahedronGeometry args={[0.28, 1]} />
+                <meshBasicMaterial color="#FF1E27" wireframe transparent opacity={0.9} blending={THREE.AdditiveBlending} />
+              </mesh>
+              <mesh>
+                <sphereGeometry args={[0.16, 16, 16]} />
+                <meshBasicMaterial color="#FFFFFF" transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+              </mesh>
+              {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => {
+                const rad = (deg * Math.PI) / 180;
+                const r = 0.65;
+                return (
+                  <mesh key={i} position={[Math.cos(rad) * r, Math.sin(rad * 3) * 0.24, Math.sin(rad) * r]}>
+                    <sphereGeometry args={[0.032, 8, 8]} />
+                    <meshBasicMaterial color={i % 2 === 0 ? '#FF3B44' : '#38BDF8'} />
+                  </mesh>
+                );
+              })}
+            </group>
+          )}
+
+          {/* Universal Rotating Holographic Orbital Rings */}
           <mesh ref={ringRef1} rotation={[0.4, 0.2, 0]}>
             <ringGeometry args={[0.72, 0.75, 48]} />
             <meshBasicMaterial
@@ -647,33 +1060,8 @@ export default function DeveloperWorkspaceScene({ onClose }) {
         </mesh>
       </group>
 
-      {/* Modern Potted Office Plant on Left Side (Matching Image 1) */}
-      <group position={[-5.2, 0, 3.4]}>
-        {/* Planter Pot */}
-        <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.38, 0.26, 0.7, 24]} />
-          <meshStandardMaterial color="#14161f" roughness={0.4} metalness={0.6} />
-        </mesh>
-        <mesh position={[0, 0.71, 0]}>
-          <cylinderGeometry args={[0.36, 0.36, 0.04, 24]} />
-          <meshStandardMaterial color="#090a0d" roughness={0.9} metalness={0.1} />
-        </mesh>
-        {/* Plant Stems & Foliage */}
-        {[0, 60, 120, 180, 240, 300].map((deg, i) => {
-          const rad = (deg * Math.PI) / 180;
-          return (
-            <mesh
-              key={i}
-              position={[Math.sin(rad) * 0.22, 1.05 + (i % 2) * 0.18, Math.cos(rad) * 0.22]}
-              rotation={[0.35, rad, 0.35]}
-              castShadow
-            >
-              <sphereGeometry args={[0.22, 12, 10]} />
-              <meshStandardMaterial color="#1e3a2f" roughness={0.6} metalness={0.1} />
-            </mesh>
-          );
-        })}
-      </group>
+      {/* High-Tech Cyber Command Data Pylon & Quantum Power Column (Zero green, 100% Crimson/Carbon Cyber Deck) */}
+      <CyberCommandPylon />
 
       {/* =========================================================================
           7. MAIN CENTER DISPLAY — "FEATURED PROJECTS" (NETLIFY / VERCEL STYLE)
@@ -917,7 +1305,7 @@ export default function DeveloperWorkspaceScene({ onClose }) {
         </mesh>
 
         {/* Central Glowing Red Star Core Emitter Lens (Matching Image 2 center beacon) */}
-        <mesh position={[0, -0.05, 0]}>
+        <mesh ref={beaconRef} position={[0, -0.05, 0]}>
           <sphereGeometry args={[0.35, 24, 24]} />
           <meshBasicMaterial color="#FF1E27" />
         </mesh>
@@ -938,6 +1326,17 @@ export default function DeveloperWorkspaceScene({ onClose }) {
             );
           })
         )}
+
+        {/* Navigation Strobes on North, South, East, West Rafters (Flashing Starship Signal Lights) */}
+        {[0, 90, 180, 270].map((deg, idx) => {
+          const rad = (deg * Math.PI) / 180;
+          return (
+            <mesh key={`strobe-${idx}`} position={[Math.sin(rad) * 11.2, 0.06, Math.cos(rad) * 11.2]}>
+              <sphereGeometry args={[0.055, 12, 12]} />
+              <meshBasicMaterial color="#FFFFFF" transparent opacity={strobeState ? 1.0 : 0.15} />
+            </mesh>
+          );
+        })}
 
         {/* Subtle Vertical Hologram Projection Light Column down to Floor Pedestal */}
         <mesh position={[0, -3.2, 0]}>
@@ -985,7 +1384,13 @@ export default function DeveloperWorkspaceScene({ onClose }) {
       </group>
 
       {/* =========================================================================
-          12. CELESTIAL DEEP-SPACE SKY DOME WITH SPARKLING STARS & NEBULA
+          12. MICRO-DETAILS: FLOOR CONDUITS & ATMOSPHERIC CYBER EMBER MOTES
+         ========================================================================= */}
+      <CyberFloorConduits />
+      <CyberAtmosphericMotes count={90} />
+
+      {/* =========================================================================
+          13. CELESTIAL DEEP-SPACE SKY DOME WITH SPARKLING STARS & NEBULA
               Visible through the high panoramic glass clerestory above the screens
          ========================================================================= */}
       <points geometry={starsGeometry}>

@@ -62,6 +62,7 @@ export default function Character({
   });
   const walkPhase = useRef(0);
   const hasWalked = useRef(false);
+  const footstepRingRef = useRef();
 
   // Hologram Materialization State & Uniforms (Sci-Fi Red Creation Beam)
   const holoUniforms = useRef({
@@ -353,8 +354,14 @@ export default function Character({
           if (child.material.isMeshStandardMaterial || child.material.isMeshPhysicalMaterial) {
             // Keep clothing and skin natural, matte, organic and non-metallic (real cloth & skin)
             child.material.metalness = 0.0;
-            child.material.roughness = Math.max(child.material.roughness !== undefined ? child.material.roughness : 0.9, 0.88);
-            child.material.envMapIntensity = 0.2;
+            child.material.roughness = 0.92;
+            child.material.envMapIntensity = 0.0; // eliminate metallic reflections completely
+            // Lift dark clothing base color slightly so fabric weave, buttons, and folds are clearly visible
+            if (child.material.color) {
+              child.material.color.r = Math.max(child.material.color.r, 0.14);
+              child.material.color.g = Math.max(child.material.color.g, 0.14);
+              child.material.color.b = Math.max(child.material.color.b, 0.16);
+            }
           }
         }
 
@@ -831,7 +838,7 @@ export default function Character({
       root.current.position.z = loungeZ + Math.sin(angle) * minLoungeDist;
     }
 
-    // 4. Potted Office Plant Collision (plant pot at [-5.2, 3.4], radius 1.35m)
+    // 4. Cyber Command Pylon Collision (pylon base at [-5.2, 3.4], radius 1.35m)
     const plantX = -5.2;
     const plantZ = 3.4;
     const distFromPlant = Math.hypot(root.current.position.x - plantX, root.current.position.z - plantZ);
@@ -1027,6 +1034,15 @@ export default function Character({
         },
       });
     }
+    // Dynamic Footstep Floor Pulse Ring (Active Stage Sensor)
+    if (footstepRingRef.current) {
+      const isCharacterMoving = moving && !isBraked.current;
+      const targetScale = isCharacterMoving ? 1.0 + Math.sin(state.clock.getElapsedTime() * 10) * 0.15 : 1.0;
+      footstepRingRef.current.scale.set(targetScale, targetScale, 1.0);
+      if (footstepRingRef.current.material) {
+        footstepRingRef.current.material.opacity = isCharacterMoving ? 0.75 : 0.22;
+      }
+    }
   });
 
   return (
@@ -1035,6 +1051,22 @@ export default function Character({
       <group ref={modelRoot} position={[0, groundOffset, 0]}>
         <primitive object={scene} />
       </group>
+
+      {/* Soft Non-Specular Local Diffuse Fill Light (Ensures character is always clearly lit) */}
+      <pointLight position={[0, 1.8, 0.5]} intensity={1.1} distance={4.5} decay={2} color="#ffffff" />
+
+      {/* Dynamic Sensor Footstep Energy Ring */}
+      <mesh ref={footstepRingRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
+        <ringGeometry args={[0.26, 0.40, 32]} />
+        <meshBasicMaterial
+          color="#FF1E27"
+          transparent
+          opacity={0.25}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
 
       {/* Holographic Projector Base & Scanning Laser Ray Slice (Images 1, 2, 3, 4, 5) */}
       {isHoloActive && (
