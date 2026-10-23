@@ -178,11 +178,36 @@ export default function Character({
       triggerHologram(true);
     };
 
+    const handleCharacterKeyEvent = (e) => {
+      const { action, active } = e.detail || {};
+      if (!action) return;
+      if (action === 'forward') {
+        isBraked.current = false;
+        nativeKeys.current.forward = !!active;
+      } else if (action === 'back') {
+        isBraked.current = false;
+        nativeKeys.current.back = !!active;
+      } else if (action === 'left') {
+        nativeKeys.current.left = !!active;
+      } else if (action === 'right') {
+        nativeKeys.current.right = !!active;
+      } else if (action === 'run') {
+        nativeKeys.current.run = !!active;
+      } else if (action === 'stop') {
+        if (active) {
+          handleCustomStop();
+        } else {
+          nativeKeys.current.stop = false;
+        }
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     window.addEventListener('blur', handleBlur);
     window.addEventListener('character-stop', handleCustomStop);
     window.addEventListener('character-materialize', handleMaterialize);
+    window.addEventListener('character-key-event', handleCharacterKeyEvent);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -190,6 +215,7 @@ export default function Character({
       window.removeEventListener('blur', handleBlur);
       window.removeEventListener('character-stop', handleCustomStop);
       window.removeEventListener('character-materialize', handleMaterialize);
+      window.removeEventListener('character-key-event', handleCharacterKeyEvent);
     };
   }, []);
 
@@ -882,6 +908,14 @@ export default function Character({
           ? `${activeClipName.current || 'Walk'} (${actionDesc})`
           : `${actionDesc} (Procedural Leg Rig)`,
         lockArms,
+        activeKeys: {
+          forward: forwardActive,
+          back: backActive,
+          left: leftActive,
+          right: rightActive,
+          run: !!rawRun,
+          stop: isBraked.current || isStopKeyActive,
+        },
       });
     }
   });
