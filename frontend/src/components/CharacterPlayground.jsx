@@ -32,14 +32,6 @@ export default function CharacterPlayground({ onClose }) {
   });
 
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [isStudioLighting, setIsStudioLighting] = useState(true);
-
-  const handleToggleLighting = () => {
-    const nextState = !isStudioLighting;
-    setIsStudioLighting(nextState);
-    playClickSound('switch');
-    window.dispatchEvent(new CustomEvent('charan-toggle-lighting', { detail: { studio: nextState } }));
-  };
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -501,35 +493,6 @@ export default function CharacterPlayground({ onClose }) {
             <i className={soundActive ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark'}></i>
           </button>
 
-          {/* Lighting Mode Quick Switch Pill */}
-          <button
-            type="button"
-            onClick={handleToggleLighting}
-            data-sound="switch"
-            aria-label="Toggle Lighting Atmosphere"
-            title={isStudioLighting ? 'Workspace Lighting: High Clarity Studio Diffuse (Click for Cyber Glow)' : 'Workspace Lighting: Cyber Glow (Click for High Clarity Studio)'}
-            style={{
-              background: 'rgba(20, 22, 32, 0.85)',
-              border: `1px solid ${isStudioLighting ? 'rgba(255, 255, 255, 0.28)' : 'rgba(255, 30, 39, 0.6)'}`,
-              padding: '6px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              color: isStudioLighting ? '#FFFFFF' : '#FF1E27',
-              fontSize: '0.74rem',
-              fontFamily: "'Space Grotesk', system-ui, sans-serif",
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.18s ease',
-              outline: 'none',
-              backdropFilter: 'blur(8px)',
-              boxShadow: isStudioLighting ? '0 2px 8px rgba(255,255,255,0.1)' : '0 2px 10px rgba(255,30,39,0.3)',
-            }}
-          >
-            <i className={isStudioLighting ? 'fa-solid fa-sun' : 'fa-solid fa-moon'}></i>
-            <span>{isStudioLighting ? 'Studio Light' : 'Cyber Ambiance'}</span>
-          </button>
         </div>
 
         {/* Top Right: Exit Workspace Button */}

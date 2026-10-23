@@ -354,14 +354,8 @@ export default function Character({
           if (child.material.isMeshStandardMaterial || child.material.isMeshPhysicalMaterial) {
             // Keep clothing and skin natural, matte, organic and non-metallic (real cloth & skin)
             child.material.metalness = 0.0;
-            child.material.roughness = 0.92;
-            child.material.envMapIntensity = 0.0; // eliminate metallic reflections completely
-            // Lift dark clothing base color slightly so fabric weave, buttons, and folds are clearly visible
-            if (child.material.color) {
-              child.material.color.r = Math.max(child.material.color.r, 0.14);
-              child.material.color.g = Math.max(child.material.color.g, 0.14);
-              child.material.color.b = Math.max(child.material.color.b, 0.16);
-            }
+            child.material.roughness = Math.max(child.material.roughness !== undefined ? child.material.roughness : 0.9, 0.88);
+            child.material.envMapIntensity = 0.15;
           }
         }
 
@@ -1052,8 +1046,6 @@ export default function Character({
         <primitive object={scene} />
       </group>
 
-      {/* Soft Non-Specular Local Diffuse Fill Light (Ensures character is always clearly lit) */}
-      <pointLight position={[0, 1.8, 0.5]} intensity={1.1} distance={4.5} decay={2} color="#ffffff" />
 
       {/* Dynamic Sensor Footstep Energy Ring */}
       <mesh ref={footstepRingRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>

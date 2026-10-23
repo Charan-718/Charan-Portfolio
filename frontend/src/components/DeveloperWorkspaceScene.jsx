@@ -407,9 +407,6 @@ export default function DeveloperWorkspaceScene({ onClose }) {
   const [currentPage, setCurrentPage] = useState(0); // 0 = First 4 projects, 1 = Next 4 projects
   const [, setTick] = useState(0);
 
-  // Lighting Mode (Default to High Clarity Studio Diffuse Lighting)
-  const [isStudioBright, setIsStudioBright] = useState(true);
-
   // Central Hologram State: 0 = Planetary Net, 1 = Quantum Tesseract, 2 = AI Neural Core
   const [holoMode, setHoloMode] = useState(0);
   const [strobeState, setStrobeState] = useState(false);
@@ -422,18 +419,6 @@ export default function DeveloperWorkspaceScene({ onClose }) {
   const tesseractInnerRef = useRef();
   const neuralCoreRef = useRef();
   const beaconRef = useRef();
-
-  useEffect(() => {
-    const handleToggleLighting = (e) => {
-      if (e.detail && typeof e.detail.studio === 'boolean') {
-        setIsStudioBright(e.detail.studio);
-      } else {
-        setIsStudioBright((prev) => !prev);
-      }
-    };
-    window.addEventListener('charan-toggle-lighting', handleToggleLighting);
-    return () => window.removeEventListener('charan-toggle-lighting', handleToggleLighting);
-  }, []);
 
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
@@ -692,32 +677,28 @@ export default function DeveloperWorkspaceScene({ onClose }) {
              Ensures the 3D character and environment are clearly visible, with crisp
              clothing folds, natural skin tones, and rich contrast without any metallic glare.
          ========================================================================= */}
-      {/* Pure Diffuse Ambient Light (Evenly illuminates clothing, skin, and meshes with ZERO specular glare) */}
-      <ambientLight intensity={isStudioBright ? 2.4 : 1.7} color="#ffffff" />
+      {/* Pure Diffuse Ambient Light (Evenly illuminates textures with clean, natural matte finish) */}
+      <ambientLight intensity={1.45} color="#ffffff" />
 
-      {/* Soft Natural Hemisphere Fill (Lifts character legs, torso, and clothing from below) */}
-      <hemisphereLight skyColor="#ffffff" groundColor="#4a363b" intensity={isStudioBright ? 1.2 : 0.8} />
+      {/* Soft Natural Hemisphere Fill (Gentle vertical gradient from ceiling to floor) */}
+      <hemisphereLight skyColor="#ffffff" groundColor="#222222" intensity={0.65} />
 
       {/* Single Soft Overhead Directional Key Light (Provides natural gravity shadows) */}
       <directionalLight
-        position={[0, 9, 3]}
-        intensity={isStudioBright ? 1.6 : 1.1}
+        position={[0, 8, 3]}
+        intensity={1.05}
         color="#ffffff"
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0001}
       />
 
-      {/* Camera-Perspective Fill Light (Directly illuminates character back & shoulders in 3rd person) */}
+      {/* Gentle Camera-Side Fill Light (Ensures character back is clearly visible without specular glare) */}
       <directionalLight
-        position={[0, 4, -8]}
-        intensity={isStudioBright ? 1.4 : 0.9}
+        position={[0, 3, -6]}
+        intensity={0.55}
         color="#ffffff"
       />
-
-      {/* Lateral Studio Fill Lights (Left & Right soft diffuse fill) */}
-      <directionalLight position={[-7, 4, 0]} intensity={isStudioBright ? 0.9 : 0.5} color="#fff2f2" />
-      <directionalLight position={[7, 4, 0]} intensity={isStudioBright ? 0.9 : 0.5} color="#fff2f2" />
 
       {/* Soft Environmental Neon Accents (Localized to the pedestal, screens, and furniture) */}
       {/* Red Volumetric Glow over Center Hologram Pedestal */}
