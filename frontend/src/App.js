@@ -1350,10 +1350,7 @@ function App() {
                   </div>
                 </div>
 
-                {/* DOMINATING SPIDER-MAN 3D CHARACTER CTA WITH CURSOR-ATTRACTING SPIDER WEB */}
-                <SpideyWebHero onOpenArena={openCharacterArena} />
-
-                {/* Secondary Action CTAs */}
+                {/* Action CTAs */}
                 <div className="hero-actions">
                   <button onClick={() => scrollToSection('projects')} className="btn-primary">
                     <span>EXPLORE ARCHITECTURE</span>
@@ -2093,42 +2090,8 @@ function App() {
         </div>
       )}
 
-      {/* FLOATING 3D CHARACTER PLAYGROUND QUICK-LAUNCH PILL */}
-      <button
-        onClick={openCharacterArena}
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 90,
-          background: 'linear-gradient(135deg, #FF1E27 0%, #B70A11 100%)',
-          color: '#ffffff',
-          border: '1px solid rgba(255, 255, 255, 0.25)',
-          borderRadius: '50px',
-          padding: '12px 22px',
-          fontWeight: 800,
-          fontSize: '0.92rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          cursor: 'pointer',
-          boxShadow: '0 8px 24px rgba(255, 30, 39, 0.45)',
-          transition: 'all 0.25s ease',
-          fontFamily: 'var(--font-heading)',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-3px) scale(1.03)';
-          e.currentTarget.style.boxShadow = '0 12px 30px rgba(255, 30, 39, 0.6)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 30, 39, 0.45)';
-        }}
-        aria-label="Play 3D Character Workspace"
-      >
-        <i className="fa-solid fa-cube" style={{ fontSize: '1.15rem' }}></i>
-        <span>Play 3D Character</span>
-      </button>
+      {/* FLOATING 3D CHARACTER QUICK-LAUNCH CARD (MINIMAL 1:1 SQUARE WITH SPIDER-WEB LINK) */}
+      <SpideyWebHero onOpenArena={openCharacterArena} />
     </div>
   );
 }

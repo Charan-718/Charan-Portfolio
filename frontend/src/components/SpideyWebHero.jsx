@@ -60,17 +60,29 @@ export default function SpideyWebHero({ onOpenArena }) {
       m.cursorY = clientY;
 
       const heroSection = document.getElementById('hero');
-      if (!heroSection) return;
+      let insideHero = false;
+      if (heroSection) {
+        const heroRect = heroSection.getBoundingClientRect();
+        insideHero =
+          clientX >= heroRect.left - 20 &&
+          clientX <= heroRect.right + 20 &&
+          clientY >= heroRect.top - 20 &&
+          clientY <= heroRect.bottom + 20;
+      }
 
-      const heroRect = heroSection.getBoundingClientRect();
-      // Track within the hero bounds with a generous comfort margin
-      const inside =
-        clientX >= heroRect.left - 20 &&
-        clientX <= heroRect.right + 20 &&
-        clientY >= heroRect.top - 20 &&
-        clientY <= heroRect.bottom + 20;
+      let nearBtn = false;
+      if (btnRef.current) {
+        const br = btnRef.current.getBoundingClientRect();
+        const dist = Math.hypot(
+          clientX - (br.left + br.width / 2),
+          clientY - (br.top + br.height / 2)
+        );
+        nearBtn = dist < 240;
+      }
 
-      if (inside) {
+      const active = insideHero || nearBtn;
+
+      if (active) {
         if (!m.isInside) {
           m.isInside = true;
           setIsLinked(true);
@@ -477,8 +489,8 @@ export default function SpideyWebHero({ onOpenArena }) {
           document.body
         )}
 
-      {/* Dominating Spider-Man Magnetic CTA Button Container */}
-      <div className="spidey-hero-wrapper">
+      {/* Minimal Square 1:1 Floating Spider-Man Magnetic 3D Character Card */}
+      <div className={`spidey-hero-wrapper ${isLinked ? 'active-web-linked' : ''}`}>
         {/* Pulsating Spidey-Sense Radar Rings */}
         <div className="spidey-radar-container" aria-hidden="true">
           <div className="spidey-radar-ring ring-1"></div>
@@ -486,14 +498,14 @@ export default function SpideyWebHero({ onOpenArena }) {
           <div className="spidey-radar-ring ring-3"></div>
         </div>
 
-        {/* The Dominating Magnetic Button */}
+        {/* Minimal Square Magnetic Button */}
         <button
           ref={btnRef}
           type="button"
           onClick={handleClick}
           className="spidey-magnetic-btn"
           aria-label="Play 3D Character Workspace"
-          title="Launch Interactive 3D Character Workspace (Spider-Man Web Linked)"
+          title="Play 3D Character Workspace (Interactive GTA Locomotion)"
         >
           {/* Web Lattice Texture Overlay */}
           <div className="spidey-web-pattern-bg" aria-hidden="true"></div>
@@ -501,62 +513,19 @@ export default function SpideyWebHero({ onOpenArena }) {
           {/* Laser Sheen Sweep */}
           <div className="spidey-laser-sheen" aria-hidden="true"></div>
 
-          {/* Left Text Block */}
+          {/* Minimal 3D Cube Icon & Micro Label */}
           <div className="spidey-btn-body">
-            <div className="spidey-btn-badge">
-              <span className="spidey-badge-dot"></span>
-              <span>
-                {isLinked ? '🕷️ SPIDEY-WEB LINKED' : '⚡ 3D WORKSPACE ARENA'}
-              </span>
-            </div>
-
-            <div className="spidey-btn-title">
-              <span>PLAY 3D CHARACTER</span>
-              <i
-                className="fa-solid fa-arrow-up-right-from-square"
-                style={{ fontSize: '0.9rem', color: '#FFFFFF' }}
-              ></i>
-            </div>
-
-            <div className="spidey-btn-sub">
-              <span>EXPLORE WORKSPACE</span>
-              <span className="spidey-key-pill">WASD</span>
-              <span>• FULL 3D FREEDOM</span>
-            </div>
+            <i className="fa-solid fa-cube spidey-cube-icon"></i>
+            <span className="spidey-btn-title">3D PLAY</span>
           </div>
 
-          {/* Right Emblem & Web-Shooter Nozzle */}
-          <div className="spidey-btn-action-zone">
-            <div className="spidey-cube-icon-box">
-              <i className="fa-solid fa-cube"></i>
-            </div>
-
-            {/* Glowing Web-Shooter Nozzle where the Web Line originates */}
-            <div
-              ref={nozzleRef}
-              className="spidey-web-emitter-nozzle"
-              aria-hidden="true"
-            ></div>
-          </div>
+          {/* Web-Shooter Nozzle Emitter */}
+          <div
+            ref={nozzleRef}
+            className="spidey-web-emitter-nozzle"
+            aria-hidden="true"
+          ></div>
         </button>
-
-        {/* Subtle Live Connection Status */}
-        <div className="spidey-status-banner">
-          <i
-            className="fa-solid fa-circle-nodes"
-            style={{ color: isLinked ? '#FF1E27' : '#64748b' }}
-          ></i>
-          <span>
-            {isLinked ? (
-              <>
-                <strong>WEB ANCHOR ACTIVE:</strong> TRACKING POINTER • CLICK TO
-                ENTER WORKSPACE
-              </>
-            ) : (
-              <>MOVE CURSOR INTO HERO SECTION TO ACTIVATE WEB ATTRACTION</>
-            )}
-          </span>
-        </div>
       </div>
     </>
   );

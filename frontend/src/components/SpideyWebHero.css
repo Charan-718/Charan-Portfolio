@@ -1,16 +1,17 @@
 /* =============================================================================
-   DOMINATING SPIDER-MAN WEB HERO BUTTON & CANVAS STYLES
-   Magnetic cursor-tracking spider web, pulsating radar rings & cyber spider-suit styling
+   MINIMAL 1:1 SQUARE 3D CHARACTER QUICK-LAUNCH CARD WITH SPIDER-WEB ATTRACTION
+   Placed at the previous floating bottom-right position (24px, 24px)
    ============================================================================= */
 
 .spidey-hero-wrapper {
-  position: relative;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 66px;
+  height: 66px;
+  z-index: 1000;
+  perspective: 800px;
   display: block;
-  width: 100%;
-  max-width: 540px;
-  margin: clamp(14px, 2vh, 22px) 0 clamp(16px, 2.2vh, 24px) 0;
-  z-index: 10;
-  perspective: 1000px;
 }
 
 /* Full-viewport fixed overlay canvas for pixel-perfect cursor tracking */
@@ -27,7 +28,7 @@
 /* Concentric Spidey-Sense Radar Pulse Rings */
 .spidey-radar-container {
   position: absolute;
-  inset: -12px;
+  inset: -6px;
   pointer-events: none;
   z-index: -1;
   display: flex;
@@ -38,7 +39,15 @@
 .spidey-radar-ring {
   position: absolute;
   inset: 0;
-  border-radius: 14px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
   border: 1.5px solid rgba(255, 30, 39, 0.75);
   box-shadow: 0 0 16px rgba(255, 30, 39, 0.45);
   animation: spideyRadarPulse 2.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
@@ -63,33 +72,42 @@
     opacity: 0.45;
   }
   100% {
-    transform: scale(1.18, 1.35);
+    transform: scale(1.3);
     opacity: 0;
     border-color: rgba(255, 30, 39, 0);
   }
 }
 
-/* Main Dominating Magnetic Button */
+/* Main Minimal Square Button (Height & Width are Same: 66px x 66px) */
 .spidey-magnetic-btn {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 16px 24px;
-  background: linear-gradient(135deg, #FF1E27 0%, #D40C14 55%, #8A0005 100%);
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  padding: 0;
+  background: linear-gradient(135deg, #FF1E27 0%, #D40C14 60%, #8A0005 100%);
   color: #FFFFFF;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-radius: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  /* Cyber mecha chamfered cutout corners matching website design */
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
   cursor: pointer;
   box-shadow: 
-    0 0 35px rgba(255, 30, 39, 0.65),
-    0 12px 32px rgba(0, 0, 0, 0.65),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    0 0 25px rgba(255, 30, 39, 0.6),
+    0 8px 24px rgba(0, 0, 0, 0.75);
   text-decoration: none;
-  font-family: var(--font-heading, 'Space Grotesk', system-ui, sans-serif);
   overflow: hidden;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
   will-change: transform;
   transform-style: preserve-3d;
   user-select: none;
@@ -99,9 +117,8 @@
 .spidey-magnetic-btn:hover {
   border-color: #FFFFFF;
   box-shadow: 
-    0 0 50px rgba(255, 30, 39, 0.9),
-    0 18px 45px rgba(0, 0, 0, 0.8),
-    inset 0 1px 2px rgba(255, 255, 255, 0.7);
+    0 0 35px rgba(255, 30, 39, 0.9),
+    0 12px 30px rgba(0, 0, 0, 0.85);
 }
 
 /* Spider-Suit Hexagonal / Web Lattice Background Texture */
@@ -109,13 +126,13 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.16;
+  opacity: 0.18;
   background-image: 
     radial-gradient(circle at 100% 50%, transparent 20%, rgba(255,255,255,0.2) 21%, transparent 22%),
     radial-gradient(circle at 0% 50%, transparent 20%, rgba(255,255,255,0.2) 21%, transparent 22%),
     linear-gradient(45deg, transparent 48%, rgba(255,255,255,0.25) 50%, transparent 52%),
     linear-gradient(-45deg, transparent 48%, rgba(255,255,255,0.25) 50%, transparent 52%);
-  background-size: 28px 28px;
+  background-size: 20px 20px;
 }
 
 /* Animated Sweeping Laser Sheen */
@@ -127,7 +144,7 @@
   height: 100%;
   background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.35) 50%, transparent 100%);
   transform: skewX(-25deg);
-  animation: spideySheenSweep 3.8s ease-in-out infinite;
+  animation: spideySheenSweep 3.5s ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -137,166 +154,70 @@
   100% { left: 180%; }
 }
 
-/* Left Content Block inside Button */
+/* Minimal Center Content Body */
 .spidey-btn-body {
   position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  text-align: left;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  pointer-events: none;
 }
 
-/* Top Live Status Pill */
-.spidey-btn-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 0.66rem;
+.spidey-cube-icon {
+  font-size: 1.45rem;
+  color: #FFFFFF;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  animation: spideyCubeGentlyFloat 3s ease-in-out infinite;
+}
+
+@keyframes spideyCubeGentlyFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.spidey-btn-title {
+  font-family: var(--font-heading, 'Space Grotesk', system-ui, sans-serif);
+  font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: #FFFFFF;
-  width: fit-content;
+  text-transform: uppercase;
+  line-height: 1;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
-.spidey-badge-dot {
+/* Web-Shooter Nozzle Emitter */
+.spidey-web-emitter-nozzle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #38BDF8;
-  box-shadow: 0 0 8px #38BDF8;
-  animation: spideyDotPulse 1.4s ease-in-out infinite;
-}
-
-@keyframes spideyDotPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.4); opacity: 0.5; }
-}
-
-/* Dominating Title */
-.spidey-btn-title {
-  font-size: clamp(1.15rem, 1.8vw, 1.45rem);
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  color: #FFFFFF;
-  text-transform: uppercase;
-  line-height: 1.1;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Subtitle / Controls Hint */
-.spidey-btn-sub {
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: clamp(0.68rem, 1vw, 0.76rem);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.92);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.spidey-key-pill {
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 1px 6px;
-  border-radius: 3px;
-  color: #FFFFFF;
-  font-size: 0.64rem;
-}
-
-/* Right Action Emblem & Web-Shooter Nozzle */
-.spidey-btn-action-zone {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-/* 3D Wireframe Cube Icon */
-.spidey-cube-icon-box {
-  width: 48px;
-  height: 48px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.35rem;
-  color: #FFFFFF;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  animation: spideyIconFloat 3s ease-in-out infinite;
-}
-
-@keyframes spideyIconFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-3px) rotate(4deg); }
-}
-
-/* Web-Shooter Nozzle Emitter (Where the Spider Web originates) */
-.spidey-web-emitter-nozzle {
-  position: absolute;
-  right: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
   background: #FFFFFF;
-  box-shadow: 
-    0 0 12px #FFFFFF,
-    0 0 24px #FF1E27,
-    0 0 36px #FF1E27;
-  border: 2px solid #FF1E27;
+  box-shadow: 0 0 8px #FF1E27, 0 0 14px #FFFFFF;
   pointer-events: none;
-  animation: spideyEmitterPulse 1.8s ease-in-out infinite;
+  z-index: 4;
 }
 
-@keyframes spideyEmitterPulse {
-  0%, 100% { transform: translateY(-50%) scale(1); }
-  50% { transform: translateY(-50%) scale(1.35); }
-}
-
-/* Interactive Web Tension Line Glow Banner Indicator */
-.spidey-status-banner {
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 0.65rem;
-  color: #94a3b8;
-  letter-spacing: 0.04em;
-}
-
-.spidey-status-banner strong {
-  color: #FF6B72;
-}
-
-/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .spidey-hero-wrapper {
-    max-width: 100%;
-    margin: 12px 0 18px 0;
+    bottom: 16px;
+    right: 16px;
+    width: 58px;
+    height: 58px;
   }
-
   .spidey-magnetic-btn {
-    padding: 14px 18px;
+    width: 58px;
+    height: 58px;
   }
-
-  .spidey-cube-icon-box {
-    width: 42px;
-    height: 42px;
-    font-size: 1.2rem;
+  .spidey-cube-icon {
+    font-size: 1.25rem;
+  }
+  .spidey-btn-title {
+    font-size: 0.58rem;
   }
 }

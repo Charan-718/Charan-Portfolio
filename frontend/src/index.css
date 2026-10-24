@@ -1215,8 +1215,6 @@ button {
 
 .cyber-card-frame:hover .cyber-corner-bracket {
   border-color: #FF1E27;
-  box-shadow: 0 0 8px #FF1E27;
-  transform: scale(1.18);
 }
 
 /* Header Zone with Angled Red Ribbon (DATACORP Style from Image 1) */
