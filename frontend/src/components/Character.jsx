@@ -47,8 +47,12 @@ export default function Character({
   // camPitch: camera vertical angle (starts at 0.14 slightly elevated hero view)
   const charYaw = useRef(Math.PI); // Starts facing forward towards the user (Image 1)
   const camYaw = useRef(Math.PI);  // Starts at front hero angle framing character and screens (Image 1)
-  const camPitch = useRef(0.14);   // Slightly elevated view showing full character and ceiling above
-  const camDistance = useRef(5.2); // Wide panoramic view matching Image 1
+  const camPitch = useRef(0.16);   // Slightly elevated hero view showing full character and ceiling above
+  const camDistance = useRef(8.6); // Wide panoramic establishing view matching user's screenshot
+  const targetCamDistance = useRef(8.6);
+  const mountTime = useRef(performance.now());
+  const userHasZoomed = useRef(false);
+  const isCameraInitialized = useRef(false);
   const hasUserMoved = useRef(false);
   const isPointerLocked = useRef(false);
   const isDragging = useRef(false);
@@ -98,6 +102,7 @@ export default function Character({
   const releaseCurtainAndStartHolo = useCallback(() => {
     if (!curtainFinishedRef.current) {
       curtainFinishedRef.current = true;
+      mountTime.current = performance.now();
       triggerHologram(true);
     }
   }, []);
@@ -667,10 +672,11 @@ export default function Character({
       // Don't intercept scroll if inside a scrollable modal container
       if (e.target && (e.target.closest('input') || e.target.closest('select'))) return;
       lastMouseTime.current = performance.now();
+      userHasZoomed.current = true;
       // Zoom in and out with mouse wheel
-      camDistance.current = Math.max(
-        2.0,
-        Math.min(9.0, camDistance.current + e.deltaY * 0.004)
+      targetCamDistance.current = Math.max(
+        2.2,
+        Math.min(12.0, targetCamDistance.current + e.deltaY * 0.005)
       );
     };
 
@@ -903,27 +909,38 @@ export default function Character({
       root.current.position.z = plantZ + Math.sin(angle) * minPlantDist;
     }
 
-    // 5. Command Center Platform Deck Perimeter & Wall Screen Clamping
-    // Deck is centered at [0, 4.0]. Radius 7.5m keeps character safely on the platform deck
-    // in front of all wall-mounted screens (Screen 7 at z=11.2, Screen 8 at x=-8.8, Screen 9 at x=8.8)
-    // so the character can walk up to any wall screen, inspect it, and bypass along the perimeter!
-    const deckCenterX = 0;
-    const deckCenterZ = 4.0;
-    const distFromCenter = Math.hypot(root.current.position.x - deckCenterX, root.current.position.z - deckCenterZ);
-    const maxDeckRadius = 7.5;
-    if (distFromCenter > maxDeckRadius && distFromCenter > 0.001) {
-      const angle = Math.atan2(root.current.position.z - deckCenterZ, root.current.position.x - deckCenterX);
-      root.current.position.x = deckCenterX + Math.cos(angle) * maxDeckRadius;
-      root.current.position.z = deckCenterZ + Math.sin(angle) * maxDeckRadius;
+    // 5. Main Center Display Screen Solid Collision ([0, 4.35, 11.2], width 9.5m)
+    // Allows character to walk right up in front of the screen (z = 10.5) without clipping through
+    if (root.current.position.z > 10.5 && Math.abs(root.current.position.x) < 4.85) {
+      root.current.position.z = 10.5;
     }
 
-    // Forward clamping: keeps character 3.4m in front of Main Featured Projects screen at z=11.2
-    if (root.current.position.z > 7.8) {
-      root.current.position.z = 7.8;
+    // 6. Left & Right Curved Display Enclosures
+    // Left Screen at [-8.8, 7.5], Right Screen at [8.8, 7.5]
+    const leftDist = Math.hypot(root.current.position.x - (-8.8), root.current.position.z - 7.5);
+    if (leftDist < 2.0 && leftDist > 0.001) {
+      const angle = Math.atan2(root.current.position.z - 7.5, root.current.position.x - (-8.8));
+      root.current.position.x = -8.8 + Math.cos(angle) * 2.0;
+      root.current.position.z = 7.5 + Math.sin(angle) * 2.0;
     }
-    // Backward clamping: keeps character on platform boundary
-    if (root.current.position.z < -2.2) {
-      root.current.position.z = -2.2;
+    const rightDist = Math.hypot(root.current.position.x - 8.8, root.current.position.z - 7.5);
+    if (rightDist < 2.0 && rightDist > 0.001) {
+      const angle = Math.atan2(root.current.position.z - 7.5, root.current.position.x - 8.8);
+      root.current.position.x = 8.8 + Math.cos(angle) * 2.0;
+      root.current.position.z = 7.5 + Math.sin(angle) * 2.0;
+    }
+
+    // 7. Full Cyber Command Deck Room Perimeter Walls
+    // Room is a circle of radius 14.5m centered at [0, 4.0].
+    // maxRoomRadius = 13.9m allows the character to freely roam the whole room up to the walls in all directions!
+    const roomCenterX = 0;
+    const roomCenterZ = 4.0;
+    const distFromRoomCenter = Math.hypot(root.current.position.x - roomCenterX, root.current.position.z - roomCenterZ);
+    const maxRoomRadius = 13.9;
+    if (distFromRoomCenter > maxRoomRadius && distFromRoomCenter > 0.001) {
+      const angle = Math.atan2(root.current.position.z - roomCenterZ, root.current.position.x - roomCenterX);
+      root.current.position.x = roomCenterX + Math.cos(angle) * maxRoomRadius;
+      root.current.position.z = roomCenterZ + Math.sin(angle) * maxRoomRadius;
     }
 
     // C. ANIMATION CROSSFADING & STRIDE SYNCHRONIZATION
@@ -1016,13 +1033,27 @@ export default function Character({
     }
 
     // E. GTA THIRD-PERSON CHASE CAMERA
-    // Mouse freely controls camYaw & camPitch around the character.
-    // The camera smoothly tracks the character position without turning when character rotates!
+    // Smooth cinematic zoom sequence after 2s:
+    // Starts at wide panoramic establishing view (8.6m) framing the full room, screens, and character.
+    // After 2.0s, smoothly and cinematically zooms in closer (to 5.4m) for gameplay!
+    const elapsed = (performance.now() - mountTime.current) / 1000;
+    if (elapsed >= 2.0 && !userHasZoomed.current) {
+      targetCamDistance.current = 5.4;
+    }
+
+    // Smoothly damp camera distance towards target distance
+    camDistance.current = THREE.MathUtils.damp(
+      camDistance.current,
+      targetCamDistance.current,
+      2.2, // Smooth cinematic easing
+      delta
+    );
+
     if (cameraFollow) {
       const charPos = root.current.position;
       const targetPoint = new THREE.Vector3(
         charPos.x,
-        charPos.y + 1.35, // Focal target: upper chest / neck
+        charPos.y + 1.25, // Focal target: upper chest / torso
         charPos.z
       );
 
@@ -1036,9 +1067,25 @@ export default function Character({
         targetPoint.z + dist * Math.cos(pitch) * Math.cos(yaw)
       );
 
-      // Smooth camera interpolation
-      state.camera.position.lerp(desiredCamPos, 0.16);
-      state.camera.lookAt(targetPoint);
+      // Clamp camera within room boundary so it never clips through outside perimeter walls
+      const camDistFromRoomCenter = Math.hypot(desiredCamPos.x - 0, desiredCamPos.z - 4.0);
+      if (camDistFromRoomCenter > 14.1) {
+        const camAngle = Math.atan2(desiredCamPos.z - 4.0, desiredCamPos.x);
+        desiredCamPos.x = Math.cos(camAngle) * 14.1;
+        desiredCamPos.z = 4.0 + Math.sin(camAngle) * 14.1;
+      }
+      if (desiredCamPos.y < 0.6) desiredCamPos.y = 0.6;
+
+      // On first frame, snap directly to initial position so there's zero lerp jump
+      if (!isCameraInitialized.current) {
+        state.camera.position.copy(desiredCamPos);
+        state.camera.lookAt(targetPoint);
+        isCameraInitialized.current = true;
+      } else {
+        // Smooth camera interpolation
+        state.camera.position.lerp(desiredCamPos, 0.12);
+        state.camera.lookAt(targetPoint);
+      }
     }
 
     // F. TELEMETRY REPORTING

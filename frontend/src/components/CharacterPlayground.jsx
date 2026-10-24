@@ -1234,7 +1234,7 @@ export default function CharacterPlayground({ onClose, isCurtainActive = false }
       <KeyboardControls map={keyboardMap}>
         <Canvas
           shadows
-          camera={{ position: [0, 2.1, -5.2], fov: 48 }}
+          camera={{ position: [0, 2.62, -8.5], fov: 48 }}
           style={{ width: '100%', height: '100%', cursor: cameraMode === 'chase' ? 'grab' : 'default' }}
         >
           {/* Futuristic Cyber Developer Workspace Command Center */}
@@ -1255,7 +1255,7 @@ export default function CharacterPlayground({ onClose, isCurtainActive = false }
 
           {/* Free Camera Controls (when in free orbit mode) */}
           {cameraMode === 'free' && (
-            <OrbitControls target={[0, 1, 0]} maxPolarAngle={Math.PI / 2.05} />
+            <OrbitControls target={[0, 1.25, 0]} maxPolarAngle={Math.PI / 2.05} />
           )}
         </Canvas>
       </KeyboardControls>
