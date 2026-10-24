@@ -73,6 +73,8 @@ export default function CharacterPlayground({ onClose, isCurtainActive = false }
       if (e.code === 'KeyD' || e.code === 'ArrowRight') setPressedKeys((p) => ({ ...p, right: true }));
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') setPressedKeys((p) => ({ ...p, run: true }));
       if (e.code === 'Space' || e.code === 'KeyX') setPressedKeys((p) => ({ ...p, stop: true }));
+      if (e.code === 'KeyR') window.dispatchEvent(new CustomEvent('character-materialize'));
+      if (e.code === 'KeyC') setCameraMode((p) => (p === 'chase' ? 'free' : 'chase'));
     };
 
     const handleKeyUp = (e) => {
@@ -349,6 +351,183 @@ export default function CharacterPlayground({ onClose, isCurtainActive = false }
     );
   };
 
+  const renderTactileHUDKeycap = ({
+    id,
+    icon,
+    label,
+    hotkey,
+    isRed = false,
+    isActive = false,
+    onClick,
+    title,
+    width = 56,
+    height = 56,
+    sound = 'switch',
+  }) => {
+    const isCurrentlyActive = isActive;
+    const baseBg = isRed || isCurrentlyActive ? '#8A0307' : '#D1D5DB';
+    const faceBg = isRed || isCurrentlyActive
+      ? 'linear-gradient(180deg, #FF2E36 0%, #D80C14 100%)'
+      : '#FFFFFF';
+    const glyphColor = isRed || isCurrentlyActive ? '#FFFFFF' : '#000000';
+    const shadowColor = isRed || isCurrentlyActive
+      ? 'rgba(255, 30, 39, 0.65)'
+      : 'rgba(0, 0, 0, 0.55)';
+
+    const shelfHeight = hotkey ? 17 : 14;
+    const faceHeight = height - shelfHeight;
+
+    return (
+      <button
+        key={id}
+        type="button"
+        onClick={onClick}
+        data-sound={sound}
+        title={title}
+        style={{
+          position: 'relative',
+          width: `${width}px`,
+          height: `${height}px`,
+          borderRadius: '12px',
+          border: '2.5px solid #000000',
+          background: baseBg,
+          boxShadow: isCurrentlyActive
+            ? '0 1px 0 #000000, 0 0 18px rgba(255, 30, 39, 0.95)'
+            : `0 4px 0 #000000, 0 8px 16px ${shadowColor}`,
+          transform: isCurrentlyActive ? 'translateY(3px)' : 'translateY(0)',
+          cursor: 'pointer',
+          padding: 0,
+          userSelect: 'none',
+          touchAction: 'manipulation',
+          transition: 'transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease',
+          outline: 'none',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        onMouseEnter={(e) => {
+          if (!isCurrentlyActive) {
+            e.currentTarget.style.filter = 'brightness(1.08)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.filter = 'none';
+          e.currentTarget.style.transform = isCurrentlyActive ? 'translateY(3px)' : 'translateY(0)';
+          e.currentTarget.style.boxShadow = isCurrentlyActive
+            ? '0 1px 0 #000000, 0 0 18px rgba(255, 30, 39, 0.95)'
+            : `0 4px 0 #000000, 0 8px 16px ${shadowColor}`;
+        }}
+        onPointerDown={(e) => {
+          e.currentTarget.style.transform = 'translateY(3px)';
+          e.currentTarget.style.boxShadow = isRed || isCurrentlyActive
+            ? '0 1px 0 #000000, 0 0 14px rgba(255, 30, 39, 0.9)'
+            : '0 1px 0 #000000, 0 3px 8px rgba(0, 0, 0, 0.6)';
+        }}
+        onPointerUp={(e) => {
+          e.currentTarget.style.transform = isCurrentlyActive ? 'translateY(3px)' : 'translateY(0)';
+          e.currentTarget.style.boxShadow = isCurrentlyActive
+            ? '0 1px 0 #000000, 0 0 18px rgba(255, 30, 39, 0.95)'
+            : `0 4px 0 #000000, 0 8px 16px ${shadowColor}`;
+        }}
+      >
+        {/* Inner top key face matching WASD physical mechanical keys */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '3px',
+            left: '3px',
+            right: '3px',
+            height: `${faceHeight}px`,
+            borderRadius: '8px',
+            border: '2px solid #000000',
+            background: faceBg,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: label ? '8px' : '0px',
+            pointerEvents: 'none',
+          }}
+        >
+          {icon && (
+            <i
+              className={icon}
+              style={{
+                fontSize: label ? '1.05rem' : '1.35rem',
+                color: glyphColor,
+                lineHeight: 1,
+              }}
+            ></i>
+          )}
+          {label && (
+            <span
+              style={{
+                fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                fontSize: '0.82rem',
+                fontWeight: 900,
+                color: glyphColor,
+                letterSpacing: '0.04em',
+                lineHeight: 1,
+                textTransform: 'uppercase',
+              }}
+            >
+              {label}
+            </span>
+          )}
+        </div>
+
+        {/* Micro Hotkey Badge at bottom underside */}
+        {hotkey && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '2px',
+              fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
+              fontSize: '0.58rem',
+              fontWeight: 900,
+              color: isRed || isCurrentlyActive ? '#FFFFFF' : '#000000',
+              letterSpacing: '0.05em',
+              lineHeight: 1,
+              pointerEvents: 'none',
+              textTransform: 'uppercase',
+            }}
+          >
+            {hotkey}
+          </div>
+        )}
+
+        {/* Diagonal corner bevel lines from reference illustration */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '3px',
+            left: '3px',
+            width: '8px',
+            height: '2px',
+            background: '#000000',
+            transform: 'rotate(45deg)',
+            transformOrigin: 'top left',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '3px',
+            right: '3px',
+            width: '8px',
+            height: '2px',
+            background: '#000000',
+            transform: 'rotate(-45deg)',
+            transformOrigin: 'top right',
+            pointerEvents: 'none',
+          }}
+        />
+      </button>
+    );
+  };
+
   return (
     <div
       onDragOver={(e) => e.preventDefault()}
@@ -388,140 +567,82 @@ export default function CharacterPlayground({ onClose, isCurtainActive = false }
           pointerEvents: 'none',
         }}
       >
-        {/* Top Left: Standalone Symbols & Instant Micro-Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', pointerEvents: 'auto' }}>
-          {/* Settings Symbol */}
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            data-sound="switch"
-            aria-label="Settings"
-            title="Arena Settings & Controls (Key: Esc)"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: '6px',
-              cursor: 'pointer',
-              color: settingsOpen ? '#FF1E27' : '#FFFFFF',
-              fontSize: '1.45rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'transform 0.18s ease, filter 0.18s ease, color 0.18s ease',
-              outline: 'none',
-              filter: settingsOpen ? 'drop-shadow(0 0 12px #FF1E27)' : 'drop-shadow(0 2px 8px rgba(0,0,0,0.7))',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.2) rotate(45deg)';
-              e.currentTarget.style.color = '#FF1E27';
-              e.currentTarget.style.filter = 'drop-shadow(0 0 14px #FF1E27)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-              e.currentTarget.style.color = settingsOpen ? '#FF1E27' : '#FFFFFF';
-              e.currentTarget.style.filter = settingsOpen ? 'drop-shadow(0 0 12px #FF1E27)' : 'drop-shadow(0 2px 8px rgba(0,0,0,0.7))';
-            }}
-          >
-            <i className="fa-solid fa-gear"></i>
-          </button>
+        {/* Top Left: Tactile Mechanical Keycaps HUD */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', pointerEvents: 'auto' }}>
+          {/* Settings Keycap */}
+          {renderTactileHUDKeycap({
+            id: 'hud-settings',
+            icon: 'fa-solid fa-gear',
+            hotkey: 'ESC',
+            isRed: settingsOpen,
+            isActive: settingsOpen,
+            onClick: () => setSettingsOpen((prev) => !prev),
+            title: 'Arena Settings & Controls (Key: Esc)',
+            width: 58,
+            height: 58,
+            sound: 'switch',
+          })}
 
-          {/* Hologram Symbol */}
-          <button
-            type="button"
-            onClick={() => {
+          {/* Hologram Keycap */}
+          {renderTactileHUDKeycap({
+            id: 'hud-hologram',
+            icon: 'fa-solid fa-bolt',
+            hotkey: 'R',
+            isRed: true,
+            isActive: false,
+            onClick: () => {
               window.dispatchEvent(new CustomEvent('character-materialize'));
-            }}
-            data-sound="hologram"
-            aria-label="Replay Hologram"
-            title="Replay Red Hologram Sequence (Key: R)"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: '6px',
-              cursor: 'pointer',
-              color: '#FF1E27',
-              fontSize: '1.45rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'transform 0.18s ease, filter 0.18s ease, color 0.18s ease',
-              outline: 'none',
-              filter: 'drop-shadow(0 2px 8px rgba(255, 30, 39, 0.45))',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.22)';
-              e.currentTarget.style.filter = 'drop-shadow(0 0 16px #FF1E27)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.filter = 'drop-shadow(0 2px 8px rgba(255, 30, 39, 0.45))';
-            }}
-          >
-            <i className="fa-solid fa-bolt"></i>
-          </button>
+            },
+            title: 'Replay Red Hologram Sequence (Key: R)',
+            width: 58,
+            height: 58,
+            sound: 'hologram',
+          })}
 
-          {/* Sound Toggle Button */}
-          <button
-            type="button"
-            onClick={() => toggleSound()}
-            data-sound="switch"
-            aria-label={soundActive ? 'Mute Sound' : 'Enable Sound'}
-            title={soundActive ? 'Tactile Audio: ON (Click to Mute)' : 'Tactile Audio: MUTED (Click to Enable)'}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: '6px',
-              cursor: 'pointer',
-              color: soundActive ? '#FFFFFF' : '#64748b',
-              fontSize: '1.3rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'transform 0.18s ease, color 0.18s ease',
-              outline: 'none',
-              filter: soundActive ? 'drop-shadow(0 2px 8px rgba(255,255,255,0.4))' : 'none',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.22)';
-              e.currentTarget.style.color = '#FF1E27';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.color = soundActive ? '#FFFFFF' : '#64748b';
-            }}
-          >
-            <i className={soundActive ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark'}></i>
-          </button>
+          {/* Audio Keycap */}
+          {renderTactileHUDKeycap({
+            id: 'hud-audio',
+            icon: soundActive ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark',
+            hotkey: soundActive ? 'VOL' : 'MUTE',
+            isRed: false,
+            isActive: !soundActive,
+            onClick: () => toggleSound(),
+            title: soundActive ? 'Tactile Audio: ON (Click to Mute)' : 'Tactile Audio: MUTED (Click to Enable)',
+            width: 58,
+            height: 58,
+            sound: 'switch',
+          })}
 
+          {/* Tracker Camera Follow / Free Orbit Keycap */}
+          {renderTactileHUDKeycap({
+            id: 'hud-tracker',
+            icon: 'fa-solid fa-crosshairs',
+            hotkey: cameraMode === 'chase' ? 'LOCK' : 'FREE',
+            isRed: cameraMode === 'chase',
+            isActive: cameraMode === 'chase',
+            onClick: () => setCameraMode((prev) => (prev === 'chase' ? 'free' : 'chase')),
+            title: cameraMode === 'chase' ? 'Camera Tracker: GTA Chase Follow Locked (Key: C to toggle)' : 'Camera Tracker: Free Orbit (Key: C to toggle)',
+            width: 58,
+            height: 58,
+            sound: 'switch',
+          })}
         </div>
 
-        {/* Top Right: Exit Workspace Button */}
+        {/* Top Right: Exit Workspace Tactile Mechanical Keycap */}
         {onClose && (
           <div style={{ pointerEvents: 'auto' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              data-sound="pop"
-              style={{
-                background: '#FF1E27',
-                border: 'none',
-                color: '#fff',
-                padding: '10px 18px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '7px',
-                boxShadow: '0 4px 16px rgba(255, 30, 39, 0.4)',
-                transition: 'all 0.2s ease',
-              }}
-              title="Return to Portfolio Overview"
-            >
-              <i className="fa-solid fa-arrow-left"></i>
-              <span>Exit Workspace</span>
-            </button>
+            {renderTactileHUDKeycap({
+              id: 'hud-exit',
+              icon: 'fa-solid fa-arrow-left',
+              label: 'EXIT WORKSPACE',
+              hotkey: null,
+              isRed: true,
+              onClick: onClose,
+              title: 'Exit 3D Workspace and return to Portfolio',
+              width: 184,
+              height: 52,
+              sound: 'pop',
+            })}
           </div>
         )}
       </div>
@@ -946,7 +1067,7 @@ export default function CharacterPlayground({ onClose, isCurtainActive = false }
         </div>
       </div>
 
-      {/* BOTTOM RIGHT: TELEMETRY BAR */}
+      {/* BOTTOM RIGHT: TACTILE MECHANICAL TELEMETRY TRACKER */}
       <div
         style={{
           position: 'absolute',
@@ -954,30 +1075,158 @@ export default function CharacterPlayground({ onClose, isCurtainActive = false }
           right: 24,
           zIndex: 30,
           pointerEvents: 'auto',
+          userSelect: 'none',
         }}
       >
-        {/* Telemetry Panel - Swiss Modular Card */}
         <div
           style={{
-            background: 'rgba(12, 13, 19, 0.95)',
-            backdropFilter: 'blur(14px)',
-            border: '1px solid rgba(255, 255, 255, 0.14)',
-            borderTop: '2px solid #FF1E27',
-            borderRadius: '10px',
-            padding: '10px 16px',
-            fontSize: '0.82rem',
-            color: '#94a3b8',
-            fontVariantNumeric: 'tabular-nums',
-            display: 'flex',
-            gap: '14px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+            position: 'relative',
+            borderRadius: '12px',
+            border: '2.5px solid #000000',
+            background: '#D1D5DB',
+            boxShadow: '0 4px 0 #000000, 0 8px 24px rgba(0, 0, 0, 0.65)',
+            padding: '3px 3px 14px 3px',
           }}
         >
-          <span>Action: <strong style={{ color: '#FF1E27' }}>{telemetry.activeClip}</strong></span>
-          <span>Speed: <strong style={{ color: '#fff' }}>{telemetry.speed.toFixed(1)} m/s</strong></span>
-          <span>Facing: <strong style={{ color: '#fff' }}>{telemetry.facingDeg}°</strong></span>
-          <span>Cam: <strong style={{ color: '#ffffff' }}>{telemetry.camDeg}°</strong></span>
-          <span>Pos: <strong style={{ color: '#fff' }}>X:{telemetry.pos.x} Z:{telemetry.pos.z}</strong></span>
+          {/* Inner Recessed Telemetry Console Screen */}
+          <div
+            style={{
+              position: 'relative',
+              borderRadius: '8px',
+              border: '2px solid #000000',
+              background: 'linear-gradient(180deg, #161822 0%, #0A0B10 100%)',
+              padding: '8px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+              fontFamily: "'Space Grotesk', system-ui, sans-serif",
+            }}
+          >
+            {/* Interactive Tracker Mode Keycap Pill */}
+            <button
+              type="button"
+              onClick={() => setCameraMode((prev) => (prev === 'chase' ? 'free' : 'chase'))}
+              data-sound="switch"
+              title="Click to toggle Camera Tracker (GTA Chase vs Free Orbit)"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: cameraMode === 'chase'
+                  ? 'linear-gradient(180deg, #FF2E36 0%, #D80C14 100%)'
+                  : '#1E293B',
+                border: '1.5px solid #000000',
+                borderRadius: '6px',
+                padding: '4px 9px',
+                color: '#FFFFFF',
+                fontWeight: 900,
+                fontSize: '0.68rem',
+                cursor: 'pointer',
+                letterSpacing: '0.06em',
+                boxShadow: cameraMode === 'chase'
+                  ? '0 0 12px rgba(255, 30, 39, 0.7)'
+                  : 'none',
+                outline: 'none',
+                transition: 'all 0.12s ease',
+              }}
+            >
+              <i
+                className="fa-solid fa-crosshairs"
+                style={{
+                  fontSize: '0.72rem',
+                }}
+              ></i>
+              <span>TRACKER: {cameraMode === 'chase' ? 'LOCKED' : 'FREE'}</span>
+            </button>
+
+            {/* Action State Pill */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#94A3B8', letterSpacing: '0.05em' }}>
+                ACTION
+              </span>
+              <span
+                style={{
+                  background: '#FF1E27',
+                  border: '1.5px solid #000000',
+                  borderRadius: '5px',
+                  padding: '2px 8px',
+                  color: '#FFFFFF',
+                  fontWeight: 900,
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.02em',
+                  boxShadow: '0 0 8px rgba(255, 30, 39, 0.4)',
+                }}
+              >
+                {telemetry.activeClip}
+              </span>
+            </div>
+
+            {/* Numeric Telemetry Badges */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.75rem', fontVariantNumeric: 'tabular-nums' }}>
+              <div>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#94A3B8', marginRight: '4px' }}>SPD</span>
+                <strong style={{ color: '#FFFFFF', fontWeight: 900 }}>{telemetry.speed.toFixed(1)} m/s</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#94A3B8', marginRight: '4px' }}>DIR</span>
+                <strong style={{ color: '#FFFFFF', fontWeight: 900 }}>{telemetry.facingDeg}°</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#94A3B8', marginRight: '4px' }}>CAM</span>
+                <strong style={{ color: '#FFFFFF', fontWeight: 900 }}>{telemetry.camDeg}°</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#94A3B8', marginRight: '4px' }}>POS</span>
+                <strong style={{ color: '#FFFFFF', fontWeight: 900 }}>X:{telemetry.pos.x} Z:{telemetry.pos.z}</strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Micro Underside Label with Diagonal Bevel Lines */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '2px',
+              left: '12px',
+              fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
+              fontSize: '0.55rem',
+              fontWeight: 800,
+              color: '#000000',
+              letterSpacing: '0.08em',
+              pointerEvents: 'none',
+              textTransform: 'uppercase',
+            }}
+          >
+            REALTIME LOCOMOTION TELEMETRY RIG
+          </div>
+
+          {/* Diagonal Corner Bevel Lines matching WASD reference */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '3px',
+              left: '3px',
+              width: '8px',
+              height: '2px',
+              background: '#000000',
+              transform: 'rotate(45deg)',
+              transformOrigin: 'top left',
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '3px',
+              right: '3px',
+              width: '8px',
+              height: '2px',
+              background: '#000000',
+              transform: 'rotate(-45deg)',
+              transformOrigin: 'top right',
+              pointerEvents: 'none',
+            }}
+          />
         </div>
       </div>
 
