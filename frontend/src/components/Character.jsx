@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF, useAnimations, useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -89,27 +89,54 @@ export default function Character({
     }
   };
 
-  useEffect(() => {
-    // Only trigger hologram if curtain is NOT active!
-    if (!isCurtainActive) {
+  // Curtain animation synchronization & fail-safe release
+  const curtainFinishedRef = useRef(!isCurtainActive);
+  if (!isCurtainActive) {
+    curtainFinishedRef.current = true;
+  }
+
+  const releaseCurtainAndStartHolo = useCallback(() => {
+    if (!curtainFinishedRef.current) {
+      curtainFinishedRef.current = true;
       triggerHologram(true);
     }
-  }, [modelUrl, isCurtainActive]);
+  }, []);
 
   useEffect(() => {
-    const handleHoloRescan = () => {
-      if (!isCurtainActive) triggerHologram(true);
-    };
+    if (!isCurtainActive) {
+      releaseCurtainAndStartHolo();
+    }
+  }, [isCurtainActive, releaseCurtainAndStartHolo]);
+
+  useEffect(() => {
+    // If curtain is already done on mount, trigger immediately
+    if (!isCurtainActive) {
+      triggerHologram(true);
+      return;
+    }
+
     const handleCurtainComplete = () => {
+      releaseCurtainAndStartHolo();
+    };
+
+    const handleHoloRescan = () => {
       triggerHologram(true);
     };
-    window.addEventListener('charan-hologram-rescan', handleHoloRescan);
+
     window.addEventListener('charan-curtain-complete', handleCurtainComplete);
+    window.addEventListener('charan-hologram-rescan', handleHoloRescan);
+
+    // Hard fail-safe timeout: curtain animation takes 3.2s, so 3.3s is guaranteed to release
+    const safetyTimer = setTimeout(() => {
+      releaseCurtainAndStartHolo();
+    }, 3300);
+
     return () => {
-      window.removeEventListener('charan-hologram-rescan', handleHoloRescan);
       window.removeEventListener('charan-curtain-complete', handleCurtainComplete);
+      window.removeEventListener('charan-hologram-rescan', handleHoloRescan);
+      clearTimeout(safetyTimer);
     };
-  }, [isCurtainActive]);
+  }, [isCurtainActive, releaseCurtainAndStartHolo]);
 
   // Stop / Brake & Stuck-Key Prevention
   const isBraked = useRef(false);
@@ -694,13 +721,24 @@ export default function Character({
   useFrame((state, delta) => {
     if (!root.current) return;
 
-    // Pause all hologram materialization and movement while CHARAN PORTFOLIO curtain is active!
-    if (isCurtainActive) {
-      holoTimeElapsed.current = 0.0;
-      holoUniforms.current.uHoloProgress.value = 0.0;
-      holoUniforms.current.uHoloActive.value = 1.0;
-      isHoloComplete.current = false;
-      return;
+    // Pause hologram and locomotion while CHARAN PORTFOLIO curtain is actively animating
+    if (!curtainFinishedRef.current) {
+      // Check if user is actively interacting with keys/controls to break pause immediately
+      const dreiKeys = getKeys();
+      const isInteracting = !!(
+        dreiKeys.forward || dreiKeys.back || dreiKeys.left || dreiKeys.right || dreiKeys.stop ||
+        nativeKeys.current.forward || nativeKeys.current.back || nativeKeys.current.left || nativeKeys.current.right
+      );
+
+      if (isInteracting) {
+        releaseCurtainAndStartHolo();
+      } else {
+        holoTimeElapsed.current = 0.0;
+        holoUniforms.current.uHoloProgress.value = 0.0;
+        holoUniforms.current.uHoloActive.value = 1.0;
+        isHoloComplete.current = false;
+        return;
+      }
     }
 
     // Progress Holographic Materialization Animation

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import CharacterPlayground from './components/CharacterPlayground';
 import SpideyWebHero from './components/SpideyWebHero';
@@ -19,6 +19,8 @@ const ROLES = [
 
 function InitialBlankCurtain({ onComplete, maskId = 'heroCutoutMask' }) {
   const [isSweeping, setIsSweeping] = useState(false);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
     try {
@@ -32,7 +34,7 @@ function InitialBlankCurtain({ onComplete, maskId = 'heroCutoutMask' }) {
 
     // After 1.2s constant-speed zoom, unmount overlay cleanly
     const finishTimer = setTimeout(() => {
-      if (onComplete) onComplete();
+      if (onCompleteRef.current) onCompleteRef.current();
       try {
         window.dispatchEvent(new CustomEvent('charan-curtain-complete'));
       } catch (e) {}
@@ -42,7 +44,7 @@ function InitialBlankCurtain({ onComplete, maskId = 'heroCutoutMask' }) {
       clearTimeout(holdTimer);
       clearTimeout(finishTimer);
     };
-  }, [onComplete]);
+  }, []);
 
   return (
     <div
