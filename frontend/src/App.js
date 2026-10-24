@@ -4,9 +4,6 @@ import CharacterPlayground from './components/CharacterPlayground';
 import SpideyWebHero from './components/SpideyWebHero';
 import {
   initGlobalButtonSounds,
-  isSoundEnabled,
-  toggleSound,
-  onSoundStateChange,
   playClickSound,
 } from './utils/soundEffects';
 
@@ -136,7 +133,6 @@ function App() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [toastMessage, setToastMessage] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [soundActive, setSoundActive] = useState(() => isSoundEnabled());
   // Initial 2-second black screen hold & cinematic transparent cutout zoom (only on initial load, never on reloads)
   const [showInitialIntro, setShowInitialIntro] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -213,13 +209,11 @@ function App() {
     }
   }, [isCharacterArenaOpen]);
 
-  // Initialize global button click sounds (< 1s tactile feedback) and subscribe to mute/unmute
+  // Initialize global button click sounds (< 1s tactile feedback)
   useEffect(() => {
     const cleanupSounds = initGlobalButtonSounds();
-    const unsubscribe = onSoundStateChange((enabled) => setSoundActive(enabled));
     return () => {
       cleanupSounds();
-      unsubscribe();
     };
   }, []);
   // Image handling for charan_profile.png with fallbacks
@@ -1171,17 +1165,17 @@ function App() {
               <span>LAT: 16.5448° N &nbsp;•&nbsp; LON: 81.5212° E</span>
             </div>
             <div className="system-node-item">
-              <span>PORTFOLIO_SPEC // v2.6 [SWISS_GRID]</span>
+              <span>PORTFOLIO // v2.6 • FULL-STACK & AI</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Swiss Navigation Header */}
+      {/* Main Navigation Header */}
       <header className="header-nav">
         <div className="container">
           <div className="nav-container">
-            {/* Brand Logo with Geometric Swiss Square */}
+            {/* Brand Logo */}
             <button
               onClick={() => scrollToSection('hero')}
               className="logo-brand"
@@ -1233,35 +1227,6 @@ function App() {
                 <i className="fa-solid fa-cube"></i>
               </button>
 
-              <a
-                href="https://github.com/Charan-718"
-                target="_blank"
-                rel="noreferrer"
-                className="btn-nav-action"
-                title="GitHub Repository"
-              >
-                <i className="fa-brands fa-github"></i>
-                <span className="hide-on-mobile">GITHUB</span>
-              </a>
-
-              {/* Sound Controls Button */}
-              <button
-                onClick={toggleSound}
-                className="btn-nav-action btn-nav-icon-only"
-                title={soundActive ? 'UI Sound Effects Active (Click to Mute)' : 'UI Sound Effects Muted (Click to Enable)'}
-                style={{
-                  cursor: 'pointer',
-                  background: soundActive ? 'rgba(255, 30, 39, 0.12)' : 'rgba(255, 255, 255, 0.05)',
-                  border: `1px solid ${soundActive ? '#FF1E27' : 'rgba(255, 255, 255, 0.16)'}`,
-                  color: soundActive ? '#FF6B72' : '#94a3b8',
-                  transition: 'all 0.2s ease',
-                }}
-                data-sound="switch"
-                aria-label={soundActive ? 'Mute Sound' : 'Enable Sound'}
-              >
-                <i className={soundActive ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark'}></i>
-              </button>
-
               <button
                 className="mobile-toggle-btn"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -1277,14 +1242,14 @@ function App() {
       {/* High-Velocity Marquee Spec Strip */}
       <div className="marquee-ticker" aria-hidden="true">
         <div className="marquee-track">
-          <span className="marquee-item">SWISS GRID ARCHITECTURE <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">PRODUCTION FULL-STACK ARCHITECTURE <span className="marquee-bullet">■</span></span>
           <span className="marquee-item">FULL-STACK HRMS PLATFORM <span className="marquee-bullet">■</span></span>
           <span className="marquee-item">DEEP LEARNING EIS BATTERY MODELING <span className="marquee-bullet">■</span></span>
           <span className="marquee-item">3X NATIONAL HACKATHON CHAMPION <span className="marquee-bullet">■</span></span>
           <span className="marquee-item">REACT & TYPESCRIPT <span className="marquee-bullet">■</span></span>
           <span className="marquee-item">NODE.JS & POSTGRESQL / POSTGIS <span className="marquee-bullet">■</span></span>
           <span className="marquee-item">800+ CODING CHALLENGES SOLVED <span className="marquee-bullet">■</span></span>
-          <span className="marquee-item">SWISS GRID ARCHITECTURE <span className="marquee-bullet">■</span></span>
+          <span className="marquee-item">PRODUCTION FULL-STACK ARCHITECTURE <span className="marquee-bullet">■</span></span>
           <span className="marquee-item">FULL-STACK HRMS PLATFORM <span className="marquee-bullet">■</span></span>
           <span className="marquee-item">DEEP LEARNING EIS BATTERY MODELING <span className="marquee-bullet">■</span></span>
           <span className="marquee-item">3X NATIONAL HACKATHON CHAMPION <span className="marquee-bullet">■</span></span>
@@ -1297,7 +1262,7 @@ function App() {
       {/* MAIN BODY */}
       <main>
         {/* ==========================================================================
-            1. HERO SECTION (SWISS MODULAR POSTER GRID)
+            1. HERO SECTION
             ========================================================================== */}
         <section id="hero" className="section-hero">
           <div className="container">
@@ -1305,7 +1270,7 @@ function App() {
               {/* Left Column: Monumental Typographic Display */}
               <div className="hero-content">
                 <div className="spec-header-tag">
-                  <span className="spec-code">[SPEC_ID: 718-CHR]</span>
+                  <span className="spec-code">[CHR // 718]</span>
                   <span>OPEN TO SOFTWARE ENGINEERING & INTERNSHIP ROLES</span>
                 </div>
 
@@ -1352,11 +1317,6 @@ function App() {
 
                 {/* Action CTAs */}
                 <div className="hero-actions">
-                  <button onClick={() => scrollToSection('projects')} className="btn-primary">
-                    <span>EXPLORE ARCHITECTURE</span>
-                    <i className="fa-solid fa-arrow-right"></i>
-                  </button>
-
                   <a
                     href="https://leetcode.com/u/Charan_0608/"
                     target="_blank"
@@ -1375,7 +1335,7 @@ function App() {
 
                 {/* Social Connect Coordinates */}
                 <div className="hero-social-strip">
-                  <span className="social-strip-label">NETWORK COORD:</span>
+                  <span className="social-strip-label">NETWORK:</span>
                   <div className="social-links-row">
                     <a href="https://github.com/Charan-718" target="_blank" rel="noreferrer" className="social-node-link" title="GitHub">
                       <i className="fa-brands fa-github"></i>
@@ -1393,12 +1353,12 @@ function App() {
                 </div>
               </div>
 
-              {/* Right Column: Swiss Exhibition Poster Media Frame */}
+              {/* Right Column: Poster Media Frame */}
               <div className="hero-media">
                 <div className="swiss-poster-frame">
                   {/* Top Technical Metadata */}
                   <div className="poster-top-bar">
-                    <span className="poster-header-code">[PRO_GRID // 01]</span>
+                    <span className="poster-header-code">[SYSTEM // 01]</span>
                     <span className="poster-header-uid">UID: CHR-718-AIML</span>
                   </div>
 
@@ -1471,12 +1431,12 @@ function App() {
             <div className="section-header-swiss">
               <div>
                 <span className="section-eyebrow-tag">
-                  <i className="fa-solid fa-layer-group"></i> SECTION_02 // SYSTEM BUILDS
+                  <i className="fa-solid fa-layer-group"></i> SECTION_02 // BUILDS
                 </span>
-                <h2 className="section-title">ENGINEERED PLATFORMS</h2>
+                <h2 className="section-title">FEATURED PROJECTS</h2>
               </div>
               <p className="section-desc">
-                Production full-stack web applications, AI planning architectures, and containerized microservices with live deployments.
+                Production full-stack web applications, AI systems, and cloud deployments built for real-world impact.
               </p>
             </div>
 
@@ -1844,12 +1804,12 @@ function App() {
             <div className="section-header-swiss">
               <div>
                 <span className="section-eyebrow-tag">
-                  <i className="fa-solid fa-terminal"></i> SECTION_07 // COMMUNICATE
+                  <i className="fa-solid fa-terminal"></i> SECTION_07 // CONTACT
                 </span>
-                <h2 className="section-title">INITIATE CONTACT</h2>
+                <h2 className="section-title">GET IN TOUCH</h2>
               </div>
               <p className="section-desc">
-                Direct communication terminal for software engineering roles, technical internships, and collaborative architecture projects.
+                Open to software engineering roles, technical internships, and impactful collaborative projects.
               </p>
             </div>
 
@@ -2077,7 +2037,7 @@ function App() {
 
           <div className="footer-bottom-bar">
             <span>© {new Date().getFullYear()} CHARAN SAI BARNIKANI. ALL SPECIFICATIONS RESERVED.</span>
-            <span>SYSTEM_BUILD // SWISS_GRID_v2.6</span>
+            <span>CHARAN SAI BARNIKANI // PORTFOLIO v2.6</span>
           </div>
         </div>
       </footer>
