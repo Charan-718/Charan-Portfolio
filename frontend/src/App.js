@@ -1499,62 +1499,85 @@ function App() {
             {/* Swiss Poster Project Cards Grid */}
             <div className="projects-grid">
               {filteredProjects.map((proj) => (
-                <div key={proj.id} className="project-card-swiss">
-                  <div className="project-card-top">
-                    <span className="project-index-num">[{proj.index}]</span>
-                    <span className="project-badge-tag">{proj.badgeText}</span>
-                  </div>
+                <div key={proj.id} className="project-card-swiss cyber-card-frame">
+                  <div className="cyber-card-inner">
+                    {/* Corner Targeting Crosshairs (Images 1 & 2) */}
+                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
 
-                  <div className="project-card-body">
-                    <span className="project-category-sub">{proj.category}</span>
-                    <h3 className="project-title-swiss">{proj.title}</h3>
-                    <p className="project-desc-swiss">{proj.description}</p>
-
-                    <ul className="project-features-block">
-                      {proj.features.map((feat, fIdx) => (
-                        <li key={fIdx}>
-                          <i className="fa-solid fa-angle-right"></i>
-                          <span>{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="project-tags-matrix">
-                      {proj.tags.map((tag, tIdx) => (
-                        <span key={tIdx} className="tech-pill">{tag}</span>
-                      ))}
+                    {/* Top Angled Cyber Ribbon Header (Image 1 DATACORP Style) */}
+                    <div className="cyber-card-header">
+                      <div className="cyber-header-banner">
+                        <span className="project-index-num">[{proj.index}]</span>
+                        {/* Barcode Strip Graphic */}
+                        <div className="cyber-barcode-strip" aria-hidden="true">
+                          <span></span><span></span><span></span><span></span><span></span>
+                          <span></span><span></span><span></span><span></span><span></span>
+                          <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                      </div>
+                      <div className="cyber-header-badge-col">
+                        <span className="project-badge-tag">{proj.badgeText}</span>
+                        <div className="cyber-hazard-stripes" aria-hidden="true"></div>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="project-card-footer">
-                    {proj.demoLink ? (
+                    <div className="project-card-body">
+                      <div className="project-category-row">
+                        <span className="project-category-sub">{proj.category}</span>
+                        <span className="project-spec-code">SYS_ID: 718-{proj.index}</span>
+                      </div>
+                      <h3 className="project-title-swiss">{proj.title}</h3>
+                      <p className="project-desc-swiss">{proj.description}</p>
+
+                      <ul className="project-features-block">
+                        {proj.features.map((feat, fIdx) => (
+                          <li key={fIdx}>
+                            <i className="fa-solid fa-angles-right" style={{ color: '#FF1E27', fontSize: '0.72rem' }}></i>
+                            <span>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="project-tags-matrix">
+                        {proj.tags.map((tag, tIdx) => (
+                          <span key={tIdx} className="tech-pill">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="project-card-footer cyber-card-footer">
+                      {proj.demoLink ? (
+                        <a
+                          href={proj.demoLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="project-action-btn btn-demo-swiss cyber-btn-left"
+                        >
+                          <span>LAUNCH DEMO</span>
+                          <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                      ) : (
+                        <span
+                          className="project-action-btn btn-demo-disabled cyber-btn-left"
+                          title="Live demonstration not configured for this repository"
+                        >
+                          <span>NOT CONFIGURED</span>
+                          <i className="fa-solid fa-ban"></i>
+                        </span>
+                      )}
                       <a
-                        href={proj.demoLink}
+                        href={proj.codeLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="project-action-btn btn-demo-swiss"
+                        className="project-action-btn btn-code-swiss cyber-btn-right"
                       >
-                        <span>LAUNCH DEMO</span>
-                        <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                        <i className="fa-brands fa-github"></i>
+                        <span>SOURCE CODE</span>
                       </a>
-                    ) : (
-                      <span
-                        className="project-action-btn btn-demo-disabled"
-                        title="Live demonstration not configured for this repository"
-                      >
-                        <span>NOT CONFIGURED</span>
-                        <i className="fa-solid fa-ban"></i>
-                      </span>
-                    )}
-                    <a
-                      href={proj.codeLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="project-action-btn btn-code-swiss"
-                    >
-                      <i className="fa-brands fa-github"></i>
-                      <span>SOURCE CODE</span>
-                    </a>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1579,44 +1602,68 @@ function App() {
               </p>
             </div>
 
-            <div className="education-swiss-card">
-              <div className="edu-grid-content">
-                <div className="edu-primary-info">
-                  <div className="edu-badge-tag">
-                    <i className="fa-solid fa-certificate"></i> B.TECH DEGREE PROGRAM
+            <div className="education-swiss-card cyber-card-frame cyber-card-wide">
+              <div className="cyber-card-inner">
+                {/* 4 Corner Targeting Crosshairs */}
+                <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
+
+                {/* Top Cyber Ribbon */}
+                <div className="cyber-card-header">
+                  <div className="cyber-header-banner">
+                    <span className="project-index-num">[ACAD_03]</span>
+                    <div className="cyber-barcode-strip" aria-hidden="true">
+                      <span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span>
+                    </div>
                   </div>
-                  <h3 className="edu-degree-title">Artificial Intelligence & Machine Learning</h3>
-                  <div className="edu-institution">S R K R Engineering College, Bhimavaram</div>
-                  <div className="edu-cgpa-box">
-                    <span>ACADEMIC PERFORMANCE:</span>
-                    <span className="cgpa-highlight">9.12 CGPA / 10</span>
+                  <div className="cyber-header-badge-col">
+                    <span className="project-badge-tag">AIML // 2023-2027</span>
+                    <div className="cyber-hazard-stripes" aria-hidden="true"></div>
                   </div>
                 </div>
 
-                <div className="edu-disciplines-list">
-                  <div className="discipline-item">
-                    <i className="fa-solid fa-microchip"></i>
-                    <span>Artificial Intelligence & ML</span>
+                <div className="edu-grid-content">
+                  <div className="edu-primary-info">
+                    <div className="edu-badge-tag">
+                      <i className="fa-solid fa-certificate"></i> B.TECH DEGREE PROGRAM
+                    </div>
+                    <h3 className="edu-degree-title">Artificial Intelligence & Machine Learning</h3>
+                    <div className="edu-institution">S R K R Engineering College, Bhimavaram</div>
+                    <div className="edu-cgpa-box">
+                      <span>ACADEMIC PERFORMANCE:</span>
+                      <span className="cgpa-highlight">9.12 CGPA / 10</span>
+                    </div>
                   </div>
-                  <div className="discipline-item">
-                    <i className="fa-solid fa-network-wired"></i>
-                    <span>Deep Learning & Neural Nets</span>
-                  </div>
-                  <div className="discipline-item">
-                    <i className="fa-solid fa-code-merge"></i>
-                    <span>Data Structures & Algorithms</span>
-                  </div>
-                  <div className="discipline-item">
-                    <i className="fa-solid fa-database"></i>
-                    <span>Database Management (DBMS)</span>
-                  </div>
-                  <div className="discipline-item">
-                    <i className="fa-solid fa-cubes"></i>
-                    <span>Object-Oriented Programming</span>
-                  </div>
-                  <div className="discipline-item">
-                    <i className="fa-solid fa-server"></i>
-                    <span>Computer Networks (CN)</span>
+
+                  <div className="edu-disciplines-list">
+                    <div className="discipline-item">
+                      <i className="fa-solid fa-microchip"></i>
+                      <span>Artificial Intelligence & ML</span>
+                    </div>
+                    <div className="discipline-item">
+                      <i className="fa-solid fa-network-wired"></i>
+                      <span>Deep Learning & Neural Nets</span>
+                    </div>
+                    <div className="discipline-item">
+                      <i className="fa-solid fa-code-merge"></i>
+                      <span>Data Structures & Algorithms</span>
+                    </div>
+                    <div className="discipline-item">
+                      <i className="fa-solid fa-database"></i>
+                      <span>Database Management (DBMS)</span>
+                    </div>
+                    <div className="discipline-item">
+                      <i className="fa-solid fa-cubes"></i>
+                      <span>Object-Oriented Programming</span>
+                    </div>
+                    <div className="discipline-item">
+                      <i className="fa-solid fa-server"></i>
+                      <span>Computer Networks (CN)</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1643,18 +1690,26 @@ function App() {
 
             <div className="skills-matrix-grid">
               {skillCategories.map((cat, cIdx) => (
-                <div key={cIdx} className="skill-matrix-box">
-                  <div className="skill-box-header">
-                    <div className="skill-box-icon">
-                      <i className={cat.icon}></i>
-                    </div>
-                    <h3 className="skill-box-title">{cat.category}</h3>
-                  </div>
+                <div key={cIdx} className="skill-matrix-box cyber-card-frame">
+                  <div className="cyber-card-inner skill-box-inner">
+                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
 
-                  <div className="skill-pills-wrap">
-                    {cat.skills.map((skill, sIdx) => (
-                      <span key={sIdx} className="skill-badge">{skill}</span>
-                    ))}
+                    <div className="skill-box-header">
+                      <div className="skill-box-icon">
+                        <i className={cat.icon}></i>
+                      </div>
+                      <h3 className="skill-box-title">{cat.category}</h3>
+                      <div className="cyber-hazard-stripes" style={{ width: '32px', marginLeft: 'auto' }} aria-hidden="true"></div>
+                    </div>
+
+                    <div className="skill-pills-wrap">
+                      {cat.skills.map((skill, sIdx) => (
+                        <span key={sIdx} className="skill-badge">{skill}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1681,24 +1736,32 @@ function App() {
 
             <div className="timeline-swiss-list">
               {internships.map((item) => (
-                <div key={item.id} className="timeline-node-card">
-                  <div className="timeline-aside">
-                    <span className="timeline-period-tag">{item.period}</span>
-                    <span className="timeline-type-tag">{item.type}</span>
-                  </div>
+                <div key={item.id} className="timeline-node-card cyber-card-frame">
+                  <div className="cyber-card-inner timeline-node-inner">
+                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
 
-                  <div className="timeline-main">
-                    <h3 className="timeline-role-title">{item.role}</h3>
-                    <span className="timeline-org-name">{item.organization}</span>
+                    <div className="timeline-aside">
+                      <span className="timeline-period-tag">{item.period}</span>
+                      <span className="timeline-type-tag">{item.type}</span>
+                      <div className="cyber-hazard-stripes" style={{ width: '42px', marginTop: '12px' }} aria-hidden="true"></div>
+                    </div>
 
-                    <ul className="timeline-bullets-list">
-                      {item.highlights.map((bullet, bIdx) => (
-                        <li key={bIdx} className="timeline-bullet-item">
-                          <i className="fa-solid fa-circle-dot"></i>
-                          <span>{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="timeline-main">
+                      <h3 className="timeline-role-title">{item.role}</h3>
+                      <span className="timeline-org-name">{item.organization}</span>
+
+                      <ul className="timeline-bullets-list">
+                        {item.highlights.map((bullet, bIdx) => (
+                          <li key={bIdx} className="timeline-bullet-item">
+                            <i className="fa-solid fa-angles-right" style={{ color: '#FF1E27', fontSize: '0.72rem' }}></i>
+                            <span>{bullet}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1726,14 +1789,24 @@ function App() {
             {/* Achievements Grid */}
             <div className="achievements-swiss-grid">
               {achievements.map((ach, aIdx) => (
-                <div key={aIdx} className="achievement-swiss-box">
-                  <div className="achievement-icon-square">
-                    <i className={ach.icon}></i>
-                  </div>
-                  <div>
-                    <span className="achievement-tag-pill">{ach.tag}</span>
-                    <h4 className="achievement-title-text">{ach.title}</h4>
-                    <p className="achievement-desc-text">{ach.desc}</p>
+                <div key={aIdx} className="achievement-swiss-box cyber-card-frame">
+                  <div className="cyber-card-inner achievement-box-inner">
+                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
+
+                    <div className="achievement-icon-square">
+                      <i className={ach.icon}></i>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <span className="achievement-tag-pill">{ach.tag}</span>
+                        <div className="cyber-hazard-stripes" style={{ width: '32px' }} aria-hidden="true"></div>
+                      </div>
+                      <h4 className="achievement-title-text">{ach.title}</h4>
+                      <p className="achievement-desc-text">{ach.desc}</p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1746,13 +1819,20 @@ function App() {
             </h3>
             <div className="certifications-swiss-grid">
               {certifications.map((cert, cIdx) => (
-                <div key={cIdx} className="cert-swiss-card">
-                  <div className="cert-top-row">
-                    <i className={`${cert.icon} cert-icon-mini`}></i>
-                    <h4 className="cert-name">{cert.title}</h4>
+                <div key={cIdx} className="cert-swiss-card cyber-card-frame">
+                  <div className="cyber-card-inner cert-card-inner">
+                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
+
+                    <div className="cert-top-row">
+                      <i className={`${cert.icon} cert-icon-mini`}></i>
+                      <h4 className="cert-name">{cert.title}</h4>
+                    </div>
+                    <span className="cert-issuer-tag">{cert.issuer}</span>
+                    <p className="cert-info-p">{cert.desc}</p>
                   </div>
-                  <span className="cert-issuer-tag">{cert.issuer}</span>
-                  <p className="cert-info-p">{cert.desc}</p>
                 </div>
               ))}
             </div>
@@ -1779,142 +1859,195 @@ function App() {
             <div className="contact-swiss-grid">
               {/* Left Coordinates Panel */}
               <div className="contact-spec-panel">
-                <div className="contact-coord-card">
-                  <div className="coord-icon">
-                    <i className="fa-regular fa-envelope"></i>
-                  </div>
-                  <div>
-                    <div className="coord-label">PRIMARY INBOX</div>
-                    <div className="coord-val">charan06082004@gmail.com</div>
-                    <button onClick={copyEmailToClipboard} className="btn-copy-chip">
-                      <i className="fa-regular fa-copy"></i> [CLICK TO COPY]
-                    </button>
+                <div className="contact-coord-card cyber-card-frame">
+                  <div className="cyber-card-inner contact-coord-inner">
+                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
+
+                    <div className="coord-icon">
+                      <i className="fa-regular fa-envelope"></i>
+                    </div>
+                    <div>
+                      <div className="coord-label">PRIMARY INBOX</div>
+                      <div className="coord-val">charan06082004@gmail.com</div>
+                      <button onClick={copyEmailToClipboard} className="btn-copy-chip">
+                        <i className="fa-regular fa-copy"></i> [CLICK TO COPY]
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="contact-coord-card">
-                  <div className="coord-icon">
-                    <i className="fa-solid fa-phone"></i>
-                  </div>
-                  <div>
-                    <div className="coord-label">TELECOMMUNICATION</div>
-                    <div className="coord-val">+91 6302695484</div>
-                    <button onClick={copyPhoneToClipboard} className="btn-copy-chip">
-                      <i className="fa-regular fa-copy"></i> [CLICK TO COPY]
-                    </button>
+                <div className="contact-coord-card cyber-card-frame">
+                  <div className="cyber-card-inner contact-coord-inner">
+                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
+
+                    <div className="coord-icon">
+                      <i className="fa-solid fa-phone"></i>
+                    </div>
+                    <div>
+                      <div className="coord-label">TELECOMMUNICATION</div>
+                      <div className="coord-val">+91 6302695484</div>
+                      <button onClick={copyPhoneToClipboard} className="btn-copy-chip">
+                        <i className="fa-regular fa-copy"></i> [CLICK TO COPY]
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="contact-coord-card">
-                  <div className="coord-icon">
-                    <i className="fa-solid fa-location-crosshairs"></i>
-                  </div>
-                  <div>
-                    <div className="coord-label">LOCATION COORD</div>
-                    <div className="coord-val">Rajahmundry, AP, 533105</div>
-                    <div className="coord-sub">India • Open to Relocation & Remote Engagements</div>
+                <div className="contact-coord-card cyber-card-frame">
+                  <div className="cyber-card-inner contact-coord-inner">
+                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
+
+                    <div className="coord-icon">
+                      <i className="fa-solid fa-location-crosshairs"></i>
+                    </div>
+                    <div>
+                      <div className="coord-label">LOCATION COORD</div>
+                      <div className="coord-val">Rajahmundry, AP, 533105</div>
+                      <div className="coord-sub">India • Open to Relocation & Remote Engagements</div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="contact-coord-card">
-                  <div className="coord-icon">
-                    <i className="fa-solid fa-network-wired"></i>
-                  </div>
-                  <div>
-                    <div className="coord-label">PROFILES & PLATFORMS</div>
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                      <a href="https://www.linkedin.com/in/charan-sai-barnikani/" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
-                        <i className="fa-brands fa-linkedin-in"></i> LinkedIn
-                      </a>
-                      <a href="https://github.com/Charan-718" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
-                        <i className="fa-brands fa-github"></i> GitHub
-                      </a>
-                      <a href="https://leetcode.com/u/Charan_0608/" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
-                        <i className="fa-solid fa-code"></i> LeetCode
-                      </a>
+                <div className="contact-coord-card cyber-card-frame">
+                  <div className="cyber-card-inner contact-coord-inner">
+                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
+
+                    <div className="coord-icon">
+                      <i className="fa-solid fa-network-wired"></i>
+                    </div>
+                    <div>
+                      <div className="coord-label">PROFILES & PLATFORMS</div>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                        <a href="https://www.linkedin.com/in/charan-sai-barnikani/" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
+                          <i className="fa-brands fa-linkedin-in"></i> LinkedIn
+                        </a>
+                        <a href="https://github.com/Charan-718" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
+                          <i className="fa-brands fa-github"></i> GitHub
+                        </a>
+                        <a href="https://leetcode.com/u/Charan_0608/" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
+                          <i className="fa-solid fa-code"></i> LeetCode
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Right Form Terminal */}
-              <div className="contact-form-swiss">
-                <form onSubmit={handleFormSubmit}>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label-swiss" htmlFor="name">
-                        YOUR NAME <span className="req-star">*</span>
-                      </label>
-                      <input
-                        id="name"
-                        type="text"
-                        required
-                        placeholder="e.g. Hiring Lead / Recruiter"
-                        className="form-control-swiss"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      />
-                    </div>
+              <div className="contact-form-swiss cyber-card-frame cyber-card-wide">
+                <div className="cyber-card-inner">
+                  {/* 4 Corner Targeting Crosshairs */}
+                  <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
+                  <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
+                  <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
+                  <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
 
-                    <div className="form-group">
-                      <label className="form-label-swiss" htmlFor="email">
-                        YOUR EMAIL <span className="req-star">*</span>
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        required
-                        placeholder="e.g. recruiter@company.com"
-                        className="form-control-swiss"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      />
+                  {/* Top Angled Cyber Ribbon Header */}
+                  <div className="cyber-card-header">
+                    <div className="cyber-header-banner">
+                      <span className="project-index-num">[COMM_07]</span>
+                      <div className="cyber-barcode-strip" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span>
+                        <span></span><span></span><span></span><span></span><span></span>
+                      </div>
+                    </div>
+                    <div className="cyber-header-badge-col">
+                      <span className="project-badge-tag">SECURE SSL // 256-BIT DISPATCH</span>
+                      <div className="cyber-hazard-stripes" aria-hidden="true"></div>
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label-swiss" htmlFor="subject">
-                      SUBJECT / TOPIC
-                    </label>
-                    <input
-                      id="subject"
-                      type="text"
-                      placeholder="e.g. Software Engineering Opportunity / Collaboration"
-                      className="form-control-swiss"
-                      value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    />
-                  </div>
+                  <div className="contact-form-body">
+                    <form onSubmit={handleFormSubmit}>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label className="form-label-swiss" htmlFor="name">
+                            YOUR NAME <span className="req-star">*</span>
+                          </label>
+                          <input
+                            id="name"
+                            type="text"
+                            required
+                            placeholder="e.g. Hiring Lead / Recruiter"
+                            className="form-control-swiss"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          />
+                        </div>
 
-                  <div className="form-group">
-                    <label className="form-label-swiss" htmlFor="message">
-                      MESSAGE TRANSMISSION <span className="req-star">*</span>
-                    </label>
-                    <textarea
-                      id="message"
-                      required
-                      rows="4"
-                      placeholder="Hi Charan, we would like to discuss an engineering opportunity regarding your background in Full-Stack and AI/ML..."
-                      className="form-control-swiss textarea-swiss"
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    ></textarea>
-                  </div>
+                        <div className="form-group">
+                          <label className="form-label-swiss" htmlFor="email">
+                            YOUR EMAIL <span className="req-star">*</span>
+                          </label>
+                          <input
+                            id="email"
+                            type="email"
+                            required
+                            placeholder="e.g. recruiter@company.com"
+                            className="form-control-swiss"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          />
+                        </div>
+                      </div>
 
-                  <button type="submit" className="btn-submit-swiss" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <span>TRANSMITTING...</span>
-                        <i className="fa-solid fa-spinner fa-spin"></i>
-                      </>
-                    ) : (
-                      <>
-                        <span>DISPATCH MESSAGE</span>
-                        <i className="fa-solid fa-arrow-right"></i>
-                      </>
-                    )}
-                  </button>
-                </form>
+                      <div className="form-group">
+                        <label className="form-label-swiss" htmlFor="subject">
+                          SUBJECT / TOPIC
+                        </label>
+                        <input
+                          id="subject"
+                          type="text"
+                          placeholder="e.g. Software Engineering Opportunity / Collaboration"
+                          className="form-control-swiss"
+                          value={formData.subject}
+                          onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label-swiss" htmlFor="message">
+                          MESSAGE TRANSMISSION <span className="req-star">*</span>
+                        </label>
+                        <textarea
+                          id="message"
+                          required
+                          rows="4"
+                          placeholder="Hi Charan, we would like to discuss an engineering opportunity regarding your background in Full-Stack and AI/ML..."
+                          className="form-control-swiss textarea-swiss"
+                          value={formData.message}
+                          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                        ></textarea>
+                      </div>
+
+                      <button type="submit" className="btn-submit-swiss" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                          <>
+                            <span>TRANSMITTING...</span>
+                            <i className="fa-solid fa-spinner fa-spin"></i>
+                          </>
+                        ) : (
+                          <>
+                            <span>DISPATCH MESSAGE</span>
+                            <i className="fa-solid fa-arrow-right"></i>
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

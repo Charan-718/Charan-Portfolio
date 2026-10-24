@@ -729,6 +729,15 @@ button {
   padding: clamp(12px, 1.8vh, 16px);
   position: relative;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 30, 39, 0.1);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 24px) 0,
+    100% 24px,
+    100% calc(100% - 16px),
+    calc(100% - 16px) 100%,
+    24px 100%,
+    0 calc(100% - 24px)
+  );
 }
 
 /* Poster Top Technical Header */
@@ -1102,53 +1111,151 @@ button {
   gap: 24px;
 }
 
-/* Project Card Styled as High-Performance Spec Sheet */
-.project-card-swiss {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
+/* =============================================================================
+   2. FEATURED PROJECTS SECTION (CYBER MECHA SHAPED CARDS - IMAGES 1 & 2 SPEC)
+   Asymmetrical polygon chamfers, DATACORP red ribbons, barcodes, targeting brackets
+   ============================================================================= */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* Universal Cyber Card Polygon Frame (Outer Border & Drop-Shadow) */
+.cyber-card-frame {
+  position: relative;
+  background: rgba(255, 255, 255, 0.12);
+  /* Asymmetrical polygon: Top-right 28px chamfer, Bottom-left 28px chamfer, stepped tech profile */
+  clip-path: polygon(
+    0 0,
+    calc(100% - 28px) 0,
+    100% 28px,
+    100% calc(100% - 18px),
+    calc(100% - 18px) 100%,
+    28px 100%,
+    0 calc(100% - 28px)
+  );
+  padding: 1.5px; /* Forms the razor-sharp 1.5px outer border */
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.35s ease,
+              filter 0.35s ease;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.7));
+  display: flex;
+}
+
+.cyber-card-frame:hover {
+  transform: translateY(-8px);
+  background: linear-gradient(135deg, #FF1E27 0%, rgba(255, 30, 39, 0.4) 50%, #FF1E27 100%);
+  filter: drop-shadow(0 0 22px rgba(255, 30, 39, 0.45)) drop-shadow(0 22px 48px rgba(0, 0, 0, 0.85));
+}
+
+/* Inner Body of the Cyber Card */
+.cyber-card-inner {
+  position: relative;
+  background: linear-gradient(165deg, #131622 0%, #0C0E16 65%, #08090E 100%);
+  clip-path: inherit;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
-.project-card-swiss::before {
-  content: '';
+/* Wide Variant for Academic Foundation Card */
+.cyber-card-wide {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 36px) 0,
+    100% 36px,
+    100% calc(100% - 20px),
+    calc(100% - 20px) 100%,
+    36px 100%,
+    0 calc(100% - 36px)
+  );
+}
+
+/* Corner Crosshair Targeting Brackets ┌ ┐ └ ┘ (Images 1 & 2) */
+.cyber-corner-bracket {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--border-hairline);
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  z-index: 6;
   transition: all 0.3s ease;
 }
 
-.project-card-swiss:hover {
-  transform: translateY(-6px);
-  border-color: var(--vermillion-border);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(255, 30, 39, 0.15);
+.bracket-tl {
+  top: 10px;
+  left: 10px;
+  border-right: none;
+  border-bottom: none;
 }
 
-.project-card-swiss:hover::before {
-  background: var(--vermillion);
-  box-shadow: 0 0 10px var(--vermillion);
+.bracket-tr {
+  top: 10px;
+  right: 28px;
+  border-left: none;
+  border-bottom: none;
 }
 
-.project-card-top {
+.bracket-bl {
+  bottom: 10px;
+  left: 28px;
+  border-right: none;
+  border-top: none;
+}
+
+.bracket-br {
+  bottom: 10px;
+  right: 14px;
+  border-left: none;
+  border-top: none;
+}
+
+.cyber-card-frame:hover .cyber-corner-bracket {
+  border-color: #FF1E27;
+  box-shadow: 0 0 8px #FF1E27;
+  transform: scale(1.18);
+}
+
+/* Header Zone with Angled Red Ribbon (DATACORP Style from Image 1) */
+.cyber-card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-hairline);
+  justify-content: space-between;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 48px;
+}
+
+.cyber-header-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #FF1E27 0%, #D40C14 70%, #9E0007 100%);
+  padding: 11px 22px 11px 16px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
+  color: #FFFFFF;
+  box-shadow: 0 2px 12px rgba(255, 30, 39, 0.45);
 }
 
 .project-index-num {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--vermillion);
+  font-family: var(--font-display, 'Syne', system-ui, sans-serif);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #FFFFFF;
   letter-spacing: -0.02em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.cyber-header-badge-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  padding-right: 32px;
 }
 
 .project-badge-tag {
@@ -1156,17 +1263,52 @@ button {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4px 10px;
-  border: 1px solid var(--border-hairline);
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 3px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.project-card-body {
-  padding: 24px 20px;
-  flex-grow: 1;
+/* Micro Barcode Stripes (Image 1 & 2) */
+.cyber-barcode-strip {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+  opacity: 0.92;
+}
+
+.cyber-barcode-strip span {
+  display: inline-block;
+  height: 100%;
+  background: #FFFFFF;
+  width: 1.5px;
+}
+
+.cyber-barcode-strip span:nth-child(2n) { width: 3px; }
+.cyber-barcode-strip span:nth-child(3n) { width: 1px; }
+.cyber-barcode-strip span:nth-child(5n) { width: 2.5px; }
+
+/* Hazard Caution Diagonal Slashes (Image 2 & 3) */
+.cyber-hazard-stripes {
+  width: 48px;
+  height: 5px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #FF1E27,
+    #FF1E27 3px,
+    transparent 3px,
+    transparent 7px
+  );
+  opacity: 0.85;
+}
+
+/* Sub-header Spec Row inside Card Body */
+.project-category-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .project-category-sub {
@@ -1175,7 +1317,22 @@ button {
   color: var(--text-muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 6px;
+}
+
+.project-spec-code {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  color: #FF6B72;
+  font-weight: 700;
+}
+
+/* Card Body */
+.project-card-body {
+  padding: 22px 20px 24px 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .project-title-swiss {
@@ -1209,19 +1366,13 @@ button {
   line-height: 1.4;
 }
 
-.project-features-block li i {
-  color: var(--vermillion);
-  font-size: 0.7rem;
-  margin-top: 3px;
-}
-
 .project-tags-matrix {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: auto;
   padding-top: 16px;
-  border-top: 1px dashed var(--border-hairline);
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
 }
 
 .tech-pill {
@@ -1233,10 +1384,20 @@ button {
   padding: 3px 8px;
 }
 
-.project-card-footer {
+/* Angled Tech Action Buttons in Footer */
+.cyber-card-footer {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-top: 1px solid var(--border-hairline);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.cyber-btn-left {
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+}
+
+.cyber-btn-right {
+  clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%);
 }
 
 .project-action-btn {
@@ -1251,32 +1412,28 @@ button {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .btn-demo-swiss {
-  background: rgba(255, 30, 39, 0.08);
-  color: var(--vermillion-bright);
-  border-right: 1px solid var(--border-hairline);
+  background: rgba(255, 30, 39, 0.12);
+  color: #FF6B72;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .btn-demo-swiss:hover {
   background: var(--vermillion);
-  color: var(--text-white);
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+  color: #FFFFFF;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4);
 }
 
 .btn-demo-disabled {
   background: rgba(255, 255, 255, 0.02);
   color: var(--text-muted, #71717A);
-  border-right: 1px solid var(--border-hairline);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   cursor: not-allowed;
   user-select: none;
   opacity: 0.55;
-}
-
-.btn-demo-disabled:hover {
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--text-muted, #71717A);
 }
 
 .btn-code-swiss {
@@ -1286,28 +1443,15 @@ button {
 
 .btn-code-swiss:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-white);
+  color: #FFFFFF;
 }
 
 /* ==========================================================================
    3. EDUCATION & FOUNDATION SECTION
    ========================================================================== */
 .education-swiss-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  padding: 36px;
   position: relative;
-}
-
-.education-swiss-card::after {
-  content: 'AIML // 2023-2027';
-  position: absolute;
-  top: 24px;
-  right: 28px;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  letter-spacing: 0.12em;
+  width: 100%;
 }
 
 .edu-grid-content {
@@ -1315,6 +1459,8 @@ button {
   grid-template-columns: 1.2fr 1fr;
   gap: 40px;
   align-items: center;
+  padding: 36px 36px 40px 36px;
+  width: 100%;
 }
 
 .edu-primary-info {
@@ -1396,21 +1542,18 @@ button {
 .skills-matrix-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 
 .skill-matrix-box {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  padding: 24px;
   position: relative;
-  transition: all 0.25s ease;
+  width: 100%;
 }
 
-.skill-matrix-box:hover {
-  border-color: var(--border-strong);
-  background: var(--bg-panel-hover);
-  transform: translateY(-2px);
+.skill-box-inner {
+  padding: 24px 22px 26px 22px;
+  height: 100%;
+  width: 100%;
 }
 
 .skill-box-header {
@@ -1474,19 +1617,17 @@ button {
 }
 
 .timeline-node-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  padding: 32px;
   position: relative;
+  width: 100%;
+}
+
+.timeline-node-inner {
   display: grid;
   grid-template-columns: 240px 1fr;
   gap: 36px;
-  transition: all 0.25s ease;
-}
-
-.timeline-node-card:hover {
-  border-color: var(--vermillion-border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 28px 32px;
+  width: 100%;
+  position: relative;
 }
 
 .timeline-aside {
@@ -1557,24 +1698,23 @@ button {
 .achievements-swiss-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 22px;
   margin-bottom: 48px;
 }
 
 .achievement-swiss-box {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  padding: 24px;
+  position: relative;
+  width: 100%;
+}
+
+.achievement-box-inner {
+  padding: 24px 22px;
   display: flex;
   gap: 20px;
   align-items: flex-start;
-  transition: all 0.25s ease;
-}
-
-.achievement-swiss-box:hover {
-  border-color: var(--vermillion);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  height: 100%;
+  width: 100%;
+  position: relative;
 }
 
 .achievement-icon-square {
@@ -1618,13 +1758,19 @@ button {
 .certifications-swiss-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 22px;
 }
 
 .cert-swiss-card {
-  background: #0C0C10;
-  border: 1px solid var(--border-hairline);
-  padding: 20px;
+  position: relative;
+  width: 100%;
+}
+
+.cert-card-inner {
+  padding: 24px 22px;
+  height: 100%;
+  width: 100%;
+  position: relative;
 }
 
 .cert-top-row {
@@ -1678,18 +1824,17 @@ button {
 }
 
 .contact-coord-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  padding: 20px;
+  position: relative;
+  width: 100%;
+}
+
+.contact-coord-inner {
+  padding: 18px 20px;
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  transition: all 0.2s ease;
-}
-
-.contact-coord-card:hover {
-  border-color: var(--border-strong);
-  background: var(--bg-panel-hover);
+  width: 100%;
+  position: relative;
 }
 
 .coord-icon {
@@ -1747,9 +1892,13 @@ button {
 
 /* Contact Form */
 .contact-form-swiss {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  padding: 32px;
+  position: relative;
+  width: 100%;
+}
+
+.contact-form-body {
+  padding: 28px 32px 34px 32px;
+  width: 100%;
 }
 
 .form-row {
@@ -1991,9 +2140,16 @@ button {
   .skills-matrix-grid {
     grid-template-columns: 1fr;
   }
-  .timeline-node-card {
+  .timeline-node-inner {
     grid-template-columns: 1fr;
     gap: 16px;
+    padding: 22px 18px;
+  }
+  .edu-grid-content {
+    padding: 24px 18px;
+  }
+  .contact-form-body {
+    padding: 22px 18px;
   }
   .timeline-aside {
     border-right: none;
