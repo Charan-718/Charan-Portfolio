@@ -8,10 +8,10 @@ import {
 } from './utils/soundEffects';
 
 const ROLES = [
-  'Full-Stack Developer',
-  'AI & Deep Learning Enthusiast',
-  'B.Tech AIML Student (9.12 CGPA)',
-  'React, Node.js & Python Engineer'
+  'Full-Stack Systems Engineer',
+  'AI & Deep Learning Developer',
+  'B.Tech in Artificial Intelligence',
+  'React, TypeScript & Node.js Architect'
 ];
 
 function InitialBlankCurtain({ onComplete, maskId = 'heroCutoutMask' }) {
@@ -1159,13 +1159,13 @@ function App() {
           <div className="system-strip-inner">
             <div className="system-node-item">
               <span className="live-beacon"></span>
-              <span>SYSTEM: ACTIVE // SRKR.AIML.2027</span>
+              <span>AVAILABLE FOR HIRE • 2026 / 2027 ROLES</span>
             </div>
             <div className="system-node-item hide-on-mobile">
-              <span>LAT: 16.5448° N &nbsp;•&nbsp; LON: 81.5212° E</span>
+              <span>RAJAHMUNDRY, INDIA &nbsp;•&nbsp; OPEN TO RELOCATION & REMOTE</span>
             </div>
             <div className="system-node-item">
-              <span>PORTFOLIO // v2.6 • FULL-STACK & AI</span>
+              <span>B.TECH IN ARTIFICIAL INTELLIGENCE & MACHINE LEARNING</span>
             </div>
           </div>
         </div>
@@ -1270,7 +1270,7 @@ function App() {
               {/* Left Column: Monumental Typographic Display */}
               <div className="hero-content">
                 <div className="spec-header-tag">
-                  <span className="spec-code">[CHR // 718]</span>
+                  <span className="spec-code" style={{ background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', borderColor: 'rgba(34, 197, 94, 0.3)' }}>AVAILABLE</span>
                   <span>OPEN TO SOFTWARE ENGINEERING & INTERNSHIP ROLES</span>
                 </div>
 
@@ -1358,18 +1358,16 @@ function App() {
                 <div className="swiss-poster-frame">
                   {/* Top Technical Metadata */}
                   <div className="poster-top-bar">
-                    <span className="poster-header-code">[SYSTEM // 01]</span>
-                    <span className="poster-header-uid">UID: CHR-718-AIML</span>
+                    <span className="poster-header-code">PROFILE SPOTLIGHT</span>
+                    <span className="poster-header-uid">● VERIFIED PORTFOLIO</span>
                   </div>
 
-                  {/* Main Portrait Canvas with Diagonal Crosshair Guide & Corner Brackets */}
+                  {/* Main Portrait Canvas with Crisp Corner Brackets */}
                   <div className="poster-canvas-box">
-                    <div className="poster-grid-cross"></div>
                     <div className="poster-corner-mark mark-tl"></div>
                     <div className="poster-corner-mark mark-tr"></div>
                     <div className="poster-corner-mark mark-bl"></div>
                     <div className="poster-corner-mark mark-br"></div>
-                    <div className="poster-watermark-text">AIML</div>
 
                     {imageIndex < profileImages.length ? (
                       <img
@@ -1382,7 +1380,7 @@ function App() {
                       <div className="poster-fallback-box">
                         <i className="fa-solid fa-user-gear poster-fallback-icon"></i>
                         <h4 style={{ color: '#fff', fontFamily: 'var(--font-heading)' }}>CHARAN SAI BARNIKANI</h4>
-                        <span style={{ color: 'var(--vermillion)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>B.TECH AIML • 9.12 CGPA</span>
+                        <span style={{ color: 'var(--vermillion)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>B.TECH AIML</span>
                       </div>
                     )}
                   </div>
@@ -1391,30 +1389,11 @@ function App() {
                   <div className="poster-spec-footer">
                     <div className="poster-spec-row">
                       <span className="poster-spec-title">CHARAN SAI BARNIKANI</span>
-                      <span className="poster-spec-val">CGPA: 9.12</span>
+                      <span className="poster-spec-title" style={{ color: 'var(--vermillion)' }}>B.TECH AIML</span>
                     </div>
                     <div className="poster-spec-row">
-                      <span className="poster-subinfo">SRKR ENGINEERING COLLEGE // AIML</span>
-                      <span className="poster-subinfo">2023 — 2027</span>
-                    </div>
-
-                    <div className="poster-barcode-wrap">
-                      <div className="poster-barcode" aria-hidden="true">
-                        <span className="bar"></span>
-                        <span className="bar thick"></span>
-                        <span className="bar"></span>
-                        <span className="bar red"></span>
-                        <span className="bar"></span>
-                        <span className="bar thick"></span>
-                        <span className="bar red"></span>
-                        <span className="bar"></span>
-                        <span className="bar thick"></span>
-                        <span className="bar"></span>
-                        <span className="bar"></span>
-                        <span className="bar thick red"></span>
-                        <span className="bar"></span>
-                      </div>
-                      <span className="poster-subinfo">BARCODE // 6302695484</span>
+                      <span className="poster-subinfo">SRKR ENGINEERING COLLEGE</span>
+                      <span className="poster-subinfo">CLASS OF 2027</span>
                     </div>
                   </div>
                 </div>
@@ -1431,7 +1410,7 @@ function App() {
             <div className="section-header-swiss">
               <div>
                 <span className="section-eyebrow-tag">
-                  <i className="fa-solid fa-layer-group"></i> SECTION_02 // BUILDS
+                  <i className="fa-solid fa-layer-group"></i> 02 // BUILDS &amp; PLATFORMS
                 </span>
                 <h2 className="section-title">FEATURED PROJECTS</h2>
               </div>
@@ -1464,16 +1443,10 @@ function App() {
                     <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
                     <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
 
-                    {/* Top Angled Cyber Ribbon Header (Image 1 DATACORP Style) */}
+                    {/* Top Angled Cyber Ribbon Header */}
                     <div className="cyber-card-header">
                       <div className="cyber-header-banner">
                         <span className="project-index-num">[{proj.index}]</span>
-                        {/* Barcode Strip Graphic */}
-                        <div className="cyber-barcode-strip" aria-hidden="true">
-                          <span></span><span></span><span></span><span></span><span></span>
-                          <span></span><span></span><span></span><span></span><span></span>
-                          <span></span><span></span><span></span><span></span><span></span>
-                        </div>
                       </div>
                       <div className="cyber-header-badge-col">
                         <span className="project-badge-tag">{proj.badgeText}</span>
@@ -1484,7 +1457,6 @@ function App() {
                     <div className="project-card-body">
                       <div className="project-category-row">
                         <span className="project-category-sub">{proj.category}</span>
-                        <span className="project-spec-code">SYS_ID: 718-{proj.index}</span>
                       </div>
                       <h3 className="project-title-swiss">{proj.title}</h3>
                       <p className="project-desc-swiss">{proj.description}</p>
@@ -1550,7 +1522,7 @@ function App() {
             <div className="section-header-swiss">
               <div>
                 <span className="section-eyebrow-tag">
-                  <i className="fa-solid fa-graduation-cap"></i> SECTION_03 // FOUNDATION
+                  <i className="fa-solid fa-graduation-cap"></i> 03 // EDUCATION
                 </span>
                 <h2 className="section-title">ACADEMIC FOUNDATION</h2>
               </div>
@@ -1571,11 +1543,6 @@ function App() {
                 <div className="cyber-card-header">
                   <div className="cyber-header-banner">
                     <span className="project-index-num">[ACAD_03]</span>
-                    <div className="cyber-barcode-strip" aria-hidden="true">
-                      <span></span><span></span><span></span><span></span><span></span>
-                      <span></span><span></span><span></span><span></span><span></span>
-                      <span></span><span></span><span></span><span></span><span></span>
-                    </div>
                   </div>
                   <div className="cyber-header-badge-col">
                     <span className="project-badge-tag">AIML // 2023-2027</span>
@@ -1636,7 +1603,7 @@ function App() {
             <div className="section-header-swiss">
               <div>
                 <span className="section-eyebrow-tag">
-                  <i className="fa-solid fa-sliders"></i> SECTION_04 // TOOLKIT
+                  <i className="fa-solid fa-sliders"></i> 04 // SKILLS &amp; STACK
                 </span>
                 <h2 className="section-title">CAPABILITIES MATRIX</h2>
               </div>
@@ -1682,7 +1649,7 @@ function App() {
             <div className="section-header-swiss">
               <div>
                 <span className="section-eyebrow-tag">
-                  <i className="fa-solid fa-briefcase"></i> SECTION_05 // TRAJECTORY
+                  <i className="fa-solid fa-briefcase"></i> 05 // EXPERIENCE &amp; RESEARCH
                 </span>
                 <h2 className="section-title">EXPERIENCE & RESEARCH</h2>
               </div>
@@ -1734,7 +1701,7 @@ function App() {
             <div className="section-header-swiss">
               <div>
                 <span className="section-eyebrow-tag">
-                  <i className="fa-solid fa-trophy"></i> SECTION_06 // MILESTONES
+                  <i className="fa-solid fa-trophy"></i> 06 // HONORS &amp; AWARDS
                 </span>
                 <h2 className="section-title">RECOGNITION & HONORS</h2>
               </div>
@@ -1804,7 +1771,7 @@ function App() {
             <div className="section-header-swiss">
               <div>
                 <span className="section-eyebrow-tag">
-                  <i className="fa-solid fa-terminal"></i> SECTION_07 // CONTACT
+                  <i className="fa-regular fa-paper-plane"></i> 07 // DIRECT CONTACT
                 </span>
                 <h2 className="section-title">GET IN TOUCH</h2>
               </div>
@@ -1827,10 +1794,10 @@ function App() {
                       <i className="fa-regular fa-envelope"></i>
                     </div>
                     <div>
-                      <div className="coord-label">PRIMARY INBOX</div>
+                      <div className="coord-label">DIRECT EMAIL</div>
                       <div className="coord-val">charan06082004@gmail.com</div>
                       <button onClick={copyEmailToClipboard} className="btn-copy-chip">
-                        <i className="fa-regular fa-copy"></i> [CLICK TO COPY]
+                        <i className="fa-regular fa-copy"></i> COPY EMAIL
                       </button>
                     </div>
                   </div>
@@ -1847,10 +1814,10 @@ function App() {
                       <i className="fa-solid fa-phone"></i>
                     </div>
                     <div>
-                      <div className="coord-label">TELECOMMUNICATION</div>
+                      <div className="coord-label">PHONE</div>
                       <div className="coord-val">+91 6302695484</div>
                       <button onClick={copyPhoneToClipboard} className="btn-copy-chip">
-                        <i className="fa-regular fa-copy"></i> [CLICK TO COPY]
+                        <i className="fa-regular fa-copy"></i> COPY PHONE
                       </button>
                     </div>
                   </div>
@@ -1867,7 +1834,7 @@ function App() {
                       <i className="fa-solid fa-location-crosshairs"></i>
                     </div>
                     <div>
-                      <div className="coord-label">LOCATION COORD</div>
+                      <div className="coord-label">LOCATION</div>
                       <div className="coord-val">Rajahmundry, AP, 533105</div>
                       <div className="coord-sub">India • Open to Relocation & Remote Engagements</div>
                     </div>
@@ -1885,7 +1852,7 @@ function App() {
                       <i className="fa-solid fa-network-wired"></i>
                     </div>
                     <div>
-                      <div className="coord-label">PROFILES & PLATFORMS</div>
+                      <div className="coord-label">PROFILES &amp; SOCIALS</div>
                       <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
                         <a href="https://www.linkedin.com/in/charan-sai-barnikani/" target="_blank" rel="noreferrer" className="skill-badge" style={{ color: 'var(--vermillion)' }}>
                           <i className="fa-brands fa-linkedin-in"></i> LinkedIn
@@ -1911,18 +1878,16 @@ function App() {
                   <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
                   <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
 
-                  {/* Top Angled Cyber Ribbon Header */}
-                  <div className="cyber-card-header">
-                    <div className="cyber-header-banner">
-                      <span className="project-index-num">[COMM_07]</span>
-                      <div className="cyber-barcode-strip" aria-hidden="true">
-                        <span></span><span></span><span></span><span></span><span></span>
-                        <span></span><span></span><span></span><span></span><span></span>
+                  {/* Form Header */}
+                  <div className="cyber-card-header" style={{ borderBottom: '1px solid var(--border-hairline)', paddingBottom: '12px' }}>
+                    <div className="cyber-header-banner" style={{ background: 'transparent', padding: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 8px #22c55e' }}></span>
+                        <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.08em', color: '#ffffff' }}>SEND A DIRECT MESSAGE</span>
                       </div>
                     </div>
                     <div className="cyber-header-badge-col">
-                      <span className="project-badge-tag">SECURE SSL // 256-BIT DISPATCH</span>
-                      <div className="cyber-hazard-stripes" aria-hidden="true"></div>
+                      <span className="project-badge-tag">FAST RESPONSE</span>
                     </div>
                   </div>
 
@@ -1976,7 +1941,7 @@ function App() {
 
                       <div className="form-group">
                         <label className="form-label-swiss" htmlFor="message">
-                          MESSAGE TRANSMISSION <span className="req-star">*</span>
+                          YOUR MESSAGE <span className="req-star">*</span>
                         </label>
                         <textarea
                           id="message"
@@ -1992,12 +1957,12 @@ function App() {
                       <button type="submit" className="btn-submit-swiss" disabled={isSubmitting}>
                         {isSubmitting ? (
                           <>
-                            <span>TRANSMITTING...</span>
+                            <span>SENDING MESSAGE...</span>
                             <i className="fa-solid fa-spinner fa-spin"></i>
                           </>
                         ) : (
                           <>
-                            <span>DISPATCH MESSAGE</span>
+                            <span>SEND MESSAGE</span>
                             <i className="fa-solid fa-arrow-right"></i>
                           </>
                         )}
@@ -2019,7 +1984,7 @@ function App() {
           <div className="footer-flex-row">
             <div>
               <div className="footer-logo-title">CHARAN SAI BARNIKANI</div>
-              <div className="footer-sub-text">B.TECH AIML // S R K R ENGINEERING COLLEGE // 9.12 CGPA</div>
+              <div className="footer-sub-text">B.TECH IN ARTIFICIAL INTELLIGENCE &amp; MACHINE LEARNING • SRKR ENGINEERING COLLEGE</div>
             </div>
 
             <div className="footer-nav-items">
