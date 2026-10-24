@@ -875,17 +875,6 @@ export default function Character({
       root.current.position.z = pedZ + Math.sin(angle) * minPedDist;
     }
 
-    // 2. Quick Access Kiosk Terminal Collision (freestanding kiosk at [-5.0, 0.5], radius 1.85m)
-    // Prevents character from walking into or through the kiosk; smoothly bypasses around it!
-    const kioskX = -5.0;
-    const kioskZ = 0.5;
-    const distFromKiosk = Math.hypot(root.current.position.x - kioskX, root.current.position.z - kioskZ);
-    const minKioskDist = 1.85;
-    if (distFromKiosk < minKioskDist && distFromKiosk > 0.001) {
-      const angle = Math.atan2(root.current.position.z - kioskZ, root.current.position.x - kioskX);
-      root.current.position.x = kioskX + Math.cos(angle) * minKioskDist;
-      root.current.position.z = kioskZ + Math.sin(angle) * minKioskDist;
-    }
 
     // 3. Modern Lounge Furniture Collision (corner lounge at [4.5, 2.2], radius 1.65m)
     const loungeX = 4.5;

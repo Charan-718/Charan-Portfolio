@@ -35,9 +35,10 @@ function loadImage(src, onLoad) {
 }
 
 // =========================================================================
-// 1. MAIN FEATURED PROJECTS DISPLAY TEXTURE (2048 x 1088)
 // =========================================================================
-export function createProjectsScreenTexture(currentPage, projects, publicUrl, onUpdate) {
+// 1. MAIN FEATURED PROJECTS DISPLAY TEXTURE (2048 x 1088) WITH HORIZONTAL SWIPING / SCROLLING
+// =========================================================================
+export function createProjectsScreenTexture(initialScrollX = 0, projects, publicUrl, onUpdate) {
   const canvas = document.createElement('canvas');
   canvas.width = 2048;
   canvas.height = 1088;
@@ -49,7 +50,15 @@ export function createProjectsScreenTexture(currentPage, projects, publicUrl, on
   texture.magFilter = THREE.LinearFilter;
   texture.generateMipmaps = true;
 
-  const redraw = () => {
+  let currentScrollX = initialScrollX || 0;
+  const allProjects = projects || [];
+  const numCols = Math.ceil(allProjects.length / 2);
+  const colStep = 996;
+  const totalContentW = 52 + numCols * colStep - 46 + 52;
+  const maxScrollX = Math.max(0, totalContentW - 2048);
+
+  const redraw = (scrollX = currentScrollX) => {
+    currentScrollX = Math.max(0, Math.min(maxScrollX, scrollX));
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // 1. Dark Cyberpunk Monitor Base Background
@@ -63,111 +72,17 @@ export function createProjectsScreenTexture(currentPage, projects, publicUrl, on
     ctx.fillStyle = bgRad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Glowing Red Outer Border
-    drawRoundRect(ctx, 16, 16, canvas.width - 32, canvas.height - 32, 28);
-    ctx.strokeStyle = '#FF1E27';
-    ctx.lineWidth = 6;
-    ctx.shadowColor = '#FF1E27';
-    ctx.shadowBlur = 24;
-    ctx.stroke();
-    ctx.shadowBlur = 0; // reset shadow
+    // 2. Render Project Cards with Horizontal Scroll Offset
+    allProjects.forEach((proj, idx) => {
+      const col = Math.floor(idx / 2);
+      const row = idx % 2;
+      const x = 52 + col * colStep - currentScrollX;
+      const y = row === 0 ? 142 : 588;
+      const w = 950;
+      const h = 420;
 
-    // Corner Tech Accent Brackets
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 4;
-    // Top-left
-    ctx.beginPath();
-    ctx.moveTo(34, 60); ctx.lineTo(34, 34); ctx.lineTo(60, 34);
-    ctx.stroke();
-    // Top-right
-    ctx.beginPath();
-    ctx.moveTo(canvas.width - 60, 34); ctx.lineTo(canvas.width - 34, 34); ctx.lineTo(canvas.width - 34, 60);
-    ctx.stroke();
-    // Bottom-left
-    ctx.beginPath();
-    ctx.moveTo(34, canvas.height - 60); ctx.lineTo(34, canvas.height - 34); ctx.lineTo(60, canvas.height - 34);
-    ctx.stroke();
-    // Bottom-right
-    ctx.beginPath();
-    ctx.moveTo(canvas.width - 60, canvas.height - 34); ctx.lineTo(canvas.width - 34, canvas.height - 34); ctx.lineTo(canvas.width - 34, canvas.height - 60);
-    ctx.stroke();
-
-    // 2. Top Header Bar
-    // Red Live Beacon Dot
-    ctx.fillStyle = '#FF1E27';
-    ctx.beginPath();
-    ctx.arc(68, 72, 10, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#FF6B72';
-    ctx.shadowColor = '#FF1E27';
-    ctx.shadowBlur = 14;
-    ctx.beginPath();
-    ctx.arc(68, 72, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Header Title
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = '900 32px "Space Grotesk", sans-serif';
-    ctx.fillText('FEATURED PRODUCTION ARCHITECTURE', 96, 82);
-
-    ctx.fillStyle = '#FF4D55';
-    ctx.font = '700 20px "JetBrains Mono", monospace';
-    ctx.fillText('SYS // LIVE_DEPLOYMENTS_MATRIX', 800, 80);
-
-    // Header Right: Pagination Controls
-    // "< PREV" Button
-    drawRoundRect(ctx, 1600, 48, 140, 48, 10);
-    ctx.fillStyle = currentPage === 1 ? 'rgba(255, 30, 39, 0.25)' : 'rgba(255, 255, 255, 0.08)';
-    ctx.fill();
-    ctx.strokeStyle = currentPage === 1 ? '#FF1E27' : 'rgba(255, 255, 255, 0.2)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = '800 20px "Space Grotesk", sans-serif';
-    ctx.fillText('‹ PREV', 1632, 80);
-
-    // Page Indicator Badge
-    drawRoundRect(ctx, 1756, 48, 128, 48, 10);
-    ctx.fillStyle = 'rgba(255, 30, 39, 0.15)';
-    ctx.fill();
-    ctx.strokeStyle = '#FF1E27';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.fillStyle = '#FF6B72';
-    ctx.font = '800 18px "Space Grotesk", sans-serif';
-    ctx.fillText(`PAGE ${currentPage + 1} / 2`, 1774, 80);
-
-    // "NEXT >" Button
-    drawRoundRect(ctx, 1900, 48, 100, 48, 10);
-    ctx.fillStyle = currentPage === 0 ? 'rgba(255, 30, 39, 0.25)' : 'rgba(255, 255, 255, 0.08)';
-    ctx.fill();
-    ctx.strokeStyle = currentPage === 0 ? '#FF1E27' : 'rgba(255, 255, 255, 0.2)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = '800 20px "Space Grotesk", sans-serif';
-    ctx.fillText('NEXT ›', 1916, 80);
-
-    // Header divider line
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(50, 118);
-    ctx.lineTo(canvas.width - 50, 118);
-    ctx.stroke();
-
-    // 3. Render 2x2 Grid of 4 Project Cards
-    const displayed = projects.slice(currentPage * 4, currentPage * 4 + 4);
-    const cardPositions = [
-      { x: 52, y: 142, w: 950, h: 420 },   // Card 0: Top-Left
-      { x: 1046, y: 142, w: 950, h: 420 }, // Card 1: Top-Right
-      { x: 52, y: 588, w: 950, h: 420 },   // Card 2: Bottom-Left
-      { x: 1046, y: 588, w: 950, h: 420 }, // Card 3: Bottom-Right
-    ];
-
-    displayed.forEach((proj, idx) => {
-      const { x, y, w, h } = cardPositions[idx];
+      // Culling: only draw if within or near canvas viewport
+      if (x + w < -60 || x > canvas.width + 60) return;
 
       // Card Background with dark glass gradient
       drawRoundRect(ctx, x, y, w, h, 20);
@@ -177,12 +92,12 @@ export function createProjectsScreenTexture(currentPage, projects, publicUrl, on
       ctx.fillStyle = cardGrad;
       ctx.fill();
 
-      // Card Border with subtle red accent
+      // Card Border with subtle accent
       ctx.strokeStyle = proj.accentColor ? `${proj.accentColor}88` : 'rgba(255, 30, 39, 0.45)';
       ctx.lineWidth = 2.5;
       ctx.stroke();
 
-      // Left Column: Thumbnail Preview (430 x 270 px)
+      // Left Column: Thumbnail Preview (430 x 260 px)
       const thumbX = x + 24;
       const thumbY = y + 24;
       const thumbW = 430;
@@ -215,7 +130,7 @@ export function createProjectsScreenTexture(currentPage, projects, publicUrl, on
         ctx.fillText(proj.id.toUpperCase(), thumbX + 30, thumbY + 130);
         ctx.fillStyle = '#94a3b8';
         ctx.font = '600 16px monospace';
-        ctx.fillText('LIVE_PREVIEW_LOADING...', thumbX + 30, thumbY + 165);
+        ctx.fillText('LIVE_PREVIEW_READY', thumbX + 30, thumbY + 165);
       }
 
       // Thumbnail Bottom Bar: Live Host Pill
@@ -263,7 +178,6 @@ export function createProjectsScreenTexture(currentPage, projects, publicUrl, on
       // Title
       ctx.fillStyle = '#FFFFFF';
       ctx.font = '900 27px "Space Grotesk", sans-serif';
-      // Truncate if long
       let titleText = proj.title;
       if (titleText.length > 28) titleText = titleText.substring(0, 26) + '...';
       ctx.fillText(titleText, rightX, y + 134);
@@ -271,7 +185,7 @@ export function createProjectsScreenTexture(currentPage, projects, publicUrl, on
       // Status Pill
       ctx.fillStyle = '#94a3b8';
       ctx.font = '600 15px "Space Grotesk", sans-serif';
-      ctx.fillText(`Production Deploy: `, rightX, y + 168);
+      ctx.fillText('Production Deploy: ', rightX, y + 168);
       ctx.fillStyle = '#22c55e';
       ctx.font = '800 15px "Space Grotesk", sans-serif';
       ctx.fillText(proj.status, rightX + 140, y + 168);
@@ -317,24 +231,144 @@ export function createProjectsScreenTexture(currentPage, projects, publicUrl, on
       ctx.fillText('CLICK TO LAUNCH', x + w - 175, techY + 26);
     });
 
-    // 4. Bottom Footer Info
+    // 3. Top Header Bar (Fixed atop scrolling cards)
+    ctx.fillStyle = 'rgba(10, 12, 19, 0.95)';
+    ctx.fillRect(16, 16, canvas.width - 32, 110);
+
+    // Glowing Red Outer Border
+    drawRoundRect(ctx, 16, 16, canvas.width - 32, canvas.height - 32, 28);
+    ctx.strokeStyle = '#FF1E27';
+    ctx.lineWidth = 6;
+    ctx.shadowColor = '#FF1E27';
+    ctx.shadowBlur = 24;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Corner Tech Accent Brackets
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(34, 60); ctx.lineTo(34, 34); ctx.lineTo(60, 34); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(canvas.width - 60, 34); ctx.lineTo(canvas.width - 34, 34); ctx.lineTo(canvas.width - 34, 60); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(34, canvas.height - 60); ctx.lineTo(34, canvas.height - 34); ctx.lineTo(60, canvas.height - 34); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(canvas.width - 60, canvas.height - 34); ctx.lineTo(canvas.width - 34, canvas.height - 34); ctx.lineTo(canvas.width - 34, canvas.height - 60); ctx.stroke();
+
+    // Red Live Beacon Dot
+    ctx.fillStyle = '#FF1E27';
+    ctx.beginPath();
+    ctx.arc(68, 72, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#FF6B72';
+    ctx.shadowColor = '#FF1E27';
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.arc(68, 72, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Header Title
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '900 32px "Space Grotesk", sans-serif';
+    ctx.fillText('FEATURED PRODUCTION ARCHITECTURE', 96, 82);
+
+    ctx.fillStyle = '#FF4D55';
+    ctx.font = '700 20px "JetBrains Mono", monospace';
+    ctx.fillText('SYS // LIVE_DEPLOYMENTS_MATRIX', 800, 80);
+
+    // Header Right: Horizontal Swipe Controls
+    // "‹ SWIPE" Button
+    drawRoundRect(ctx, 1530, 48, 130, 48, 10);
+    ctx.fillStyle = currentScrollX > 10 ? 'rgba(255, 30, 39, 0.25)' : 'rgba(255, 255, 255, 0.08)';
+    ctx.fill();
+    ctx.strokeStyle = currentScrollX > 10 ? '#FF1E27' : 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '800 18px "Space Grotesk", sans-serif';
+    ctx.fillText('‹ SWIPE', 1554, 79);
+
+    // Progress Badge
+    drawRoundRect(ctx, 1675, 48, 185, 48, 10);
+    ctx.fillStyle = 'rgba(255, 30, 39, 0.15)';
+    ctx.fill();
+    ctx.strokeStyle = '#FF1E27';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = '#FF6B72';
+    ctx.font = '800 16px "Space Grotesk", sans-serif';
+    const progressPercent = maxScrollX > 0 ? Math.round((currentScrollX / maxScrollX) * 100) : 100;
+    ctx.fillText(`EXPLORE • ${progressPercent}%`, 1705, 78);
+
+    // "SWIPE ›" Button
+    drawRoundRect(ctx, 1875, 48, 130, 48, 10);
+    ctx.fillStyle = currentScrollX < maxScrollX - 10 ? 'rgba(255, 30, 39, 0.25)' : 'rgba(255, 255, 255, 0.08)';
+    ctx.fill();
+    ctx.strokeStyle = currentScrollX < maxScrollX - 10 ? '#FF1E27' : 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '800 18px "Space Grotesk", sans-serif';
+    ctx.fillText('SWIPE ›', 1899, 79);
+
+    // Header divider line
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(50, 118);
+    ctx.lineTo(canvas.width - 50, 118);
+    ctx.stroke();
+
+    // 4. Bottom Footer with Cyber Horizontal Scrollbar
+    ctx.fillStyle = 'rgba(10, 12, 19, 0.96)';
+    ctx.fillRect(16, 1014, canvas.width - 32, 60);
+
+    // Scrollbar Track
+    const trackX = 52;
+    const trackY = 1024;
+    const trackW = 1944;
+    const trackH = 8;
+    drawRoundRect(ctx, trackX, trackY, trackW, trackH, 4);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Scrollbar Thumb
+    const thumbW = Math.max(260, (2048 / totalContentW) * trackW);
+    const thumbX = maxScrollX > 0 ? trackX + (currentScrollX / maxScrollX) * (trackW - thumbW) : trackX;
+    drawRoundRect(ctx, thumbX, trackY - 2, thumbW, trackH + 4, 6);
+    const thumbGrad = ctx.createLinearGradient(thumbX, trackY, thumbX + thumbW, trackY);
+    thumbGrad.addColorStop(0, '#FF1E27');
+    thumbGrad.addColorStop(1, '#FF6B72');
+    ctx.fillStyle = thumbGrad;
+    ctx.shadowColor = '#FF1E27';
+    ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Footer Info
     ctx.fillStyle = '#94a3b8';
-    ctx.font = '600 18px "Space Grotesk", sans-serif';
-    ctx.fillText('Interactive 3D Command Deck: Click any project button or thumbnail to launch in browser', 68, 1052);
+    ctx.font = '600 16px "Space Grotesk", sans-serif';
+    ctx.fillText('DRAG OR SWIPE HORIZONTALLY TO EXPLORE ALL CONFIGURED PRODUCTION SYSTEMS', 68, 1060);
 
     ctx.fillStyle = '#FF6B72';
-    ctx.font = '800 18px "JetBrains Mono", monospace';
-    ctx.fillText(`SHOWING ${currentPage * 4 + 1}–${currentPage * 4 + displayed.length} OF ${projects.length} HOSTED APPS`, 1550, 1052);
+    ctx.font = '800 16px "JetBrains Mono", monospace';
+    ctx.fillText(`ALL ${allProjects.length} LIVE PRODUCTION APPS ONLINE`, 1620, 1060);
 
     texture.needsUpdate = true;
   };
 
-  redraw();
-  return { texture, canvas, redraw };
+  const setScrollX = (newScrollX) => {
+    redraw(newScrollX);
+  };
+
+  redraw(initialScrollX);
+  return { texture, canvas, redraw, setScrollX, getMaxScrollX: () => maxScrollX };
 }
 
 // =========================================================================
 // 2. WELCOME & REPOSITORIES TELEMETRY DISPLAY TEXTURE (1024 x 880)
+// Features Charan's GitHub Profile, Live Repositories & Architecture
 // =========================================================================
 export function createWelcomeScreenTexture() {
   const canvas = document.createElement('canvas');
@@ -388,88 +422,137 @@ export function createWelcomeScreenTexture() {
   ctx.stroke();
 
   // Profile Card
-  drawRoundRect(ctx, 40, 120, canvas.width - 80, 220, 16);
-  ctx.fillStyle = 'rgba(18, 22, 34, 0.9)';
+  drawRoundRect(ctx, 40, 115, canvas.width - 80, 205, 16);
+  ctx.fillStyle = 'rgba(18, 22, 34, 0.92)';
   ctx.fill();
   ctx.strokeStyle = 'rgba(255, 30, 39, 0.35)';
   ctx.lineWidth = 2;
   ctx.stroke();
 
   // Avatar Icon Box
-  drawRoundRect(ctx, 68, 148, 80, 80, 12);
+  drawRoundRect(ctx, 64, 138, 72, 72, 12);
   ctx.fillStyle = 'rgba(255, 30, 39, 0.2)';
   ctx.fill();
   ctx.strokeStyle = '#FF1E27';
   ctx.lineWidth = 2;
   ctx.stroke();
   ctx.fillStyle = '#FF1E27';
-  ctx.font = '900 36px "Space Grotesk", sans-serif';
-  ctx.fillText('⌘', 94, 202);
+  ctx.font = '900 34px "Space Grotesk", sans-serif';
+  ctx.fillText('⌘', 86, 188);
 
   // Profile Info
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '900 34px "Space Grotesk", sans-serif';
-  ctx.fillText('Charan', 170, 185);
+  ctx.font = '900 32px "Space Grotesk", sans-serif';
+  ctx.fillText('Charan', 156, 172);
 
   ctx.fillStyle = '#FF6B72';
-  ctx.font = '800 18px "Space Grotesk", sans-serif';
-  ctx.fillText('Full-Stack AI Engineer & Systems Architect', 170, 215);
+  ctx.font = '800 17px "Space Grotesk", sans-serif';
+  ctx.fillText('Full-Stack AI Engineer & Systems Architect', 156, 198);
+
+  // GitHub Account Direct Handle Pill in Profile Card
+  drawRoundRect(ctx, 630, 140, 320, 38, 8);
+  ctx.fillStyle = 'rgba(255, 30, 39, 0.15)';
+  ctx.fill();
+  ctx.strokeStyle = '#FF1E27';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '800 15px "JetBrains Mono", monospace';
+  ctx.fillText('⌨ github.com/Charan-718 ↗', 646, 164);
 
   ctx.fillStyle = '#cbd5e1';
-  ctx.font = '500 17px "Space Grotesk", sans-serif';
-  ctx.fillText('Building production-grade web applications, distributed databases,', 68, 275);
-  ctx.fillText('and enterprise AI systems with seamless interactive 3D graphics.', 68, 305);
+  ctx.font = '500 16px "Space Grotesk", sans-serif';
+  ctx.fillText('Building production-grade web applications, distributed databases,', 64, 252);
+  ctx.fillText('and enterprise AI systems with seamless interactive 3D graphics.', 64, 280);
 
   // 2 Telemetry Stat Cards
-  // Stat Card 1: 32 Repos
-  drawRoundRect(ctx, 40, 370, 450, 180, 16);
-  ctx.fillStyle = 'rgba(18, 22, 34, 0.9)';
+  // Stat Card 1: GITHUB PROFILE & REPOSITORIES (Enhanced with full GitHub account link content)
+  drawRoundRect(ctx, 40, 340, 450, 205, 16);
+  ctx.fillStyle = 'rgba(18, 22, 34, 0.95)';
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.strokeStyle = 'rgba(255, 30, 39, 0.4)';
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // GitHub badge icon
-  drawRoundRect(ctx, 64, 400, 56, 56, 10);
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+  // GitHub badge icon box
+  drawRoundRect(ctx, 64, 362, 54, 54, 10);
+  ctx.fillStyle = 'rgba(255, 30, 39, 0.2)';
   ctx.fill();
+  ctx.strokeStyle = '#FF1E27';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '900 28px sans-serif';
-  ctx.fillText('⌨', 80, 440);
+  ctx.font = '900 26px sans-serif';
+  ctx.fillText('⌨', 78, 399);
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '900 52px "Space Grotesk", sans-serif';
-  ctx.fillText('32', 140, 448);
+  ctx.font = '900 46px "Space Grotesk", sans-serif';
+  ctx.fillText('32', 134, 404);
+
+  ctx.fillStyle = '#FF6B72';
+  ctx.font = '700 14px "JetBrains Mono", monospace';
+  ctx.fillText('@Charan-718', 214, 400);
 
   ctx.fillStyle = '#94a3b8';
-  ctx.font = '700 18px "Space Grotesk", sans-serif';
-  ctx.fillText('Public Repositories', 68, 510);
+  ctx.font = '700 16px "Space Grotesk", sans-serif';
+  ctx.fillText('Public Repositories • Open Source', 64, 442);
+
+  // GitHub Profile Action Button
+  const ghBtnY = 472;
+  drawRoundRect(ctx, 64, ghBtnY, 402, 52, 10);
+  const ghGrad = ctx.createLinearGradient(64, ghBtnY, 466, ghBtnY + 52);
+  ghGrad.addColorStop(0, '#FF2E36');
+  ghGrad.addColorStop(1, '#C80810');
+  ctx.fillStyle = ghGrad;
+  ctx.shadowColor = '#FF1E27';
+  ctx.shadowBlur = 14;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '900 17px "Space Grotesk", sans-serif';
+  ctx.fillText('OPEN GITHUB PROFILE ↗', 154, ghBtnY + 33);
 
   // Stat Card 2: 18+ Deployments
-  drawRoundRect(ctx, 534, 370, 450, 180, 16);
-  ctx.fillStyle = 'rgba(18, 22, 34, 0.9)';
+  drawRoundRect(ctx, 534, 340, 450, 205, 16);
+  ctx.fillStyle = 'rgba(18, 22, 34, 0.95)';
   ctx.fill();
   ctx.strokeStyle = 'rgba(34, 197, 94, 0.35)';
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  drawRoundRect(ctx, 558, 400, 56, 56, 10);
+  drawRoundRect(ctx, 558, 362, 54, 54, 10);
   ctx.fillStyle = 'rgba(34, 197, 94, 0.16)';
   ctx.fill();
   ctx.fillStyle = '#22c55e';
-  ctx.font = '900 28px sans-serif';
-  ctx.fillText('🌐', 572, 440);
+  ctx.font = '900 26px sans-serif';
+  ctx.fillText('🌐', 570, 399);
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '900 52px "Space Grotesk", sans-serif';
-  ctx.fillText('18+', 634, 448);
+  ctx.font = '900 46px "Space Grotesk", sans-serif';
+  ctx.fillText('18+', 626, 404);
 
   ctx.fillStyle = '#4ade80';
-  ctx.font = '700 18px "Space Grotesk", sans-serif';
-  ctx.fillText('Live Production Deployments', 562, 510);
+  ctx.font = '700 14px "JetBrains Mono", monospace';
+  ctx.fillText('VERIFIED HOSTS', 740, 400);
+
+  ctx.fillStyle = '#4ade80';
+  ctx.font = '700 16px "Space Grotesk", sans-serif';
+  ctx.fillText('Live Production Deployments', 558, 442);
+
+  // Deployments Action Button
+  const depBtnY = 472;
+  drawRoundRect(ctx, 558, depBtnY, 402, 52, 10);
+  ctx.fillStyle = 'rgba(34, 197, 94, 0.18)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(34, 197, 94, 0.6)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '900 17px "Space Grotesk", sans-serif';
+  ctx.fillText('EXPLORE HOSTED REPOS ↗', 636, depBtnY + 33);
 
   // System Matrix Status Box
-  drawRoundRect(ctx, 40, 580, canvas.width - 80, 240, 16);
+  drawRoundRect(ctx, 40, 565, canvas.width - 80, 260, 16);
   ctx.fillStyle = 'rgba(14, 17, 26, 0.95)';
   ctx.fill();
   ctx.strokeStyle = 'rgba(255, 30, 39, 0.25)';
@@ -478,24 +561,25 @@ export function createWelcomeScreenTexture() {
 
   ctx.fillStyle = '#FF4D55';
   ctx.font = '800 16px "JetBrains Mono", monospace';
-  ctx.fillText('CORE RUNTIME & INFRASTRUCTURE', 68, 620);
+  ctx.fillText('CORE RUNTIME & INFRASTRUCTURE', 68, 604);
 
   const specs = [
     { label: 'Cloud Hosting:', val: 'Vercel / Netlify / AWS' },
     { label: 'Databases:', val: 'PostgreSQL, MongoDB, Supabase' },
     { label: 'AI & ML:', val: 'FAISS Vector Search, LangChain, OpenAI' },
+    { label: 'GitHub Ecosystem:', val: 'github.com/Charan-718 (32 Repositories)' },
     { label: 'Status:', val: 'All Systems Operational (100% Uptime)' },
   ];
 
   specs.forEach((s, i) => {
-    const rowY = 660 + i * 36;
+    const rowY = 642 + i * 36;
     ctx.fillStyle = '#94a3b8';
     ctx.font = '700 16px "Space Grotesk", sans-serif';
     ctx.fillText(s.label, 68, rowY);
 
-    ctx.fillStyle = s.label === 'Status:' ? '#22c55e' : '#FFFFFF';
+    ctx.fillStyle = s.label === 'Status:' ? '#22c55e' : (s.label === 'GitHub Ecosystem:' ? '#FF6B72' : '#FFFFFF');
     ctx.font = '700 16px "JetBrains Mono", monospace';
-    ctx.fillText(s.val, 240, rowY);
+    ctx.fillText(s.val, 260, rowY);
   });
 
   texture.needsUpdate = true;

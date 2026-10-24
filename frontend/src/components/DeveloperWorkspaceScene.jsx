@@ -6,7 +6,6 @@ import {
   createProjectsScreenTexture,
   createWelcomeScreenTexture,
   createTechStackScreenTexture,
-  createQuickAccessScreenTexture,
 } from './workspaceScreenTextures';
 
 export const workspaceProjects = [
@@ -199,11 +198,6 @@ function CyberFloorConduits() {
         <meshBasicMaterial color="#FF1E27" transparent opacity={0.45} side={THREE.DoubleSide} />
       </mesh>
 
-      {/* 3. Pedestal to Quick Access Kiosk */}
-      <mesh position={[-2.4, 0, 2.5]} rotation={[-Math.PI / 2, 0, 0.98]}>
-        <planeGeometry args={[0.04, 5.8]} />
-        <meshBasicMaterial color="#FF1E27" transparent opacity={0.45} side={THREE.DoubleSide} />
-      </mesh>
 
       {/* 4. Pedestal to Cyber Pylon */}
       <mesh position={[-2.6, 0, 3.8]} rotation={[-Math.PI / 2, 0, 1.72]}>
@@ -404,8 +398,15 @@ function CyberCommandPylon({ onInteract }) {
 
 export default function DeveloperWorkspaceScene({ onClose }) {
   const publicUrl = process.env.PUBLIC_URL || '';
-  const [currentPage, setCurrentPage] = useState(0); // 0 = First 4 projects, 1 = Next 4 projects
   const [, setTick] = useState(0);
+
+  // Horizontal scroll momentum and dragging state for Projects display screen
+  const targetScrollX = useRef(0);
+  const currentScrollX = useRef(0);
+  const isDraggingProjects = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartScrollX = useRef(0);
+  const hasDraggedFar = useRef(false);
 
   // Central Hologram State: 0 = Planetary Net, 1 = Quantum Tesseract, 2 = AI Neural Core
   const [holoMode, setHoloMode] = useState(0);
@@ -450,7 +451,7 @@ export default function DeveloperWorkspaceScene({ onClose }) {
       ringRef1.current.rotation.x += delta * 0.2;
     }
     if (ringRef2.current) {
-      ringRef2.current.rotation.z -= delta * 0.28;
+      ringRef2.current.rotation.z += delta * 0.28;
       ringRef2.current.rotation.y += delta * 0.25;
     }
 
@@ -465,6 +466,15 @@ export default function DeveloperWorkspaceScene({ onClose }) {
     if (isStrobe !== strobeState) {
       setStrobeState(isStrobe);
     }
+
+    // 4. Smooth Horizontal Swipe / Momentum Scroll for Projects Screen
+    if (projectsTextureObj && projectsTextureObj.setScrollX) {
+      const diff = targetScrollX.current - currentScrollX.current;
+      if (Math.abs(diff) > 0.4) {
+        currentScrollX.current += diff * Math.min(1, delta * 14);
+        projectsTextureObj.setScrollX(currentScrollX.current);
+      }
+    }
   });
 
   const handlePedestalClick = (e) => {
@@ -475,10 +485,10 @@ export default function DeveloperWorkspaceScene({ onClose }) {
 
   // 100% WebGL Canvas Textures for physical 3D screens (zero DOM overlays, perfect depth buffer occlusion)
   const projectsTextureObj = useMemo(() => {
-    return createProjectsScreenTexture(currentPage, workspaceProjects, publicUrl, () => {
+    return createProjectsScreenTexture(0, workspaceProjects, publicUrl, () => {
       setTick((t) => t + 1);
     });
-  }, [currentPage, publicUrl]);
+  }, [publicUrl]);
 
   const welcomeTextureObj = useMemo(() => {
     return createWelcomeScreenTexture();
@@ -486,10 +496,6 @@ export default function DeveloperWorkspaceScene({ onClose }) {
 
   const techStackTextureObj = useMemo(() => {
     return createTechStackScreenTexture();
-  }, []);
-
-  const quickAccessTextureObj = useMemo(() => {
-    return createQuickAccessScreenTexture();
   }, []);
 
   // Celestial deep-space starfield visible through the high panoramic glass clerestory (Matching Image 2)
@@ -515,53 +521,123 @@ export default function DeveloperWorkspaceScene({ onClose }) {
       projectsTextureObj?.texture?.dispose();
       welcomeTextureObj?.texture?.dispose();
       techStackTextureObj?.texture?.dispose();
-      quickAccessTextureObj?.texture?.dispose();
       starsGeometry?.dispose();
     };
-  }, [projectsTextureObj, welcomeTextureObj, techStackTextureObj, quickAccessTextureObj, starsGeometry]);
+  }, [projectsTextureObj, welcomeTextureObj, techStackTextureObj, starsGeometry]);
+
+  // Horizontal Swipe & Drag Interactions for Main Projects Screen
+  const handleProjectsPointerDown = (e) => {
+    e.stopPropagation();
+    if (!e.uv) return;
+    isDraggingProjects.current = true;
+    dragStartX.current = e.uv.x;
+    dragStartScrollX.current = targetScrollX.current;
+    hasDraggedFar.current = false;
+  };
+
+  const handleProjectsPointerMove = (e) => {
+    e.stopPropagation();
+    if (!e.uv) return;
+
+    if (isDraggingProjects.current) {
+      // Invert delta: dragging pointer left (smaller uv.x) reveals cards to the right (higher scrollX)
+      const deltaX = (dragStartX.current - e.uv.x) * 2048;
+      if (Math.abs(deltaX) > 8) {
+        hasDraggedFar.current = true;
+      }
+      const maxScroll = projectsTextureObj?.getMaxScrollX ? projectsTextureObj.getMaxScrollX() : 1994;
+      targetScrollX.current = Math.max(0, Math.min(maxScroll, dragStartScrollX.current + deltaX));
+      document.body.style.cursor = 'grabbing';
+      return;
+    }
+
+    const canvasX = e.uv.x * 2048;
+    const canvasY = (1 - e.uv.y) * 1088;
+
+    let isClickable = false;
+    // Header swipe buttons: ‹ SWIPE (1530..1660, 48..96) and SWIPE › (1875..2005, 48..96)
+    if (canvasY >= 48 && canvasY <= 96) {
+      if ((canvasX >= 1530 && canvasX <= 1660) || (canvasX >= 1875 && canvasX <= 2005)) {
+        isClickable = true;
+      }
+    } else if (canvasY >= 142 && canvasY <= 1008) {
+      const curX = currentScrollX.current;
+      for (let i = 0; i < workspaceProjects.length; i++) {
+        const col = Math.floor(i / 2);
+        const row = i % 2;
+        const cardX = 52 + col * 996 - curX;
+        const cardY = row === 0 ? 142 : 588;
+        if (canvasX >= cardX && canvasX <= cardX + 950 && canvasY >= cardY && canvasY <= cardY + 420) {
+          isClickable = true;
+          break;
+        }
+      }
+    }
+
+    document.body.style.cursor = isClickable ? 'pointer' : 'grab';
+  };
+
+  const handleProjectsPointerUp = (e) => {
+    e.stopPropagation();
+    isDraggingProjects.current = false;
+    document.body.style.cursor = 'auto';
+  };
+
+  const handleProjectsPointerOut = () => {
+    isDraggingProjects.current = false;
+    document.body.style.cursor = 'auto';
+  };
+
+  const handleProjectsWheel = (e) => {
+    e.stopPropagation();
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    const maxScroll = projectsTextureObj?.getMaxScrollX ? projectsTextureObj.getMaxScrollX() : 1994;
+    targetScrollX.current = Math.max(0, Math.min(maxScroll, targetScrollX.current + delta * 1.5));
+  };
 
   const handleProjectsClick = (e) => {
     e.stopPropagation();
     if (!e.uv) return;
+    if (hasDraggedFar.current) {
+      hasDraggedFar.current = false;
+      return;
+    }
+
     const canvasX = e.uv.x * 2048;
     const canvasY = (1 - e.uv.y) * 1088;
+    const maxScroll = projectsTextureObj?.getMaxScrollX ? projectsTextureObj.getMaxScrollX() : 1994;
 
-    // Header pagination controls
-    if (canvasY >= 35 && canvasY <= 110) {
-      if (canvasX >= 1580 && canvasX <= 1750) {
-        if (currentPage > 0) {
-          playClickSound('switch');
-          setCurrentPage(0);
-        }
+    // Header swipe controls
+    if (canvasY >= 48 && canvasY <= 96) {
+      if (canvasX >= 1530 && canvasX <= 1660) {
+        playClickSound('switch');
+        targetScrollX.current = Math.max(0, targetScrollX.current - 996);
         return;
       }
-      if (canvasX >= 1880 && canvasX <= 2010) {
-        if (currentPage < 1) {
-          playClickSound('switch');
-          setCurrentPage(1);
-        }
+      if (canvasX >= 1875 && canvasX <= 2005) {
+        playClickSound('switch');
+        targetScrollX.current = Math.min(maxScroll, targetScrollX.current + 996);
         return;
       }
     }
 
     // Project cards click handling
-    const displayed = workspaceProjects.slice(currentPage * 4, currentPage * 4 + 4);
-    const cardPositions = [
-      { x: 52, y: 142, w: 950, h: 420 },
-      { x: 1046, y: 142, w: 950, h: 420 },
-      { x: 52, y: 588, w: 950, h: 420 },
-      { x: 1046, y: 588, w: 950, h: 420 },
-    ];
+    const curX = currentScrollX.current;
+    for (let i = 0; i < workspaceProjects.length; i++) {
+      const col = Math.floor(i / 2);
+      const row = i % 2;
+      const cardX = 52 + col * 996 - curX;
+      const cardY = row === 0 ? 142 : 588;
+      const cardW = 950;
+      const cardH = 420;
 
-    for (let i = 0; i < displayed.length; i++) {
-      const { x, y, w, h } = cardPositions[i];
-      if (canvasX >= x && canvasX <= x + w && canvasY >= y && canvasY <= y + h) {
-        const proj = displayed[i];
-        const rightX = x + 476;
-        const btn1Y = y + 236;
+      if (canvasX >= cardX && canvasX <= cardX + cardW && canvasY >= cardY && canvasY <= cardY + cardH) {
+        const proj = workspaceProjects[i];
+        const rightX = cardX + 476;
+        const btn1Y = cardY + 236;
 
         // GitHub Repo button
-        if (canvasX >= rightX + 224 && canvasX <= rightX + 410 && canvasY >= btn1Y && canvasY <= btn1Y + 54) {
+        if (canvasX >= rightX + 224 && canvasX <= rightX + 404 && canvasY >= btn1Y && canvasY <= btn1Y + 48) {
           playClickSound('click');
           window.open(`https://github.com/${proj.repo}`, '_blank', 'noopener,noreferrer');
           return;
@@ -575,43 +651,37 @@ export default function DeveloperWorkspaceScene({ onClose }) {
     }
   };
 
-  const handleProjectsPointerMove = (e) => {
-    e.stopPropagation();
-    if (!e.uv) return;
-    const canvasX = e.uv.x * 2048;
-    const canvasY = (1 - e.uv.y) * 1088;
-
-    let isClickable = false;
-    if (canvasY >= 35 && canvasY <= 110) {
-      if ((canvasX >= 1580 && canvasX <= 1750) || (canvasX >= 1880 && canvasX <= 2010)) {
-        isClickable = true;
-      }
-    } else if (canvasY >= 142 && canvasY <= 1008) {
-      if ((canvasX >= 52 && canvasX <= 1002) || (canvasX >= 1046 && canvasX <= 1996)) {
-        isClickable = true;
-      }
-    }
-
-    document.body.style.cursor = isClickable ? 'pointer' : 'auto';
-  };
-
   const handleWelcomeClick = (e) => {
     e.stopPropagation();
     if (!e.uv) return;
     const canvasX = e.uv.x * 1024;
     const canvasY = (1 - e.uv.y) * 880;
 
-    // Stat card 1: Public Repositories (x: 40..490, y: 370..550)
-    if (canvasX >= 40 && canvasX <= 490 && canvasY >= 370 && canvasY <= 550) {
+    // Direct GitHub profile handle pill in header (x: 630..950, y: 140..178)
+    if (canvasX >= 630 && canvasX <= 950 && canvasY >= 140 && canvasY <= 178) {
       playClickSound('click');
       window.open('https://github.com/Charan-718', '_blank', 'noopener,noreferrer');
       return;
     }
 
-    // Stat card 2: Live Deployments (x: 534..984, y: 370..550)
-    if (canvasX >= 534 && canvasX <= 984 && canvasY >= 370 && canvasY <= 550) {
+    // Stat card 1: GitHub Profile & 32 Public Repositories (x: 40..490, y: 340..550)
+    if (canvasX >= 40 && canvasX <= 490 && canvasY >= 340 && canvasY <= 550) {
+      playClickSound('click');
+      window.open('https://github.com/Charan-718', '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Stat card 2: Live Production Deployments (x: 534..984, y: 340..550)
+    if (canvasX >= 534 && canvasX <= 984 && canvasY >= 340 && canvasY <= 550) {
       playClickSound('click');
       window.open('https://github.com/Charan-718?tab=repositories', '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // System Matrix specs box (x: 40..984, y: 565..825)
+    if (canvasX >= 40 && canvasX <= 984 && canvasY >= 565 && canvasY <= 825) {
+      playClickSound('click');
+      window.open('https://github.com/Charan-718', '_blank', 'noopener,noreferrer');
       return;
     }
   };
@@ -622,52 +692,10 @@ export default function DeveloperWorkspaceScene({ onClose }) {
     const canvasX = e.uv.x * 1024;
     const canvasY = (1 - e.uv.y) * 880;
     const isClickable =
-      canvasY >= 370 &&
-      canvasY <= 550 &&
-      ((canvasX >= 40 && canvasX <= 490) || (canvasX >= 534 && canvasX <= 984));
+      (canvasX >= 630 && canvasX <= 950 && canvasY >= 140 && canvasY <= 178) ||
+      (canvasY >= 340 && canvasY <= 550 && ((canvasX >= 40 && canvasX <= 490) || (canvasX >= 534 && canvasX <= 984))) ||
+      (canvasX >= 40 && canvasX <= 984 && canvasY >= 565 && canvasY <= 825);
     document.body.style.cursor = isClickable ? 'pointer' : 'auto';
-  };
-
-  const handleQuickAccessClick = (e) => {
-    e.stopPropagation();
-    if (!e.uv) return;
-    const canvasY = (1 - e.uv.y) * 630;
-
-    if (canvasY >= 130 && canvasY <= 265) {
-      // 1. Switch Projects Page
-      playClickSound('switch');
-      setCurrentPage((p) => (p === 0 ? 1 : 0));
-    } else if (canvasY >= 285 && canvasY <= 420) {
-      // 2. GitHub Profile
-      playClickSound('click');
-      window.open('https://github.com/Charan-718', '_blank', 'noopener,noreferrer');
-    } else if (canvasY >= 440 && canvasY <= 575) {
-      // 3. Trigger Hologram Re-Scan
-      playClickSound('hologram');
-      window.dispatchEvent(new CustomEvent('charan-hologram-rescan'));
-    }
-  };
-
-  const handleQuickAccessPointerMove = (e) => {
-    e.stopPropagation();
-    if (!e.uv) return;
-    const canvasY = (1 - e.uv.y) * 630;
-    let hovered = -1;
-    if (canvasY >= 130 && canvasY <= 265) hovered = 0;
-    else if (canvasY >= 285 && canvasY <= 420) hovered = 1;
-    else if (canvasY >= 440 && canvasY <= 575) hovered = 2;
-
-    if (quickAccessTextureObj?.redraw) {
-      quickAccessTextureObj.redraw(hovered);
-    }
-    document.body.style.cursor = hovered !== -1 ? 'pointer' : 'auto';
-  };
-
-  const handleQuickAccessPointerOut = () => {
-    if (quickAccessTextureObj?.redraw) {
-      quickAccessTextureObj.redraw(-1);
-    }
-    document.body.style.cursor = 'auto';
   };
 
   return (
@@ -707,8 +735,6 @@ export default function DeveloperWorkspaceScene({ onClose }) {
       {/* Red Floor Uplight under Projects Screen */}
       <pointLight position={[0, 0.5, 8.5]} intensity={1.8} distance={5} color="#FF1E27" decay={2} />
 
-      {/* Quick Access Kiosk Soft Red Beacon */}
-      <pointLight position={[-4.8, 1.5, 0.8]} intensity={1.5} distance={3.5} color="#FF1E27" decay={2} />
 
       {/* Lounge Accent Lamp */}
       <pointLight position={[4.2, 0.8, 2.0]} intensity={1.4} distance={3.0} color="#FF3B44" decay={2} />
@@ -1079,10 +1105,11 @@ export default function DeveloperWorkspaceScene({ onClose }) {
         <mesh
           position={[0, 0, 0.02]}
           onClick={handleProjectsClick}
+          onPointerDown={handleProjectsPointerDown}
           onPointerMove={handleProjectsPointerMove}
-          onPointerOut={() => {
-            document.body.style.cursor = 'auto';
-          }}
+          onPointerUp={handleProjectsPointerUp}
+          onPointerOut={handleProjectsPointerOut}
+          onWheel={handleProjectsWheel}
         >
           <planeGeometry args={[9.4, 5.0]} />
           <meshStandardMaterial
@@ -1097,8 +1124,8 @@ export default function DeveloperWorkspaceScene({ onClose }) {
       </group>
 
       {/* =========================================================================
-          8. LEFT CURVED SCREEN — "WELCOME & REPOSITORIES TELEMETRY"
-             Positioned at [-6.5, 2.7, 7.8], angled inward towards center
+          8. LEFT CURVED SCREEN — "WORKSPACE ARCHITECTURE & GITHUB TELEMETRY"
+             Positioned at [-8.8, 3.4, 7.5], angled inward towards center
          ========================================================================= */}
       <group position={[-8.8, 3.4, 7.5]} rotation={[0.06, Math.PI - 0.65, 0]}>
         {/* Physical 3D Solid Monitor Casing (Like a Real-World Display) */}
@@ -1134,7 +1161,7 @@ export default function DeveloperWorkspaceScene({ onClose }) {
 
       {/* =========================================================================
           9. RIGHT CURVED SCREEN — "TECH STACK & CORE MATRIX"
-             Positioned at [6.8, 2.75, 7.8], angled inward towards center
+             Positioned at [8.8, 3.4, 7.5], angled inward towards center
          ========================================================================= */}
       <group position={[8.8, 3.4, 7.5]} rotation={[0.06, Math.PI + 0.65, 0]}>
         {/* Physical 3D Solid Monitor Casing (Like a Real-World Display) */}
@@ -1155,63 +1182,6 @@ export default function DeveloperWorkspaceScene({ onClose }) {
             emissiveMap={techStackTextureObj.texture}
             emissive="#ffffff"
             emissiveIntensity={0.65}
-            roughness={0.2}
-            metalness={0.05}
-          />
-        </mesh>
-      </group>
-
-      {/* =========================================================================
-          10. FOREGROUND "QUICK ACCESS" KIOSK (MATCHING IMAGE 1 BOTTOM-LEFT)
-             Positioned at [-3.4, 0.75, 2.4], angled at character
-         ========================================================================= */}
-      <group position={[-5.0, 1.25, 0.5]} rotation={[-0.22, Math.PI - 0.85, 0]}>
-        {/* Physical 3D Freestanding Kiosk Base on Floor */}
-        <mesh position={[0, -1.2, -0.05]} receiveShadow castShadow>
-          <cylinderGeometry args={[0.7, 0.85, 0.1, 24]} />
-          <meshStandardMaterial color="#0c0e14" metalness={0.9} roughness={0.3} />
-        </mesh>
-        {/* Vertical Pedestal Pillar Column */}
-        <mesh position={[0, -0.65, -0.05]} receiveShadow castShadow>
-          <boxGeometry args={[0.45, 1.0, 0.35]} />
-          <meshStandardMaterial color="#14161f" metalness={0.85} roughness={0.3} />
-        </mesh>
-        {/* Glowing Red Neon Strip on Pillar */}
-        <mesh position={[0, -0.65, 0.14]}>
-          <boxGeometry args={[0.06, 0.9, 0.02]} />
-          <meshBasicMaterial color="#FF1E27" />
-        </mesh>
-
-        {/* Angled Console Desktop Shelf */}
-        <mesh position={[0, -0.18, 0.05]} rotation={[0.3, 0, 0]} receiveShadow castShadow>
-          <boxGeometry args={[2.7, 0.1, 0.7]} />
-          <meshStandardMaterial color="#0e1017" roughness={0.25} metalness={0.85} />
-        </mesh>
-
-        {/* Solid 3D Screen Enclosure Box (Prevents seeing through from back) */}
-        <mesh position={[0, 0, -0.08]} receiveShadow castShadow>
-          <boxGeometry args={[2.65, 1.65, 0.15]} />
-          <meshStandardMaterial color="#080a10" roughness={0.25} metalness={0.9} />
-        </mesh>
-
-        <mesh position={[0, 0, 0.001]}>
-          <ringGeometry args={[1.25, 1.28, 4]} />
-          <meshBasicMaterial color="#FF1E27" />
-        </mesh>
-
-        {/* True 3D WebGL Screen Surface */}
-        <mesh
-          position={[0, 0, 0.02]}
-          onClick={handleQuickAccessClick}
-          onPointerMove={handleQuickAccessPointerMove}
-          onPointerOut={handleQuickAccessPointerOut}
-        >
-          <planeGeometry args={[2.6, 1.6]} />
-          <meshStandardMaterial
-            map={quickAccessTextureObj.texture}
-            emissiveMap={quickAccessTextureObj.texture}
-            emissive="#ffffff"
-            emissiveIntensity={0.75}
             roughness={0.2}
             metalness={0.05}
           />
