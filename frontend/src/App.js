@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
 import CharacterPlayground from './components/CharacterPlayground';
+import SpideyWebHero from './components/SpideyWebHero';
 import {
   initGlobalButtonSounds,
   isSoundEnabled,
@@ -1344,7 +1345,10 @@ function App() {
                   </div>
                 </div>
 
-                {/* Action CTAs */}
+                {/* DOMINATING SPIDER-MAN 3D CHARACTER CTA WITH CURSOR-ATTRACTING SPIDER WEB */}
+                <SpideyWebHero onOpenArena={openCharacterArena} />
+
+                {/* Secondary Action CTAs */}
                 <div className="hero-actions">
                   <button onClick={() => scrollToSection('projects')} className="btn-primary">
                     <span>EXPLORE ARCHITECTURE</span>

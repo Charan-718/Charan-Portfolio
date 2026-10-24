@@ -133,6 +133,33 @@ export function playClickSound(type = 'click') {
       break;
     }
 
+    case 'thwip': {
+      // Spider-Man web-shooter THWIP sound (~130ms)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1450, now);
+      osc.frequency.exponentialRampToValueAtTime(260, now + 0.12);
+
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1200, now);
+      filter.frequency.exponentialRampToValueAtTime(400, now + 0.12);
+      filter.Q.setValueAtTime(3.5, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.24, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + 0.14);
+      break;
+    }
+
     case 'hologram': {
       // Sci-fi hologram laser warp chime (~320ms)
       const osc = ctx.createOscillator();
