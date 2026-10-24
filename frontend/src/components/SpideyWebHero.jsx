@@ -1,33 +1,37 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { playClickSound } from '../utils/soundEffects';
 import './SpideyWebHero.css';
 
 /**
  * SpideyWebHero Component
- * Dominating Spider-Man styled CTA button that shoots an elastic spider web
- * anchoring to the user's mouse cursor across the hero section with magnetic attraction physics.
+ * Dominating Spider-Man styled CTA button that shoots an authentic multi-strand
+ * elastic spider web anchoring to the user's mouse cursor with 100% pixel-perfect precision
+ * and dynamic magnetic attraction physics.
  */
 export default function SpideyWebHero({ onOpenArena }) {
-  const wrapperRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
+  const [isLinked, setIsLinked] = useState(false);
   const btnRef = useRef(null);
   const canvasRef = useRef(null);
   const nozzleRef = useRef(null);
-
-  const [isLinked, setIsLinked] = useState(false);
   const hasFiredThwip = useRef(false);
 
-  // Mouse & Web Physics State
+  // Mouse & Web Physics State (100% Viewport-Aligned Coordinates)
   const mouseState = useRef({
-    x: 0,
-    y: 0,
-    targetX: 0,
-    targetY: 0,
+    cursorX: 0,
+    cursorY: 0,
+    prevCursorX: 0,
+    prevCursorY: 0,
+    cursorSpeed: 0,
     isInside: false,
-    webProgress: 0.0, // 0 = fully retracted, 1 = connected to cursor
+    webProgress: 0.0, // 0 = retracted, 1 = connected to cursor
     sparks: [
-      { t: 0.1, speed: 0.55 },
-      { t: 0.4, speed: 0.65 },
-      { t: 0.7, speed: 0.6 },
+      { t: 0.08, speed: 0.75 },
+      { t: 0.28, speed: 0.85 },
+      { t: 0.48, speed: 0.65 },
+      { t: 0.68, speed: 0.90 },
+      { t: 0.88, speed: 0.70 },
     ],
     btnOffsetX: 0,
     btnOffsetY: 0,
@@ -35,35 +39,52 @@ export default function SpideyWebHero({ onOpenArena }) {
     btnRotY: 0,
   });
 
-  // Track Hero Section bounds & handle mouse movements
   useEffect(() => {
-    const heroSection = document.getElementById('hero');
-    if (!heroSection) return;
+    setMounted(true);
+  }, []);
 
+  // Track cursor position in viewport coordinates and detect Hero section presence
+  useEffect(() => {
     const handlePointerMove = (e) => {
-      const heroRect = heroSection.getBoundingClientRect();
       const clientX = e.clientX;
       const clientY = e.clientY;
+      const m = mouseState.current;
 
+      // Calculate instantaneous mouse movement speed for tension vibration
+      const dx = clientX - m.cursorX;
+      const dy = clientY - m.cursorY;
+      m.cursorSpeed = Math.min(60, Math.hypot(dx, dy));
+      m.prevCursorX = m.cursorX;
+      m.prevCursorY = m.cursorY;
+      m.cursorX = clientX;
+      m.cursorY = clientY;
+
+      const heroSection = document.getElementById('hero');
+      if (!heroSection) return;
+
+      const heroRect = heroSection.getBoundingClientRect();
+      // Track within the hero bounds with a generous comfort margin
       const inside =
-        clientX >= heroRect.left &&
-        clientX <= heroRect.right &&
-        clientY >= heroRect.top &&
-        clientY <= heroRect.bottom;
+        clientX >= heroRect.left - 20 &&
+        clientX <= heroRect.right + 20 &&
+        clientY >= heroRect.top - 20 &&
+        clientY <= heroRect.bottom + 20;
 
-      mouseState.current.isInside = inside;
       if (inside) {
-        mouseState.current.targetX = clientX - heroRect.left;
-        mouseState.current.targetY = clientY - heroRect.top;
-
-        if (!hasFiredThwip.current) {
-          hasFiredThwip.current = true;
+        if (!m.isInside) {
+          m.isInside = true;
           setIsLinked(true);
-          playClickSound('thwip');
+          if (!hasFiredThwip.current) {
+            hasFiredThwip.current = true;
+            playClickSound('thwip');
+          }
         }
       } else {
-        hasFiredThwip.current = false;
-        setIsLinked(false);
+        if (m.isInside) {
+          m.isInside = false;
+          hasFiredThwip.current = false;
+          setIsLinked(false);
+        }
       }
     };
 
@@ -74,71 +95,76 @@ export default function SpideyWebHero({ onOpenArena }) {
     };
 
     window.addEventListener('pointermove', handlePointerMove, { passive: true });
-    heroSection.addEventListener('pointerleave', handlePointerLeave, { passive: true });
+    document.addEventListener('mouseleave', handlePointerLeave, { passive: true });
+    window.addEventListener('blur', handlePointerLeave, { passive: true });
 
     return () => {
       window.removeEventListener('pointermove', handlePointerMove);
-      heroSection.removeEventListener('pointerleave', handlePointerLeave);
+      document.removeEventListener('mouseleave', handlePointerLeave);
+      window.removeEventListener('blur', handlePointerLeave);
     };
   }, []);
 
-  // Web Canvas & Magnetic Spring Loop
+  // Spider-Man Web Canvas & Magnetic Spring Physics Loop
   useEffect(() => {
+    if (!mounted) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const heroSection = document.getElementById('hero');
-    if (!heroSection) return;
 
     let animId;
     let time = 0;
 
-    // Handle high-DPI canvas resizing
+    // High-DPI full-viewport canvas sizing (zero offset from viewport)
     const resizeCanvas = () => {
-      const rect = heroSection.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
     const render = () => {
-      time += 0.04;
+      time += 0.045;
       const m = mouseState.current;
-      const heroRect = heroSection.getBoundingClientRect();
+      const w = window.innerWidth;
+      const h = window.innerHeight;
 
-      // Clear canvas
-      ctx.clearRect(0, 0, heroRect.width, heroRect.height);
+      // Clear full canvas
+      ctx.clearRect(0, 0, w, h);
 
-      // Smooth mouse coordinates
-      m.x += (m.targetX - m.x) * 0.22;
-      m.y += (m.targetY - m.y) * 0.22;
-
-      // Animate Web Progress (Shooting / Retraction)
+      // Interpolate web shooting / retraction progress
       const targetProgress = m.isInside ? 1.0 : 0.0;
-      m.webProgress += (targetProgress - m.webProgress) * (m.isInside ? 0.24 : 0.18);
+      m.webProgress += (targetProgress - m.webProgress) * (m.isInside ? 0.28 : 0.20);
+      if (Math.abs(m.webProgress - targetProgress) < 0.001) {
+        m.webProgress = targetProgress;
+      }
 
-      // Get Web Emitter Nozzle Coordinates relative to Hero Section
-      let emitterX = heroRect.width * 0.35;
-      let emitterY = 480;
+      // Emitter Nozzle Coordinates in exact viewport coordinates
+      let emitterX = w * 0.35;
+      let emitterY = h * 0.65;
       let btnCenterX = emitterX;
       let btnCenterY = emitterY;
 
-      if (nozzleRef.current && btnRef.current) {
-        const nozzleRect = nozzleRef.current.getBoundingClientRect();
-        emitterX = nozzleRect.left - heroRect.left + nozzleRect.width / 2;
-        emitterY = nozzleRect.top - heroRect.top + nozzleRect.height / 2;
-
-        const btnRect = btnRef.current.getBoundingClientRect();
-        btnCenterX = btnRect.left - heroRect.left + btnRect.width / 2;
-        btnCenterY = btnRect.top - heroRect.top + btnRect.height / 2;
+      if (nozzleRef.current) {
+        const nRect = nozzleRef.current.getBoundingClientRect();
+        emitterX = nRect.left + nRect.width / 2;
+        emitterY = nRect.top + nRect.height / 2;
+      }
+      if (btnRef.current) {
+        const bRect = btnRef.current.getBoundingClientRect();
+        btnCenterX = bRect.left + bRect.width / 2;
+        btnCenterY = bRect.top + bRect.height / 2;
       }
 
       // =======================================================================
-      // 1. MAGNETIC ATTRACTION PHYSICS (Pull button toward mouse)
+      // 1. MAGNETIC BUTTON ATTRACTION PHYSICS (Physical pull towards cursor)
       // =======================================================================
       if (btnRef.current) {
         let pullX = 0;
@@ -146,30 +172,30 @@ export default function SpideyWebHero({ onOpenArena }) {
         let rotX = 0;
         let rotY = 0;
 
-        if (m.isInside && m.webProgress > 0.05) {
-          const dx = m.x - btnCenterX;
-          const dy = m.y - btnCenterY;
+        if (m.isInside && m.webProgress > 0.08) {
+          const dx = m.cursorX - btnCenterX;
+          const dy = m.cursorY - btnCenterY;
           const dist = Math.hypot(dx, dy);
 
-          if (dist > 1) {
-            // Elastic tension pull: stronger as cursor approaches button
-            const maxPull = 26; // pixels
-            const proximityFactor = Math.min(1.0, 420 / (dist + 90));
+          if (dist > 2) {
+            const maxPull = 30; // Max displacement in pixels
+            // Proximity tension: stronger magnetic pull as cursor is in hero area
+            const proximityFactor = Math.min(1.0, 500 / (dist + 90));
             pullX = (dx / dist) * maxPull * proximityFactor;
             pullY = (dy / dist) * maxPull * proximityFactor;
 
             // 3D perspective tilt towards mouse
-            rotY = (pullX / maxPull) * 12;
-            rotX = -(pullY / maxPull) * 12;
+            rotY = (pullX / maxPull) * 14;
+            rotX = -(pullY / maxPull) * 14;
           }
         }
 
-        m.btnOffsetX += (pullX - m.btnOffsetX) * 0.14;
-        m.btnOffsetY += (pullY - m.btnOffsetY) * 0.14;
-        m.btnRotX += (rotX - m.btnRotX) * 0.14;
-        m.btnRotY += (rotY - m.btnRotY) * 0.14;
+        m.btnOffsetX += (pullX - m.btnOffsetX) * 0.16;
+        m.btnOffsetY += (pullY - m.btnOffsetY) * 0.16;
+        m.btnRotX += (rotX - m.btnRotX) * 0.16;
+        m.btnRotY += (rotY - m.btnRotY) * 0.16;
 
-        btnRef.current.style.transform = `perspective(600px) translate3d(${m.btnOffsetX.toFixed(
+        btnRef.current.style.transform = `perspective(800px) translate3d(${m.btnOffsetX.toFixed(
           2
         )}px, ${m.btnOffsetY.toFixed(2)}px, 0px) rotateX(${m.btnRotX.toFixed(
           2
@@ -177,33 +203,38 @@ export default function SpideyWebHero({ onOpenArena }) {
       }
 
       // =======================================================================
-      // 2. SPIDER-MAN WEB LINE RENDERING
+      // 2. SPIDER-MAN WEB LINE RENDERING (100% Pixel-Accurate Pointer Anchor)
       // =======================================================================
-      if (m.webProgress > 0.01) {
-        const targetTipX = emitterX + (m.x - emitterX) * m.webProgress;
-        const targetTipY = emitterY + (m.y - emitterY) * m.webProgress;
+      if (m.webProgress > 0.005) {
+        // Pixel-perfect target point: Exactly locks to the mouse pointer with zero lag when connected
+        const targetTipX = emitterX + (m.cursorX - emitterX) * m.webProgress;
+        const targetTipY = emitterY + (m.cursorY - emitterY) * m.webProgress;
         const webDist = Math.hypot(targetTipX - emitterX, targetTipY - emitterY);
 
-        // Dynamic Catenary Sag and Tension Vibration
-        const sagAmount = Math.sin(m.webProgress * Math.PI) * Math.min(55, webDist * 0.08);
-        const vibration = Math.sin(time * 16) * (m.isInside ? 3.5 : 0);
-        const midX = (emitterX + targetTipX) / 2 + Math.sin(time * 10) * 2;
-        const midY = (emitterY + targetTipY) / 2 + sagAmount + vibration;
+        // Dynamic Catenary Sag and Elastic Silk Vibration
+        // Sag reduces as distance increases (tautness) and has high-frequency harmonics when moving
+        const tautness = Math.min(1.0, webDist / 600);
+        const sagAmount = Math.sin(m.webProgress * Math.PI) * (26 * (1.1 - tautness * 0.5));
+        const tensionVibration = Math.sin(time * 22) * (m.isInside ? 2.5 + m.cursorSpeed * 0.08 : 0);
+        const midX = (emitterX + targetTipX) / 2 + Math.sin(time * 12) * 2;
+        const midY = (emitterY + targetTipY) / 2 + sagAmount + tensionVibration;
 
-        // A. Base Anchor Filaments (Web Fan at the Web-Shooter)
-        const knotT = 0.08;
+        // --- A. Base Web-Shooter Anchor Fan (Spider web anchor onto button) ---
+        const knotT = 0.09;
         const knotX = emitterX + (midX - emitterX) * knotT;
         const knotY = emitterY + (midY - emitterY) * knotT;
 
         const anchorOffsets = [
-          { dx: -18, dy: -24 },
-          { dx: -18, dy: 24 },
-          { dx: -38, dy: -14 },
-          { dx: -38, dy: 14 },
+          { dx: -24, dy: -22 },
+          { dx: -24, dy: 22 },
+          { dx: -42, dy: -12 },
+          { dx: -42, dy: 12 },
+          { dx: -16, dy: -30 },
+          { dx: -16, dy: 30 },
         ];
 
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-        ctx.lineWidth = 1.0;
+        ctx.lineWidth = 1.1;
         anchorOffsets.forEach((off) => {
           ctx.beginPath();
           ctx.moveTo(emitterX + off.dx, emitterY + off.dy);
@@ -211,98 +242,99 @@ export default function SpideyWebHero({ onOpenArena }) {
           ctx.stroke();
         });
 
-        // B. Outer Glowing Crimson Web Aura
+        // Emitter shockwave glow ring
         ctx.save();
+        const pulseR = 8 + (Math.sin(time * 8) * 0.5 + 0.5) * 6;
         ctx.beginPath();
-        ctx.moveTo(emitterX, emitterY);
-        ctx.quadraticCurveTo(midX, midY, targetTipX, targetTipY);
-        ctx.strokeStyle = 'rgba(255, 30, 39, 0.55)';
-        ctx.lineWidth = 5.5;
+        ctx.arc(emitterX, emitterY, pulseR, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 30, 39, 0.7)';
+        ctx.lineWidth = 1.4;
         ctx.shadowColor = '#FF1E27';
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = 10;
         ctx.stroke();
         ctx.restore();
 
-        // C. Core White Silk Cord
+        // --- B. Deep Atmospheric Crimson Web Glow ---
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(emitterX, emitterY);
         ctx.quadraticCurveTo(midX, midY, targetTipX, targetTipY);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.96)';
-        ctx.lineWidth = 2.2;
-        ctx.shadowColor = '#FFFFFF';
-        ctx.shadowBlur = 6;
+        ctx.strokeStyle = 'rgba(255, 30, 39, 0.35)';
+        ctx.lineWidth = 9.0;
+        ctx.shadowColor = '#FF1E27';
+        ctx.shadowBlur = 22;
         ctx.stroke();
         ctx.restore();
 
-        // D. Secondary Twisted Braided Micro-Filament
-        const offsetMidX = midX + Math.sin(time * 22) * 2.2;
-        const offsetMidY = midY + Math.cos(time * 22) * 2.2;
+        // --- C. Outer Tensile Crimson Sheath ---
+        ctx.save();
         ctx.beginPath();
         ctx.moveTo(emitterX, emitterY);
-        ctx.quadraticCurveTo(offsetMidX, offsetMidY, targetTipX, targetTipY);
-        ctx.strokeStyle = 'rgba(255, 120, 130, 0.65)';
-        ctx.lineWidth = 1.0;
+        ctx.quadraticCurveTo(midX, midY, targetTipX, targetTipY);
+        ctx.strokeStyle = 'rgba(255, 30, 39, 0.9)';
+        ctx.lineWidth = 4.2;
+        ctx.shadowColor = '#FF1E27';
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+        ctx.restore();
+
+        // --- D. Core Brilliant White Synthetic Silk Strand ---
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(emitterX, emitterY);
+        ctx.quadraticCurveTo(midX, midY, targetTipX, targetTipY);
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2.0;
+        ctx.shadowColor = '#FFFFFF';
+        ctx.shadowBlur = 5;
+        ctx.stroke();
+        ctx.restore();
+
+        // --- E. Double Helical Braided Silk Micro-Filaments ---
+        // Samples 28 points along the quadratic curve to draw authentic twisting web fibers
+        const steps = 28;
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const qx = (1 - t) * (1 - t) * emitterX + 2 * (1 - t) * t * midX + t * t * targetTipX;
+          const qy = (1 - t) * (1 - t) * emitterY + 2 * (1 - t) * t * midY + t * t * targetTipY;
+
+          // Derivative for perpendicular normal vector
+          const dx = 2 * (1 - t) * (midX - emitterX) + 2 * t * (targetTipX - midX);
+          const dy = 2 * (1 - t) * (midY - emitterY) + 2 * t * (targetTipY - midY);
+          const len = Math.hypot(dx, dy) || 1;
+          const nx = -dy / len;
+          const ny = dx / len;
+
+          const wave = Math.sin(t * 28 + time * 14) * 3.2;
+          const px = qx + nx * wave;
+          const py = qy + ny * wave;
+
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = 'rgba(255, 130, 140, 0.75)';
+        ctx.lineWidth = 1.1;
         ctx.stroke();
 
-        // E. Traveling Energy Sparks (Silk Dewdrops along the web line)
+        // --- F. Traveling Bio-Luminescent Dewdrop Energy Pulses ---
         m.sparks.forEach((spark) => {
-          spark.t = (spark.t + 0.008 * spark.speed) % 1.0;
+          spark.t = (spark.t + 0.01 * spark.speed) % 1.0;
           const st = spark.t * m.webProgress;
-          // Calculate quadratic bezier point at parameter st
-          const px =
-            (1 - st) * (1 - st) * emitterX +
-            2 * (1 - st) * st * midX +
-            st * st * targetTipX;
-          const py =
-            (1 - st) * (1 - st) * emitterY +
-            2 * (1 - st) * st * midY +
-            st * st * targetTipY;
+          const px = (1 - st) * (1 - st) * emitterX + 2 * (1 - st) * st * midX + st * st * targetTipX;
+          const py = (1 - st) * (1 - st) * emitterY + 2 * (1 - st) * st * midY + st * st * targetTipY;
 
           ctx.beginPath();
-          ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+          ctx.arc(px, py, 2.6, 0, Math.PI * 2);
           ctx.fillStyle = '#FFFFFF';
           ctx.shadowColor = '#FF1E27';
-          ctx.shadowBlur = 8;
+          ctx.shadowBlur = 9;
           ctx.fill();
         });
 
-        // F. Cursor Web Reticle (Spider Web Anchor around mouse pointer)
+        // --- G. Spidey-Sense Cursor Reticle (Anchored with 100% Precision) ---
         if (m.webProgress > 0.85) {
-          ctx.save();
-          // Glowing center node
-          ctx.beginPath();
-          ctx.arc(targetTipX, targetTipY, 4.5, 0, Math.PI * 2);
-          ctx.fillStyle = '#FFFFFF';
-          ctx.shadowColor = '#FF1E27';
-          ctx.shadowBlur = 12;
-          ctx.fill();
-
-          // Outer pulsing web ring
-          const ringRadius = 12 + Math.sin(time * 8) * 2.5;
-          ctx.beginPath();
-          ctx.arc(targetTipX, targetTipY, ringRadius, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(255, 30, 39, 0.85)';
-          ctx.lineWidth = 1.6;
-          ctx.stroke();
-
-          // 4 radial web crosshairs
-          for (let i = 0; i < 4; i++) {
-            const ang = (i * Math.PI) / 2 + time * 0.6;
-            ctx.beginPath();
-            ctx.moveTo(
-              targetTipX + Math.cos(ang) * 6,
-              targetTipY + Math.sin(ang) * 6
-            );
-            ctx.lineTo(
-              targetTipX + Math.cos(ang) * (ringRadius + 7),
-              targetTipY + Math.sin(ang) * (ringRadius + 7)
-            );
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
-          }
-          ctx.restore();
+          drawSpiderSenseReticle(ctx, targetTipX, targetTipY, time);
         }
       }
 
@@ -315,7 +347,119 @@ export default function SpideyWebHero({ onOpenArena }) {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, []);
+  }, [mounted]);
+
+  // Helper: Renders high-tech Spider-Man web target reticle directly centered on cursor tip
+  const drawSpiderSenseReticle = (ctx, x, y, time) => {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 1. Spidey-Sense Alert Halo (expands smoothly outward)
+    const senseRadius = 16 + (Math.sin(time * 6) * 0.5 + 0.5) * 14;
+    const senseAlpha = Math.max(0, 0.55 * (1.0 - (senseRadius - 16) / 14));
+    ctx.beginPath();
+    ctx.arc(0, 0, senseRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(255, 30, 39, ${senseAlpha.toFixed(2)})`;
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // 2. High-Tech Concentric Spider Web Rings
+    // Outer Ring (radius 16)
+    ctx.beginPath();
+    ctx.arc(0, 0, 16, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 30, 39, 0.9)';
+    ctx.lineWidth = 1.6;
+    ctx.shadowColor = '#FF1E27';
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+
+    // Inner Ring (radius 8)
+    ctx.beginPath();
+    ctx.arc(0, 0, 8, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.lineWidth = 1.2;
+    ctx.shadowColor = '#FFFFFF';
+    ctx.shadowBlur = 6;
+    ctx.stroke();
+
+    // 8 Radial Web Spokes radiating from inner to outer ring
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI) / 4 + time * 0.4;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(angle) * 4, Math.sin(angle) * 4);
+      ctx.lineTo(Math.cos(angle) * 18, Math.sin(angle) * 18);
+      ctx.strokeStyle = i % 2 === 0 ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 60, 70, 0.75)';
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+    }
+
+    // 3. Four Tactical Cyber Corner Brackets framing the cursor
+    const bDist = 20 + Math.sin(time * 8) * 1.5;
+    const bLen = 5;
+    const brackets = [
+      { dx: -1, dy: -1 },
+      { dx: 1, dy: -1 },
+      { dx: 1, dy: 1 },
+      { dx: -1, dy: 1 },
+    ];
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = '#FF1E27';
+    ctx.shadowBlur = 8;
+    brackets.forEach(({ dx, dy }) => {
+      ctx.beginPath();
+      ctx.moveTo(dx * bDist, dy * (bDist - bLen));
+      ctx.lineTo(dx * bDist, dy * bDist);
+      ctx.lineTo(dx * (bDist - bLen), dy * bDist);
+      ctx.stroke();
+    });
+
+    // 4. Center Glowing White Pointer Node
+    ctx.beginPath();
+    ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.shadowColor = '#FF1E27';
+    ctx.shadowBlur = 14;
+    ctx.fill();
+
+    // 5. Crisp Miniature Cyber Spider Silhouette
+    ctx.fillStyle = '#FF1E27';
+    ctx.shadowColor = '#FF1E27';
+    ctx.shadowBlur = 6;
+
+    // Abdomen & Thorax
+    ctx.beginPath();
+    ctx.ellipse(0, 1.4, 1.8, 2.6, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, -1.8, 1.3, 1.3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4 Pairs of Arachnid Legs
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.lineWidth = 0.9;
+    ctx.shadowBlur = 4;
+    const legs = [
+      { y: -1.8, bendX: 6, bendY: -4.5, tipX: 5.5, tipY: -6.5 },
+      { y: -0.8, bendX: 7.5, bendY: -1.8, tipX: 8.5, tipY: -2.8 },
+      { y: 0.8, bendX: 7.5, bendY: 2.0, tipX: 8.5, tipY: 3.5 },
+      { y: 2.2, bendX: 5.5, bendY: 5.2, tipX: 4.8, tipY: 7.2 },
+    ];
+    legs.forEach(({ y, bendX, bendY, tipX, tipY }) => {
+      // Right Leg
+      ctx.beginPath();
+      ctx.moveTo(1, y);
+      ctx.lineTo(bendX, bendY);
+      ctx.lineTo(tipX, tipY);
+      ctx.stroke();
+      // Left Leg (Mirrored)
+      ctx.beginPath();
+      ctx.moveTo(-1, y);
+      ctx.lineTo(-bendX, bendY);
+      ctx.lineTo(-tipX, tipY);
+      ctx.stroke();
+    });
+
+    ctx.restore();
+  };
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -325,11 +469,16 @@ export default function SpideyWebHero({ onOpenArena }) {
 
   return (
     <>
-      {/* Full-Bleed Spider Web Canvas Overlay in Hero Section */}
-      <canvas ref={canvasRef} className="spidey-web-overlay-canvas" />
+      {/* Full-Viewport Spider Web Canvas Overlay via Portal (100% precision, zero container offset) */}
+      {mounted &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <canvas ref={canvasRef} className="spidey-web-overlay-canvas" />,
+          document.body
+        )}
 
       {/* Dominating Spider-Man Magnetic CTA Button Container */}
-      <div ref={wrapperRef} className="spidey-hero-wrapper">
+      <div className="spidey-hero-wrapper">
         {/* Pulsating Spidey-Sense Radar Rings */}
         <div className="spidey-radar-container" aria-hidden="true">
           <div className="spidey-radar-ring ring-1"></div>
@@ -363,7 +512,10 @@ export default function SpideyWebHero({ onOpenArena }) {
 
             <div className="spidey-btn-title">
               <span>PLAY 3D CHARACTER</span>
-              <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.9rem', color: '#FFFFFF' }}></i>
+              <i
+                className="fa-solid fa-arrow-up-right-from-square"
+                style={{ fontSize: '0.9rem', color: '#FFFFFF' }}
+              ></i>
             </div>
 
             <div className="spidey-btn-sub">
@@ -379,7 +531,7 @@ export default function SpideyWebHero({ onOpenArena }) {
               <i className="fa-solid fa-cube"></i>
             </div>
 
-            {/* Glowing Web-Shooter Nozzle where the Web Line attaches */}
+            {/* Glowing Web-Shooter Nozzle where the Web Line originates */}
             <div
               ref={nozzleRef}
               className="spidey-web-emitter-nozzle"

@@ -34,6 +34,7 @@ export default function Character({
   cameraFollow = true,
   lockArms = true,
   controlMode = 'gta',
+  isCurtainActive = false,
   onTelemetryChange,
 }) {
   const root = useRef();
@@ -89,14 +90,26 @@ export default function Character({
   };
 
   useEffect(() => {
-    triggerHologram(true);
-  }, [modelUrl]);
+    // Only trigger hologram if curtain is NOT active!
+    if (!isCurtainActive) {
+      triggerHologram(true);
+    }
+  }, [modelUrl, isCurtainActive]);
 
   useEffect(() => {
-    const handleHoloRescan = () => triggerHologram(true);
+    const handleHoloRescan = () => {
+      if (!isCurtainActive) triggerHologram(true);
+    };
+    const handleCurtainComplete = () => {
+      triggerHologram(true);
+    };
     window.addEventListener('charan-hologram-rescan', handleHoloRescan);
-    return () => window.removeEventListener('charan-hologram-rescan', handleHoloRescan);
-  }, []);
+    window.addEventListener('charan-curtain-complete', handleCurtainComplete);
+    return () => {
+      window.removeEventListener('charan-hologram-rescan', handleHoloRescan);
+      window.removeEventListener('charan-curtain-complete', handleCurtainComplete);
+    };
+  }, [isCurtainActive]);
 
   // Stop / Brake & Stuck-Key Prevention
   const isBraked = useRef(false);
@@ -680,6 +693,15 @@ export default function Character({
   // 4. MAIN FRAME LOOP: GTA CONTROLS, ANIMATIONS, & CAMERA
   useFrame((state, delta) => {
     if (!root.current) return;
+
+    // Pause all hologram materialization and movement while CHARAN PORTFOLIO curtain is active!
+    if (isCurtainActive) {
+      holoTimeElapsed.current = 0.0;
+      holoUniforms.current.uHoloProgress.value = 0.0;
+      holoUniforms.current.uHoloActive.value = 1.0;
+      isHoloComplete.current = false;
+      return;
+    }
 
     // Progress Holographic Materialization Animation
     if (!isHoloComplete.current) {

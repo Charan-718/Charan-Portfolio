@@ -15,7 +15,7 @@ const keyboardMap = [
   { name: 'materialize', keys: ['KeyR'] },
 ];
 
-export default function CharacterPlayground({ onClose }) {
+export default function CharacterPlayground({ onClose, isCurtainActive = false }) {
   const publicUrl = process.env.PUBLIC_URL || '';
   const [cameraMode, setCameraMode] = useState('chase'); // 'chase' or 'free'
   const [lockArms, setLockArms] = useState(true); // Steady hands: only legs walk
@@ -999,6 +999,7 @@ export default function CharacterPlayground({ onClose }) {
               cameraFollow={cameraMode === 'chase'}
               lockArms={lockArms}
               controlMode="gta"
+              isCurtainActive={isCurtainActive}
               onTelemetryChange={handleTelemetry}
             />
           </Suspense>

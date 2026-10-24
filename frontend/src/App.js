@@ -33,6 +33,9 @@ function InitialBlankCurtain({ onComplete, maskId = 'heroCutoutMask' }) {
     // After 1.2s constant-speed zoom, unmount overlay cleanly
     const finishTimer = setTimeout(() => {
       if (onComplete) onComplete();
+      try {
+        window.dispatchEvent(new CustomEvent('charan-curtain-complete'));
+      } catch (e) {}
     }, 3200);
 
     return () => {
@@ -1137,7 +1140,7 @@ function App() {
             maskId="characterCutoutMask"
           />
         )}
-        <CharacterPlayground onClose={closeCharacterArena} />
+        <CharacterPlayground isCurtainActive={showInitialIntro} onClose={closeCharacterArena} />
       </>
     );
   }
