@@ -29,6 +29,101 @@ function isUpperArmTrack(trackName) {
   );
 }
 
+// Create Cyberpunk Floor Sensor Decal Texture (Matching Image 3)
+function createCyberpunkDecalTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  const redraw = (pulsePhase = 0, isMoving = false) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. Outer Cyber Chamfered Bracket (Matching Image 3)
+    ctx.save();
+    ctx.beginPath();
+    // Flat back edge
+    ctx.moveTo(80, 90);
+    // Top border with cyber notches
+    ctx.lineTo(410, 90);
+    ctx.lineTo(410, 102);
+    ctx.lineTo(455, 102);
+    ctx.lineTo(455, 90);
+    ctx.lineTo(760, 90);
+    // Front angled chamfer cuts (Image 3)
+    ctx.lineTo(870, 175);
+    ctx.lineTo(930, 256);
+    ctx.lineTo(870, 337);
+    ctx.lineTo(760, 422);
+    // Bottom border with cyber notches
+    ctx.lineTo(455, 422);
+    ctx.lineTo(455, 410);
+    ctx.lineTo(410, 410);
+    ctx.lineTo(410, 422);
+    ctx.lineTo(80, 422);
+    ctx.closePath();
+
+    // Subtle dark red glowing fill
+    ctx.fillStyle = isMoving ? 'rgba(255, 30, 39, 0.22)' : 'rgba(255, 30, 39, 0.09)';
+    ctx.fill();
+
+    // Glowing Neon Perimeter Border
+    ctx.strokeStyle = '#FF1E27';
+    ctx.shadowColor = '#FF1E27';
+    ctx.shadowBlur = isMoving ? 24 : 15;
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.restore();
+
+    // 2. Corner Bracket Ticks (Top & Bottom Left)
+    ctx.strokeStyle = 'rgba(255, 163, 167, 0.7)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(105, 115); ctx.lineTo(135, 115);
+    ctx.moveTo(105, 115); ctx.lineTo(105, 145);
+    ctx.moveTo(105, 397); ctx.lineTo(135, 397);
+    ctx.moveTo(105, 397); ctx.lineTo(105, 367);
+    ctx.stroke();
+
+    // 3. Three Glowing Forward Chevrons: >>> (Exact Image 3)
+    const chevrons = [
+      { x: 395, phase: 0 },
+      { x: 480, phase: 0.33 },
+      { x: 565, phase: 0.66 }
+    ];
+
+    chevrons.forEach((ch) => {
+      const alpha = isMoving 
+        ? 0.45 + 0.55 * Math.sin(pulsePhase * 7 - ch.phase * Math.PI * 2)
+        : 0.85;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(ch.x, 195);
+      ctx.lineTo(ch.x + 52, 256);
+      ctx.lineTo(ch.x, 317);
+      ctx.strokeStyle = `rgba(255, 30, 39, ${alpha})`;
+      ctx.shadowColor = '#FF1E27';
+      ctx.shadowBlur = 18;
+      ctx.lineWidth = 8.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Bright inner core highlight
+      ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.8})`;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.restore();
+    });
+  };
+
+  redraw();
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return { texture, canvas, redraw };
+}
+
 export default function Character({
   modelUrl = (process.env.PUBLIC_URL || '') + '/my-meshy-model.glb',
   cameraFollow = true,
@@ -42,13 +137,10 @@ export default function Character({
   const { scene, animations } = useGLTF(modelUrl);
 
   // GTA Camera and Character Orientations
-  // charYaw: character body rotation (starts facing forward at Math.PI = 180° towards user/camera as in Image 1)
-  // camYaw: camera orbital horizontal azimuth (starts at Math.PI = 180° looking into command deck from front)
-  // camPitch: camera vertical angle (starts at 0.14 slightly elevated hero view)
-  const charYaw = useRef(Math.PI); // Starts facing forward towards the user (Image 1)
-  const camYaw = useRef(Math.PI);  // Starts at front hero angle framing character and screens (Image 1)
-  const camPitch = useRef(0.16);   // Slightly elevated hero view showing full character and ceiling above
-  const camDistance = useRef(8.6); // Wide panoramic establishing view matching user's screenshot
+  const charYaw = useRef(Math.PI);
+  const camYaw = useRef(Math.PI);
+  const camPitch = useRef(0.16);
+  const camDistance = useRef(8.6);
   const targetCamDistance = useRef(8.6);
   const mountTime = useRef(performance.now());
   const userHasZoomed = useRef(false);
@@ -59,7 +151,7 @@ export default function Character({
   const dragStart = useRef({ x: 0, y: 0 });
   const lastMouseTime = useRef(0);
 
-  // Procedural leg-walk shader uniforms (used when model has no skeleton, e.g. unrigged Meshy scan)
+  // Procedural leg-walk shader uniforms
   const proceduralUniforms = useRef({
     uWalkPhase: { value: 0 },
     uWalkIntensity: { value: 0 },
@@ -67,9 +159,10 @@ export default function Character({
   });
   const walkPhase = useRef(0);
   const hasWalked = useRef(false);
-  const footstepRingRef = useRef();
+  const footstepDecalRef = useRef();
+  const cyberDecal = useMemo(() => createCyberpunkDecalTexture(), []);
 
-  // Hologram Materialization State & Uniforms (Sci-Fi Red Creation Beam)
+  // Hologram Materialization State & Uniforms
   const holoUniforms = useRef({
     uHoloProgress: { value: 0.0 },
     uHoloTime: { value: 0.0 },
@@ -898,10 +991,25 @@ export default function Character({
       root.current.position.z = plantZ + Math.sin(angle) * minPlantDist;
     }
 
-    // 5. Main Center Display Screen Solid Collision ([0, 4.35, 11.2], width 9.5m)
-    // Allows character to walk right up in front of the screen (z = 10.5) without clipping through
-    if (root.current.position.z > 10.5 && Math.abs(root.current.position.x) < 4.85) {
-      root.current.position.z = 10.5;
+    // 5. Main Center Display Screen Solid Collision ([0, 4.35, 11.2], width 9.5m, thickness 0.5m)
+    // Allows character to roam freely on the backside of the main banner without getting stuck or restricted
+    const screenMinX = -4.85;
+    const screenMaxX = 4.85;
+    const screenMinZ = 10.85;
+    const screenMaxZ = 11.55;
+    if (
+      root.current.position.x > screenMinX &&
+      root.current.position.x < screenMaxX &&
+      root.current.position.z > screenMinZ &&
+      root.current.position.z < screenMaxZ
+    ) {
+      const distToFront = Math.abs(root.current.position.z - screenMinZ);
+      const distToBack = Math.abs(root.current.position.z - screenMaxZ);
+      if (distToFront < distToBack) {
+        root.current.position.z = screenMinZ;
+      } else {
+        root.current.position.z = screenMaxZ;
+      }
     }
 
     // 6. Left & Right Curved Display Enclosures
@@ -1124,14 +1232,11 @@ export default function Character({
         },
       });
     }
-    // Dynamic Footstep Floor Pulse Ring (Active Stage Sensor)
-    if (footstepRingRef.current) {
+    // Dynamic Footstep Floor Decal (Active Cyber Stage Sensor matching Image 3)
+    if (footstepDecalRef.current) {
       const isCharacterMoving = moving && !isBraked.current;
-      const targetScale = isCharacterMoving ? 1.0 + Math.sin(state.clock.getElapsedTime() * 10) * 0.15 : 1.0;
-      footstepRingRef.current.scale.set(targetScale, targetScale, 1.0);
-      if (footstepRingRef.current.material) {
-        footstepRingRef.current.material.opacity = isCharacterMoving ? 0.75 : 0.22;
-      }
+      cyberDecal.redraw(state.clock.getElapsedTime(), isCharacterMoving);
+      cyberDecal.texture.needsUpdate = true;
     }
   });
 
@@ -1142,33 +1247,28 @@ export default function Character({
         <primitive object={scene} />
       </group>
 
-
-      {/* Dynamic Sensor Footstep Energy Ring */}
-      <mesh ref={footstepRingRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
-        <ringGeometry args={[0.26, 0.40, 32]} />
+      {/* Cyberpunk Directional Sensor Decal (Matching Image 3) */}
+      <mesh
+        ref={footstepDecalRef}
+        rotation={[-Math.PI / 2, 0, -Math.PI / 2]}
+        position={[0, 0.005, 0.15]}
+      >
+        <planeGeometry args={[1.35, 0.68]} />
         <meshBasicMaterial
-          color="#FF1E27"
+          map={cyberDecal.texture}
           transparent
-          opacity={0.25}
+          opacity={0.92}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
 
-      {/* Holographic Projector Base & Scanning Laser Ray Slice (Images 1, 2, 3, 4, 5) */}
+      {/* Holographic Projector Base & Scanning Laser Ray Slice */}
       {isHoloActive && (
         <group position={[0, 0, 0]}>
-          {/* A. Floor Projector Concentric Rotating Rings & Column */}
+          {/* Holographic Scanning Column */}
           <group position={[0, 0.003, 0]}>
-            <mesh rotation={[-Math.PI / 2, 0, holoTimeElapsed.current * 0.9]}>
-              <ringGeometry args={[0.72, 0.82, 48]} />
-              <meshBasicMaterial color="#FF1E27" transparent opacity={0.75} blending={THREE.AdditiveBlending} />
-            </mesh>
-            <mesh rotation={[-Math.PI / 2, 0, -holoTimeElapsed.current * 0.6]}>
-              <ringGeometry args={[0.02, 0.52, 32]} />
-              <meshBasicMaterial color="#FF1E27" transparent opacity={0.25} blending={THREE.AdditiveBlending} />
-            </mesh>
             <mesh position={[0, 1.0, 0]}>
               <cylinderGeometry args={[0.55, 0.80, 2.0, 32, 1, true]} />
               <meshBasicMaterial

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './index.css';
 import CharacterPlayground from './components/CharacterPlayground';
 import SpideyWebHero from './components/SpideyWebHero';
@@ -650,22 +650,22 @@ function App() {
     // REMAINING PROJECTS WITH CONFIGURED DEMO URLS
     // -------------------------------------------------------------------------
     {
-      id: 'chatbot',
+      id: 'aqvh',
       index: '04',
-      spec: 'SPEC_05 // CONVERSATIONAL AI',
-      badgeText: 'SPEC_05 // CONVERSATIONAL AI',
-      category: 'AI APPLICATIONS',
-      filterGroup: 'AI & Machine Learning',
-      title: 'Chatbot — AI Conversational Assistant',
-      description: 'A chat-based AI application that provides an interface for conversational interaction and AI-powered responses.',
+      spec: 'SPEC_04 // QUANTUM AI & FINTECH',
+      badgeText: 'SPEC_04 // QUANTUM AI & FINTECH',
+      category: 'AI Applications',
+      filterGroup: 'Quantum Computing',
+      title: 'AQVH — Quantum AI Stock Prediction Platform',
+      description: 'Grand Finals Winner at Amaravati Quantum Valley Hackathon 2025. An advanced quantum neural network utilizing hybrid quantum-classical algorithms for real-time market trend prediction.',
       features: [
-        'Interactive conversational interface',
-        'AI API integration',
-        'Conversation workflows and response handling'
+        'Hybrid Quantum-Classical Neural Network algorithms',
+        'Real-time financial candlestick & predictive stock analytics',
+        'High-speed backtesting pipeline with Qiskit & Python'
       ],
-      tags: ['JavaScript', 'AI APIs', 'Web Development'],
-      demoLink: 'https://quantum-chatbot-green.vercel.app/',
-      codeLink: 'https://github.com/Charan-718/Chatbot'
+      tags: ['Quantum Computing', 'Python', 'Qiskit', 'Machine Learning', 'FinTech'],
+      demoLink: null,
+      codeLink: 'https://github.com/Charan-718'
     },
     {
       id: 'critique-improve',
@@ -865,60 +865,7 @@ function App() {
       demoLink: 'https://outbox-assignment-plum.vercel.app',
       codeLink: 'https://github.com/Charan-718/Outbox-Assignment'
     },
-    {
-      id: 'prakalp',
-      index: '16',
-      spec: 'SPEC_22 // WEB INTERFACE',
-      badgeText: 'SPEC_22 // WEB INTERFACE',
-      category: 'FRONTEND DEVELOPMENT',
-      filterGroup: 'Web Development',
-      title: 'Prakalp Frontend',
-      description: 'A frontend project deployed through GitHub Pages. Its specific application domain and features require README verification.',
-      features: [
-        'Browser-based frontend',
-        'Project-specific interface',
-        'Detailed functionality to be confirmed'
-      ],
-      tags: ['Frontend Development', 'Web Technologies'],
-      demoLink: 'https://charan-718.github.io/PrakalpFrontend/',
-      codeLink: 'https://github.com/Charan-718/PrakalpFrontend'
-    },
-    {
-      id: 'pranathi-portfolio',
-      index: '17',
-      spec: 'SPEC_23 // PERSONAL PORTFOLIO',
-      badgeText: 'SPEC_23 // PERSONAL PORTFOLIO',
-      category: 'WEB DEVELOPMENT',
-      filterGroup: 'Web Development',
-      title: 'Pranathi Portfolio',
-      description: 'A personal portfolio website created to present an individual\'s profile, work, and professional information.',
-      features: [
-        'Personal profile presentation',
-        'Portfolio-oriented layout',
-        'Project and professional information display'
-      ],
-      tags: ['Web Development', 'Frontend', 'UI/UX'],
-      demoLink: 'https://pranathi-portfolio-alpha.vercel.app',
-      codeLink: 'https://github.com/Charan-718/Pranathi-Portfolio'
-    },
-    {
-      id: 'quantum-chatbot',
-      index: '18',
-      spec: 'SPEC_25 // AI ASSISTANT',
-      badgeText: 'SPEC_25 // AI ASSISTANT',
-      category: 'AI & QUANTUM COMPUTING',
-      filterGroup: 'Quantum Computing',
-      title: 'Quantum Chatbot',
-      description: 'A conversational AI project associated with quantum-computing interests. Its precise relationship to the Chatbot repository should be verified.',
-      features: [
-        'Conversational AI interface',
-        'AI-powered response workflow',
-        'Quantum-specific capabilities to be confirmed'
-      ],
-      tags: ['AI', 'JavaScript', 'Quantum Computing'],
-      demoLink: 'https://quantum-chatbot-green.vercel.app/',
-      codeLink: 'https://github.com/Charan-718/Quantum-Chatbot'
-    },
+
     {
       id: 'quantum-keydistribution',
       index: '19',
@@ -978,24 +925,6 @@ function App() {
     // PROJECTS WITH DEMO URL NULL / NOT CONFIGURED (PLACED AT THE LAST)
     // -------------------------------------------------------------------------
     {
-      id: 'amazon-ml',
-      index: '22',
-      spec: 'SPEC_01 // ENTITY RESOLUTION',
-      badgeText: 'SPEC_01 // ENTITY RESOLUTION',
-      category: 'MACHINE LEARNING',
-      filterGroup: 'AI & Machine Learning',
-      title: 'Amazon ML Challenge — Business Entity Resolution',
-      description: 'A large-scale entity matching pipeline designed to identify duplicate business records across datasets using candidate retrieval, structural features, and machine learning.',
-      features: [
-        'Hybrid lexical and semantic retrieval for candidate generation',
-        'Entity matching with address, name, and structural similarity features',
-        'DuckDB-based blocking and XGBoost scoring pipeline'
-      ],
-      tags: ['Python', 'XGBoost', 'DuckDB', 'FAISS', 'MiniLM', 'Pandas'],
-      demoLink: null,
-      codeLink: 'https://github.com/Charan-718/Amazon-ML-Challenge-2026'
-    },
-    {
       id: 'ble-gatt',
       index: '23',
       spec: 'SPEC_02 // BLUETOOTH CONNECTIVITY',
@@ -1030,24 +959,6 @@ function App() {
       tags: ['BLE', 'GATT', 'Mobile Development'],
       demoLink: null,
       codeLink: 'https://github.com/Charan-718/BLE-GATT-App-2'
-    },
-    {
-      id: 'portfolio',
-      index: '25',
-      spec: 'SPEC_04 // PERSONAL BRAND',
-      badgeText: 'SPEC_04 // PERSONAL BRAND',
-      category: 'FRONTEND DEVELOPMENT',
-      filterGroup: 'Web Development',
-      title: 'Charan Portfolio — Developer Portfolio',
-      description: 'A personal portfolio website for presenting software projects, technical skills, and development experience.',
-      features: [
-        'Project showcase and technical profile',
-        'Repository and deployment links',
-        'Visual presentation of development work'
-      ],
-      tags: ['Web Development', 'Frontend', 'UI/UX'],
-      demoLink: null,
-      codeLink: 'https://github.com/Charan-718/Charan-Portfolio'
     },
     {
       id: 'day-trix',
@@ -1085,60 +996,7 @@ function App() {
       demoLink: null,
       codeLink: 'https://github.com/Charan-718/Idea-Lab'
     },
-    {
-      id: 'ml-xplore',
-      index: '28',
-      spec: 'SPEC_19 // MACHINE LEARNING',
-      badgeText: 'SPEC_19 // MACHINE LEARNING',
-      category: 'AI & DATA SCIENCE',
-      filterGroup: 'AI & Machine Learning',
-      title: 'ML Xplore 6115',
-      description: 'A machine-learning-oriented project repository. The specific model, dataset, and application objective require source verification.',
-      features: [
-        'Machine-learning project workflow',
-        'Model and dataset to be identified',
-        'Evaluation methodology to be confirmed'
-      ],
-      tags: ['Machine Learning', 'Python'],
-      demoLink: null,
-      codeLink: 'https://github.com/Charan-718/ML-Xplore-6115'
-    },
-    {
-      id: 'my-app',
-      index: '29',
-      spec: 'SPEC_20 // APPLICATION DEVELOPMENT',
-      badgeText: 'SPEC_20 // APPLICATION DEVELOPMENT',
-      category: 'SOFTWARE DEVELOPMENT',
-      filterGroup: 'Mobile & IoT',
-      title: 'My App — Application Project',
-      description: 'An application repository whose intended use and implemented capabilities need confirmation from the source.',
-      features: [
-        'Application-specific workflow',
-        'User interface and interactions',
-        'Core implementation to be reviewed'
-      ],
-      tags: ['Application Development'],
-      demoLink: null,
-      codeLink: 'https://github.com/Charan-718/My-App'
-    },
-    {
-      id: 'qkrishi',
-      index: '30',
-      spec: 'SPEC_24 // AGRITECH',
-      badgeText: 'SPEC_24 // AGRITECH',
-      category: 'WEB DEVELOPMENT',
-      filterGroup: 'Web Development',
-      title: 'Qkrishi Assignment',
-      description: 'An assignment repository associated with the Qkrishi name. Its precise objective and implemented features need source verification.',
-      features: [
-        'Assignment-specific implementation',
-        'Application workflow to be reviewed',
-        'Technical details to be confirmed'
-      ],
-      tags: ['Software Development'],
-      demoLink: null,
-      codeLink: 'https://github.com/Charan-718/Qkrishi-Assignment'
-    },
+
     {
       id: 'quantumcodehub',
       index: '31',
@@ -1193,29 +1051,22 @@ function App() {
       demoLink: null,
       codeLink: 'https://github.com/Charan-718/TwinAreo'
     },
-    {
-      id: 'twinops-tactix',
-      index: '34',
-      spec: 'SPEC_32 // DIGITAL TWIN OPERATIONS',
-      badgeText: 'SPEC_32 // DIGITAL TWIN OPERATIONS',
-      category: 'DIGITAL TWIN & OPERATIONS',
-      filterGroup: 'Digital Twin & Systems',
-      title: 'TwinOps Tactix',
-      description: 'A digital-twin and operations-oriented project. Its target system, simulation model, and implemented capabilities require README verification.',
-      features: [
-        'Operations-focused project concept',
-        'Digital-twin functionality to be confirmed',
-        'Simulation and monitoring capabilities to be verified'
-      ],
-      tags: ['Digital Twin', 'Simulation', 'Software Development'],
-      demoLink: null,
-      codeLink: 'https://github.com/Charan-718/TwinOps-Tactix'
-    }
+
   ];
 
+  // Arrange live deployed projects that have live demos first
+  const sortedProjects = useMemo(() => {
+    return [...allProjects].sort((a, b) => {
+      const aLive = a.demoLink ? 1 : 0;
+      const bLive = b.demoLink ? 1 : 0;
+      return bLive - aLive;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const filteredProjects = activeFilter === 'All'
-    ? allProjects
-    : allProjects.filter((p) => p.category === activeFilter || p.filterGroup === activeFilter);
+    ? sortedProjects
+    : sortedProjects.filter((p) => p.category === activeFilter || p.filterGroup === activeFilter);
 
   // Technical Competencies
   const skillCategories = [
@@ -1395,10 +1246,14 @@ function App() {
         </div>
       </div>
 
-      {/* Main Navigation Header */}
+      {/* Main Navigation Header with Cyberpunk HUD Chassis */}
       <header className="header-nav">
         <div className="container">
           <div className="nav-container">
+            {/* Left Cyber Corner Brackets */}
+            <span className="nav-bracket nav-bracket-tl" aria-hidden="true"></span>
+            <span className="nav-bracket nav-bracket-bl" aria-hidden="true"></span>
+
             {/* Brand Logo */}
             <button
               onClick={() => scrollToSection('hero')}
@@ -1435,21 +1290,27 @@ function App() {
 
             {/* Action CTA */}
             <div className="nav-actions">
-              <button
-                onClick={openCharacterArena}
-                className="btn-nav-action btn-nav-icon-only"
-                title="Play 3D Character Workspace"
-                style={{
-                  background: 'linear-gradient(135deg, #FF1E27 0%, #D40C14 100%)',
-                  color: '#ffffff',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(255, 30, 39, 0.4)',
-                }}
-                aria-label="Play 3D Character Workspace"
-              >
-                <i className="fa-solid fa-cube"></i>
-              </button>
+              <div className="nav-hazard-accent" aria-hidden="true"></div>
+
+              <div className="nav-cube-wrapper">
+                <div className="nav-cube-radar-rings" aria-hidden="true">
+                  <div className="nav-cube-radar-ring ring-1"></div>
+                  <div className="nav-cube-radar-ring ring-2"></div>
+                </div>
+
+                <button
+                  id="navCubeArenaBtn"
+                  onClick={openCharacterArena}
+                  className="btn-nav-action btn-nav-icon-only nav-cube-btn"
+                  title="Play 3D Character Workspace"
+                  aria-label="Play 3D Character Workspace"
+                >
+                  <div className="nav-cube-web-pattern" aria-hidden="true"></div>
+                  <div className="nav-cube-laser-sheen" aria-hidden="true"></div>
+                  <i className="fa-solid fa-cube nav-cube-icon"></i>
+                  <span className="nav-cube-emitter-nozzle" aria-hidden="true"></span>
+                </button>
+              </div>
 
               <button
                 className="mobile-toggle-btn"
@@ -1459,6 +1320,10 @@ function App() {
                 <i className={mobileMenuOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'}></i>
               </button>
             </div>
+
+            {/* Right Cyber Corner Brackets */}
+            <span className="nav-bracket nav-bracket-tr" aria-hidden="true"></span>
+            <span className="nav-bracket nav-bracket-br" aria-hidden="true"></span>
           </div>
         </div>
       </header>
@@ -1589,17 +1454,17 @@ function App() {
                       <linearGradient id="strapGrad" x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%" stopColor="#FF1E27" />
                         <stop offset="10%" stopColor="#FF1E27" />
-                        <stop offset="16%" stopColor="#0F0F14" />
-                        <stop offset="50%" stopColor="#262634" />
-                        <stop offset="84%" stopColor="#0F0F14" />
+                        <stop offset="16%" stopColor="#121114" />
+                        <stop offset="50%" stopColor="#262528" />
+                        <stop offset="84%" stopColor="#121114" />
                         <stop offset="90%" stopColor="#FF1E27" />
                         <stop offset="100%" stopColor="#FF1E27" />
                       </linearGradient>
                       <linearGradient id="metalGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#48485C" />
-                        <stop offset="30%" stopColor="#262632" />
-                        <stop offset="70%" stopColor="#5C5C74" />
-                        <stop offset="100%" stopColor="#1A1A24" />
+                        <stop offset="0%" stopColor="#48484c" />
+                        <stop offset="30%" stopColor="#262528" />
+                        <stop offset="70%" stopColor="#5c5b62" />
+                        <stop offset="100%" stopColor="#1a191c" />
                       </linearGradient>
                       <linearGradient id="metalShine" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
@@ -1615,7 +1480,7 @@ function App() {
                     {/* Lanyard Crimp Buckle / Metal Anchor */}
                     <rect x="171" y="38" width="38" height="11" rx="2.5" fill="url(#metalGrad)" stroke="#6E6E8A" strokeWidth="0.8" />
                     <rect x="171" y="38" width="38" height="5.5" rx="2.5" fill="url(#metalShine)" />
-                    <line x1="174" y1="43.5" x2="206" y2="43.5" stroke="#0C0C12" strokeWidth="1.2" />
+                    <line x1="174" y1="43.5" x2="206" y2="43.5" stroke="#121114" strokeWidth="1.2" />
 
                     {/* Anchor D-Ring loop where hook connects */}
                     <path d="M 182 48 L 198 48 Q 201 56 190 56 Q 179 56 182 48 Z" fill="none" stroke="url(#metalGrad)" strokeWidth="2.6" />
@@ -1635,14 +1500,14 @@ function App() {
                     <svg className="id-card-clasp-tag-svg" viewBox="0 0 380 94" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                       <defs>
                         <linearGradient id="metalGrad2" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor="#48485C" />
-                          <stop offset="30%" stopColor="#262632" />
-                          <stop offset="70%" stopColor="#5C5C74" />
-                          <stop offset="100%" stopColor="#1A1A24" />
+                          <stop offset="0%" stopColor="#48484c" />
+                          <stop offset="30%" stopColor="#262528" />
+                          <stop offset="70%" stopColor="#5c5b62" />
+                          <stop offset="100%" stopColor="#1a191c" />
                         </linearGradient>
                         <linearGradient id="tabGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#1C1C26" />
-                          <stop offset="100%" stopColor="#0D0D11" />
+                          <stop offset="0%" stopColor="#1c1b1e" />
+                          <stop offset="100%" stopColor="#100f12" />
                         </linearGradient>
                       </defs>
 
@@ -1655,12 +1520,12 @@ function App() {
 
                       {/* Main Clasp Body */}
                       <path d="M 183 15 L 197 15 L 195 32 L 185 32 Z" fill="url(#metalGrad2)" stroke="#666680" strokeWidth="0.8" />
-                      <line x1="186" y1="19" x2="194" y2="19" stroke="#12121A" strokeWidth="1" />
-                      <line x1="186" y1="22" x2="194" y2="22" stroke="#12121A" strokeWidth="1" />
-                      <line x1="186" y1="25" x2="194" y2="25" stroke="#12121A" strokeWidth="1" />
+                      <line x1="186" y1="19" x2="194" y2="19" stroke="#141316" strokeWidth="1" />
+                      <line x1="186" y1="22" x2="194" y2="22" stroke="#141316" strokeWidth="1" />
+                      <line x1="186" y1="25" x2="194" y2="25" stroke="#141316" strokeWidth="1" />
 
                       {/* Side thumb release lever */}
-                      <path d="M 183 18 L 177 23 L 183 26 Z" fill="#2A2A38" stroke="#FF1E27" strokeWidth="0.8" />
+                      <path d="M 183 18 L 177 23 L 183 26 Z" fill="#2a292c" stroke="#FF1E27" strokeWidth="0.8" />
 
                       {/* ID Badge Top Tab (Centered at X=190, Width=168, Y: 40..94) */}
                       <path d="M 106 94 L 134 44 Q 136 40 142 40 L 238 40 Q 244 40 246 44 L 274 94 Z"
@@ -1764,8 +1629,17 @@ function App() {
 
             {/* Swiss Poster Project Cards Grid */}
             <div className="projects-grid">
-              {filteredProjects.map((proj) => (
-                <div key={proj.id} className="project-card-swiss cyber-card-frame">
+              {filteredProjects.map((proj, idx) => (
+                <div
+                  key={proj.id}
+                  className={`project-card-swiss cyber-card-frame ${proj.demoLink ? 'clickable-card' : ''}`}
+                  onClick={(e) => {
+                    if (e.target.closest('a') || e.target.closest('button')) return;
+                    if (proj.demoLink) {
+                      window.open(proj.demoLink, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                >
                   <div className="cyber-card-inner">
                     {/* Corner Targeting Crosshairs (Images 1 & 2) */}
                     <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
@@ -1776,7 +1650,7 @@ function App() {
                     {/* Top Angled Cyber Ribbon Header */}
                     <div className="cyber-card-header">
                       <div className="cyber-header-banner">
-                        <span className="project-index-num">[{proj.index}]</span>
+                        <span className="project-index-num">[{String(idx + 1).padStart(2, '0')}]</span>
                       </div>
                       <div className="cyber-header-badge-col">
                         <span className="project-badge-tag">{proj.badgeText}</span>
@@ -1788,7 +1662,20 @@ function App() {
                       <div className="project-category-row">
                         <span className="project-category-sub">{proj.category}</span>
                       </div>
-                      <h3 className="project-title-swiss">{proj.title}</h3>
+                      <h3 className="project-title-swiss">
+                        {proj.demoLink ? (
+                          <a
+                            href={proj.demoLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="project-title-direct-link"
+                          >
+                            {proj.title}
+                          </a>
+                        ) : (
+                          proj.title
+                        )}
+                      </h3>
                       <p className="project-desc-swiss">{proj.description}</p>
 
                       <ul className="project-features-block">
@@ -2354,8 +2241,8 @@ function App() {
         </div>
       )}
 
-      {/* FLOATING 3D CHARACTER QUICK-LAUNCH CARD (MINIMAL 1:1 SQUARE WITH SPIDER-WEB LINK) */}
-      <SpideyWebHero onOpenArena={openCharacterArena} />
+      {/* SPIDER-MAN WEB ATTRACTION LINKED DIRECTLY TO NAVBAR 3D PLAY BUTTON */}
+      <SpideyWebHero onOpenArena={openCharacterArena} targetId="navCubeArenaBtn" />
     </div>
   );
 }

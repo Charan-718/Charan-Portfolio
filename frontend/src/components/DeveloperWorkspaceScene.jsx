@@ -9,109 +9,129 @@ import {
 } from './workspaceScreenTextures';
 
 export const workspaceProjects = [
+  // Page 1: Verified Live Deployed Production Applications (Arranged First)
   {
     id: 'dayflow',
-    title: 'DayFlow — Full-Stack HRMS',
-    hostName: 'day-flow-six.vercel.app',
-    hostBadge: 'Vercel Hosted',
+    title: 'DayFlow',
+    subtitle: 'HRMS • Workforce',
+    tag: '[01]',
     category: 'HRMS & WORKFORCE',
     repo: 'Charan-718/Day-Flow',
     liveUrl: 'https://day-flow-six.vercel.app/',
-    thumbnail: '/thumbnails/dayflow.png',
-    status: 'Live Production',
+    thumbnail: '/thumbnails/dayflow.jpg',
     accentColor: '#FF1E27',
-    badgeText: 'SPEC_01 // HRMS & RBAC',
+  },
+  {
+    id: 'sahakarya',
+    title: 'Sahakárya',
+    subtitle: 'Cooperative Gig Services',
+    tag: '[02]',
+    category: 'COOPERATIVE GIG SERVICES',
+    repo: 'Kouhsik33/Cooperative-Gig-Services-Platform',
+    liveUrl: 'https://sahakarya.vercel.app/',
+    thumbnail: '/thumbnails/sahakarya.jpg',
+    accentColor: '#F59E0B',
+  },
+  {
+    id: 'traveloop',
+    title: 'Traveloop',
+    subtitle: 'AI Travel Planning',
+    tag: '[03]',
+    category: 'AI TRAVEL ENGINE',
+    repo: 'mounikakorrakuti1/traveloop',
+    liveUrl: 'https://traveloop-plum.vercel.app/',
+    thumbnail: '/thumbnails/traveloop.jpg',
+    accentColor: '#3B82F6',
   },
   {
     id: 'freshmart',
-    title: 'freshmart-fsd',
-    hostName: 'freshmart-fsd.netlify.app',
-    hostBadge: 'Netlify Hosted',
+    title: 'FreshMart',
+    subtitle: 'Full-Stack E-Commerce',
+    tag: '[04]',
     category: 'FULL-STACK E-COMMERCE',
     repo: 'Charan-718/freshmart-fsd',
     liveUrl: 'https://freshmart-fsd.netlify.app/',
     thumbnail: '/thumbnails/freshmart.png',
-    status: 'Live Production',
     accentColor: '#22C55E',
-    badgeText: 'SPEC_10 // GROCERY SYSTEM',
   },
   {
     id: 'greenova',
-    title: 'greenova-csp',
-    hostName: 'greenova-csp.netlify.app',
-    hostBadge: 'Netlify Hosted',
+    title: 'Greenova',
+    subtitle: 'Sustainability & Clean-Tech',
+    tag: '[05]',
     category: 'SUSTAINABILITY & CLEAN-TECH',
     repo: 'Charan-718/greenova-csp',
     liveUrl: 'https://greenova-csp.netlify.app',
     thumbnail: '/thumbnails/greenova.png',
-    status: 'Live Production',
     accentColor: '#10B981',
-    badgeText: 'SPEC_11 // CARBON OFFSET',
   },
   {
     id: 'medireport',
-    title: 'medi-report',
-    hostName: 'medi-report.netlify.app',
-    hostBadge: 'Netlify Hosted',
+    title: 'MediReport',
+    subtitle: 'Healthcare Clinical AI',
+    tag: '[06]',
     category: 'HEALTHCARE DIAGNOSTICS AI',
     repo: 'Charan-718/medi-report',
     liveUrl: 'https://medi-report.netlify.app',
     thumbnail: '/thumbnails/medireport.png',
-    status: 'Live Production',
     accentColor: '#06B6D4',
-    badgeText: 'SPEC_13 // CLINICAL AI',
   },
+
+  // Page 2: Additional Verified Production Applications & High-Tech Demos
   {
     id: 'furnexa',
-    title: 'mini-erp-furnexa',
-    hostName: 'mini-erp-furnexa.netlify.app',
-    hostBadge: 'Netlify Hosted',
+    title: 'Furnexa',
+    subtitle: 'Logistics & Mini-ERP',
+    tag: '[07]',
     category: 'LOGISTICS & MINI-ERP',
     repo: 'Charan-718/mini-erp-furnexa',
     liveUrl: 'https://mini-erp-furnexa.netlify.app',
     thumbnail: '/thumbnails/furnexa.png',
-    status: 'Live Production',
     accentColor: '#F59E0B',
-    badgeText: 'SPEC_14 // LOGISTICS',
-  },
-  {
-    id: 'traveloop',
-    title: 'Traveloop — AI Travel Planner',
-    hostName: 'traveloop-plum.vercel.app',
-    hostBadge: 'Vercel Hosted',
-    category: 'AI TRAVEL ENGINE',
-    repo: 'mounikakorrakuti1/traveloop',
-    liveUrl: 'https://traveloop-plum.vercel.app/',
-    thumbnail: '/thumbnails/traveloop.png',
-    status: 'Live Production',
-    accentColor: '#3B82F6',
-    badgeText: 'SPEC_02 // GEOSPATIAL AI',
   },
   {
     id: 'learnloop',
-    title: 'LearnLoop — EdTech Hub',
-    hostName: 'charan-718.github.io/LearnLoop',
-    hostBadge: 'GitHub Pages',
+    title: 'LearnLoop',
+    subtitle: 'Interactive Learning Platform',
+    tag: '[08]',
     category: 'INTERACTIVE LEARNING',
     repo: 'Charan-718/LearnLoop',
     liveUrl: 'https://charan-718.github.io/LearnLoop/',
     thumbnail: '/thumbnails/learnloop.png',
-    status: 'Live Production',
     accentColor: '#8B5CF6',
-    badgeText: 'SPEC_12 // INTERACTIVE STUDY',
   },
   {
-    id: 'quantum-chatbot',
-    title: 'Quantum Conversational AI',
-    hostName: 'quantum-chatbot-green.vercel.app',
-    hostBadge: 'Vercel Hosted',
-    category: 'CONVERSATIONAL AI',
-    repo: 'Charan-718/Chatbot',
-    liveUrl: 'https://quantum-chatbot-green.vercel.app/',
-    thumbnail: '/thumbnails/quantum.png',
-    status: 'Live Production',
-    accentColor: '#EC4899',
-    badgeText: 'SPEC_05 // QUANTUM BOT',
+    id: 'quantumcodehub',
+    title: 'QuantumCodeHub',
+    subtitle: 'Quantum Computing • AI',
+    tag: '[09]',
+    category: 'QUANTUM COMPUTING • AI',
+    repo: 'Charan-718/QuantumCodeHub',
+    liveUrl: 'https://charan-718.github.io/Quantum-Keydistribution/',
+    thumbnail: '/thumbnails/quantumcodehub.jpg',
+    accentColor: '#38BDF8',
+  },
+  {
+    id: 'twinaero',
+    title: 'TwinAero',
+    subtitle: 'Digital Twin • Aerospace',
+    tag: '[10]',
+    category: 'DIGITAL TWIN • AEROSPACE',
+    repo: 'Charan-718/TwinAreo',
+    liveUrl: 'https://charan-718.github.io/Extinct-Era/dino_landing_page.html',
+    thumbnail: '/thumbnails/twinaero.jpg',
+    accentColor: '#FF4D55',
+  },
+  {
+    id: 'aqvh',
+    title: 'AQVH',
+    subtitle: 'Quantum AI • Stock Prediction',
+    tag: '[11]',
+    category: 'QUANTUM AI • STOCK PREDICTION',
+    repo: 'Charan-718',
+    liveUrl: 'https://charan-718.github.io/Schrodinger-Cat/',
+    thumbnail: '/thumbnails/aqvh.jpg',
+    accentColor: '#22C55E',
   },
 ];
 
@@ -424,11 +444,11 @@ export default function DeveloperWorkspaceScene({ onClose }) {
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
 
-    // 1. Central Hologram Multimode Animations
+    // 1. Central Hologram Multimode Animations (Lowered to ensure main banner is 100% visible)
     if (holoMode === 0) {
       if (globeRef.current) {
         globeRef.current.rotation.y += delta * 0.45;
-        globeRef.current.position.y = 1.15 + Math.sin(t * 1.8) * 0.04;
+        globeRef.current.position.y = 0.36 + Math.sin(t * 1.8) * 0.03;
       }
     } else if (holoMode === 1) {
       if (tesseractOuterRef.current) {
@@ -442,7 +462,7 @@ export default function DeveloperWorkspaceScene({ onClose }) {
     } else if (holoMode === 2) {
       if (neuralCoreRef.current) {
         neuralCoreRef.current.rotation.y += delta * 0.6;
-        neuralCoreRef.current.position.y = 1.15 + Math.sin(t * 2.2) * 0.04;
+        neuralCoreRef.current.position.y = 0.36 + Math.sin(t * 2.2) * 0.03;
       }
     }
 
@@ -555,19 +575,25 @@ export default function DeveloperWorkspaceScene({ onClose }) {
     const canvasY = (1 - e.uv.y) * 1088;
 
     let isClickable = false;
-    // Header swipe buttons: ‹ SWIPE (1530..1660, 48..96) and SWIPE › (1875..2005, 48..96)
-    if (canvasY >= 48 && canvasY <= 96) {
-      if ((canvasX >= 1530 && canvasX <= 1660) || (canvasX >= 1875 && canvasX <= 2005)) {
+    // Bottom controls: ‹ PREV (674..834), VIEW ALL PROJECTS → (874..1174), NEXT › (1214..1374)
+    if (canvasY >= 960 && canvasY <= 1024) {
+      if ((canvasX >= 674 && canvasX <= 834) || (canvasX >= 874 && canvasX <= 1174) || (canvasX >= 1214 && canvasX <= 1374)) {
         isClickable = true;
       }
-    } else if (canvasY >= 142 && canvasY <= 1008) {
+    } else if (canvasY >= 170 && canvasY <= 940) {
       const curX = currentScrollX.current;
+      const cardW = 590;
+      const cardH = 360;
+      const colGap = 44;
+      const rowGap = 34;
       for (let i = 0; i < workspaceProjects.length; i++) {
-        const col = Math.floor(i / 2);
-        const row = i % 2;
-        const cardX = 52 + col * 996 - curX;
-        const cardY = row === 0 ? 142 : 588;
-        if (canvasX >= cardX && canvasX <= cardX + 950 && canvasY >= cardY && canvasY <= cardY + 420) {
+        const page = Math.floor(i / 6);
+        const idxInPage = i % 6;
+        const col = idxInPage % 3;
+        const row = Math.floor(idxInPage / 3);
+        const cardX = page * 2048 + 95 + col * (cardW + colGap) - curX;
+        const cardY = 176 + row * (cardH + rowGap);
+        if (canvasX >= cardX && canvasX <= cardX + cardW && canvasY >= cardY && canvasY <= cardY + cardH) {
           isClickable = true;
           break;
         }
@@ -591,7 +617,7 @@ export default function DeveloperWorkspaceScene({ onClose }) {
   const handleProjectsWheel = (e) => {
     e.stopPropagation();
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    const maxScroll = projectsTextureObj?.getMaxScrollX ? projectsTextureObj.getMaxScrollX() : 1994;
+    const maxScroll = projectsTextureObj?.getMaxScrollX ? projectsTextureObj.getMaxScrollX() : 2048;
     targetScrollX.current = Math.max(0, Math.min(maxScroll, targetScrollX.current + delta * 1.5));
   };
 
@@ -605,47 +631,53 @@ export default function DeveloperWorkspaceScene({ onClose }) {
 
     const canvasX = e.uv.x * 2048;
     const canvasY = (1 - e.uv.y) * 1088;
-    const maxScroll = projectsTextureObj?.getMaxScrollX ? projectsTextureObj.getMaxScrollX() : 1994;
+    const maxScroll = projectsTextureObj?.getMaxScrollX ? projectsTextureObj.getMaxScrollX() : 2048;
 
-    // Header swipe controls
-    if (canvasY >= 48 && canvasY <= 96) {
-      if (canvasX >= 1530 && canvasX <= 1660) {
+    // Bottom action controls
+    if (canvasY >= 960 && canvasY <= 1024) {
+      // ‹ PREV button
+      if (canvasX >= 674 && canvasX <= 834) {
         playClickSound('switch');
-        targetScrollX.current = Math.max(0, targetScrollX.current - 996);
+        targetScrollX.current = Math.max(0, targetScrollX.current - 2048);
         return;
       }
-      if (canvasX >= 1875 && canvasX <= 2005) {
+      // VIEW ALL PROJECTS → button
+      if (canvasX >= 874 && canvasX <= 1174) {
+        playClickSound('click');
+        if (onClose) onClose();
+        setTimeout(() => {
+          const el = document.getElementById('projects');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+        return;
+      }
+      // NEXT › button
+      if (canvasX >= 1214 && canvasX <= 1374) {
         playClickSound('switch');
-        targetScrollX.current = Math.min(maxScroll, targetScrollX.current + 996);
+        targetScrollX.current = Math.min(maxScroll, targetScrollX.current + 2048);
         return;
       }
     }
 
     // Project cards click handling
     const curX = currentScrollX.current;
+    const cardW = 590;
+    const cardH = 360;
+    const colGap = 44;
+    const rowGap = 34;
+
     for (let i = 0; i < workspaceProjects.length; i++) {
-      const col = Math.floor(i / 2);
-      const row = i % 2;
-      const cardX = 52 + col * 996 - curX;
-      const cardY = row === 0 ? 142 : 588;
-      const cardW = 950;
-      const cardH = 420;
+      const page = Math.floor(i / 6);
+      const idxInPage = i % 6;
+      const col = idxInPage % 3;
+      const row = Math.floor(idxInPage / 3);
+      const cardX = page * 2048 + 95 + col * (cardW + colGap) - curX;
+      const cardY = 176 + row * (cardH + rowGap);
 
       if (canvasX >= cardX && canvasX <= cardX + cardW && canvasY >= cardY && canvasY <= cardY + cardH) {
         const proj = workspaceProjects[i];
-        const rightX = cardX + 476;
-        const btn1Y = cardY + 236;
-
-        // GitHub Repo button
-        if (canvasX >= rightX + 224 && canvasX <= rightX + 404 && canvasY >= btn1Y && canvasY <= btn1Y + 48) {
-          playClickSound('click');
-          window.open(`https://github.com/${proj.repo}`, '_blank', 'noopener,noreferrer');
-          return;
-        }
-
-        // Live Application URL or general card click
         playClickSound('click');
-        window.open(proj.liveUrl, '_blank', 'noopener,noreferrer');
+        window.open(proj.liveUrl || `https://github.com/${proj.repo}`, '_blank', 'noopener,noreferrer');
         return;
       }
     }
@@ -841,9 +873,9 @@ export default function DeveloperWorkspaceScene({ onClose }) {
           <meshStandardMaterial color="#000000" metalness={0.95} roughness={0.1} />
         </mesh>
 
-        {/* Upward Hologram Beam (Translucent Sci-Fi Red Cylinder) */}
-        <mesh position={[0, 0.85, 0]}>
-          <cylinderGeometry args={[0.75, 0.45, 0.8, 32, 1, true]} />
+        {/* Upward Hologram Beam (Compact low-profile beam) */}
+        <mesh position={[0, 0.46, 0]}>
+          <cylinderGeometry args={[0.42, 0.32, 0.28, 32, 1, true]} />
           <meshBasicMaterial
             color="#FF1E27"
             transparent
@@ -853,13 +885,13 @@ export default function DeveloperWorkspaceScene({ onClose }) {
           />
         </mesh>
 
-        {/* Multi-Mode 3D Holographic System */}
-        <group position={[0, 1.15, 0]}>
+        {/* Multi-Mode 3D Holographic System (Positioned low so main screen is 100% visible) */}
+        <group position={[0, 0.46, 0]}>
           {/* Mode 0: Global Planetary Network */}
           {holoMode === 0 && (
             <group ref={globeRef}>
               <mesh>
-                <sphereGeometry args={[0.55, 20, 20]} />
+                <sphereGeometry args={[0.34, 20, 20]} />
                 <meshBasicMaterial
                   color="#FF1E27"
                   wireframe
@@ -869,7 +901,7 @@ export default function DeveloperWorkspaceScene({ onClose }) {
                 />
               </mesh>
               <mesh>
-                <sphereGeometry args={[0.22, 16, 16]} />
+                <sphereGeometry args={[0.14, 16, 16]} />
                 <meshBasicMaterial
                   color="#FF5259"
                   transparent
@@ -880,8 +912,8 @@ export default function DeveloperWorkspaceScene({ onClose }) {
               {[0, 120, 240].map((deg, i) => {
                 const rad = (deg * Math.PI) / 180;
                 return (
-                  <mesh key={i} position={[Math.sin(rad) * 0.76, Math.sin(rad * 2) * 0.22, Math.cos(rad) * 0.76]}>
-                    <sphereGeometry args={[0.035, 8, 8]} />
+                  <mesh key={i} position={[Math.sin(rad) * 0.48, Math.sin(rad * 2) * 0.14, Math.cos(rad) * 0.48]}>
+                    <sphereGeometry args={[0.024, 8, 8]} />
                     <meshBasicMaterial color="#FFFFFF" />
                   </mesh>
                 );
