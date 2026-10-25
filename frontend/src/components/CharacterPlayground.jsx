@@ -887,13 +887,9 @@ export default function CharacterPlayground({ onClose, isCurtainActive = false }
                     } else {
                       setActiveModel(val);
                       setModelLabel(
-                        val.includes('sample_rigged_character.glb')
-                          ? 'Vanguard Rigged Soldier (Blender/Mixamo)'
-                          : val.includes('my-meshy-model-backup.glb')
-                          ? 'Meshy Character (Original Pale Skin Backup)'
-                          : val.includes('my-meshy-model.glb')
-                          ? 'Meshy Character (Dusky Skin — Charan)'
-                          : 'character.glb'
+                        val.includes('my-meshy-solid-model.glb')
+                          ? 'Meshy Character (Solid Model)'
+                          : 'Meshy Character (Dusky Skin — Charan)'
                       );
                     }
                   }}
@@ -911,9 +907,7 @@ export default function CharacterPlayground({ onClose, isCurtainActive = false }
                   }}
                 >
                   <option value={publicUrl + '/my-meshy-model.glb'}>Meshy Character (Dusky Skin — Charan)</option>
-                  <option value={publicUrl + '/my-meshy-model-backup.glb'}>Meshy Character (Original Pale Skin Backup)</option>
-                  <option value={publicUrl + '/models/sample_rigged_character.glb'}>Vanguard Rigged Soldier (Blender/Mixamo — Steady Hands)</option>
-                  <option value={publicUrl + '/models/character.glb'}>/models/character.glb (Mixamo Rigged)</option>
+                  <option value={publicUrl + '/my-meshy-solid-model.glb'}>Meshy Character (Solid Model)</option>
                   <option value="custom">Upload / Drop Custom .glb...</option>
                 </select>
 

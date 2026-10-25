@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './index.css';
 import CharacterPlayground from './components/CharacterPlayground';
 import SpideyWebHero from './components/SpideyWebHero';
+import HeroCircuitBackground from './components/HeroCircuitBackground';
 import {
   initGlobalButtonSounds,
   playClickSound,
@@ -216,12 +217,13 @@ function App() {
       cleanupSounds();
     };
   }, []);
-  // Image handling for charan_profile.png with fallbacks
+  // Image handling for charan_id_profile.png with fallbacks
   const [imageIndex, setImageIndex] = useState(0);
   const profileImages = [
     `${process.env.PUBLIC_URL}/charan_professional_profile.png`,
-    `${process.env.PUBLIC_URL}/profile.jpg`,
-    `${process.env.PUBLIC_URL}/profile.png`
+    `${process.env.PUBLIC_URL}/charan_professional_profile.png`,
+    `${process.env.PUBLIC_URL}/charan_profile.jpg`,
+    `${process.env.PUBLIC_URL}/charan_profile.png`
   ];
 
   // Dynamic Typed Text
@@ -232,6 +234,222 @@ function App() {
   // Contact Form State
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Real Physical Pendulum & Aerodynamic Dynamics for Hanging ID Badge
+  const idCardRef = useRef(null);
+  const cardPhysics = useRef({
+    theta: -3.5,        // Current swing angle (degrees)
+    omega_z: 0.0,       // Angular velocity (deg/s)
+    targetTheta: -3.5,  // Natural resting tilt (degrees)
+    phi_y: 0.0,         // Swivel rotation (degrees)
+    omega_y: 0.0,       // Swivel velocity (deg/s)
+    phi_x: 0.0,         // Pitch/lift rotation (degrees)
+    omega_x: 0.0,       // Pitch velocity (deg/s)
+    windEnvelope: 0.0,  // Continuous wind intensity envelope [0..1]
+    isHovered: false,
+    isDragging: false,
+    dragStartX: 0,
+    dragStartTheta: 0,
+    lastMouseX: null,
+    lastMouseTime: null,
+    windTime: 0,
+    lastTime: null,
+    rafId: null,
+  });
+
+  const updateCardPhysics = useCallback((now) => {
+    const p = cardPhysics.current;
+    if (!p.lastTime) p.lastTime = now;
+    const dt = Math.min((now - p.lastTime) / 1000, 0.06);
+    p.lastTime = now;
+
+    // Sub-stepping for rock-solid stability and zero numerical drift across all frame rates (60Hz / 120Hz / 144Hz)
+    const subSteps = 3;
+    const subDt = dt / subSteps;
+
+    // Physical pendulum constants
+    const w0_z = 8.2;                // Natural angular frequency ~8.2 rad/s (period ~ 0.77s)
+    const k_z = w0_z * w0_z;         // ~67.24 (restoring torque stiffness)
+    const zeta_z = 0.50;             // Smooth, organic underdamped settling ratio
+    const c_z = 2.0 * zeta_z * w0_z; // ~8.20 (linear air damping)
+    const c_z_quad = 0.012;          // Quadratic aerodynamic drag robing high velocity energy
+
+    // Y-axis swivel torsional spring
+    const w0_y = 10.5;
+    const k_y = w0_y * w0_y;
+    const c_y = 8.5;
+
+    // X-axis pitch/lift spring
+    const w0_x = 12.0;
+    const k_x = w0_x * w0_x;
+    const c_x = 10.5;
+
+    for (let s = 0; s < subSteps; s++) {
+      // Continuous wind envelope: ramps up smoothly on hover and decays gracefully on unhover
+      const targetW = (p.isHovered && !p.isDragging) ? 1.0 : 0.0;
+      const tau = (targetW > p.windEnvelope) ? 0.28 : 0.42;
+      p.windEnvelope += (targetW - p.windEnvelope) * (subDt / tau);
+
+      // Accumulate aerodynamic wind clock
+      if (p.windEnvelope > 0.001) {
+        p.windTime += subDt;
+      }
+      const wt = p.windTime;
+
+      // Realistic aero wind forces:
+      // - Steady breeze deflection (+14 deg/s^2 equivalent bias)
+      // - Primary aerodynamic vortex shedding oscillation (w = 3.9 rad/s, f = 0.62 Hz)
+      // - Secondary harmonic turbulence
+      const windForceZ = p.windEnvelope * 3.6 * (
+        15.0 + 
+        42.0 * Math.sin(3.9 * wt) + 
+        16.0 * Math.sin(6.4 * wt + 1.2) + 
+        10.0 * Math.cos(2.2 * wt)
+      );
+
+      const windForceY = p.windEnvelope * (34.0 * Math.sin(4.8 * wt + 0.8));
+      const windForceX = p.windEnvelope * (26.0 + 16.0 * Math.cos(3.6 * wt));
+
+      if (!p.isDragging) {
+        // Equation of motion for physical pendulum
+        const accZ = -k_z * (p.theta - p.targetTheta)
+                     - c_z * p.omega_z
+                     - c_z_quad * p.omega_z * Math.abs(p.omega_z)
+                     + windForceZ;
+        
+        p.omega_z += accZ * subDt;
+        p.theta += p.omega_z * subDt;
+      }
+
+      // Coupled Y-axis swivel
+      const driveY = -0.26 * p.omega_z + windForceY;
+      const accY = -k_y * p.phi_y - c_y * p.omega_y + driveY;
+      p.omega_y += accY * subDt;
+      p.phi_y += p.omega_y * subDt;
+
+      // Coupled X-axis lift
+      const driveX = 0.16 * Math.abs(p.omega_z) + windForceX;
+      const accX = -k_x * p.phi_x - c_x * p.omega_x + driveX;
+      p.omega_x += accX * subDt;
+      p.phi_x += p.omega_x * subDt;
+    }
+
+    // Apply 3D transform directly to DOM node for silky-smooth 120 FPS execution
+    if (idCardRef.current) {
+      idCardRef.current.style.transform = `rotate(${p.theta.toFixed(3)}deg) rotateY(${p.phi_y.toFixed(3)}deg) rotateX(${p.phi_x.toFixed(3)}deg)`;
+    }
+
+    // Natural settling: seamlessly continue animating until naturally damped to rest
+    const isStationary = !p.isHovered && !p.isDragging &&
+      p.windEnvelope < 0.005 &&
+      Math.abs(p.theta - p.targetTheta) < 0.008 &&
+      Math.abs(p.omega_z) < 0.01 &&
+      Math.abs(p.phi_y) < 0.008 &&
+      Math.abs(p.phi_x) < 0.008;
+
+    if (!isStationary) {
+      p.rafId = requestAnimationFrame(updateCardPhysics);
+    } else {
+      p.theta = p.targetTheta;
+      p.omega_z = 0;
+      p.phi_y = 0;
+      p.omega_y = 0;
+      p.phi_x = 0;
+      p.omega_x = 0;
+      p.windEnvelope = 0;
+      p.rafId = null;
+      p.lastTime = null;
+      if (idCardRef.current) {
+        idCardRef.current.style.transform = `rotate(${p.targetTheta}deg) rotateY(0deg) rotateX(0deg)`;
+      }
+    }
+  }, []);
+
+  const startIdCardPhysicsLoop = useCallback(() => {
+    const p = cardPhysics.current;
+    if (!p.rafId) {
+      p.lastTime = performance.now();
+      p.rafId = requestAnimationFrame(updateCardPhysics);
+    }
+  }, [updateCardPhysics]);
+
+  const handleIdCardPointerEnter = useCallback((e) => {
+    const p = cardPhysics.current;
+    p.isHovered = true;
+    p.lastMouseX = e.clientX;
+    p.lastMouseTime = performance.now();
+    startIdCardPhysicsLoop();
+  }, [startIdCardPhysicsLoop]);
+
+  const handleIdCardPointerMove = useCallback((e) => {
+    const p = cardPhysics.current;
+    const now = performance.now();
+
+    if (p.isDragging) {
+      const dx = e.clientX - p.dragStartX;
+      const targetDragTheta = p.dragStartTheta + dx * 0.08;
+      const dtDrag = Math.max(0.01, (now - p.lastMouseTime) / 1000);
+      const dragVel = (targetDragTheta - p.theta) / dtDrag;
+      p.theta = targetDragTheta;
+      p.omega_z = Math.max(-60, Math.min(60, dragVel * 0.5));
+      p.lastMouseTime = now;
+      startIdCardPhysicsLoop();
+      return;
+    }
+
+    if (p.lastMouseX !== null && p.lastMouseTime !== null) {
+      const dx = e.clientX - p.lastMouseX;
+      const dtMouse = Math.max(0.008, Math.min(0.08, (now - p.lastMouseTime) / 1000));
+      const mouseSpeed = dx / dtMouse;
+      const impulse = Math.max(-16, Math.min(16, mouseSpeed * 0.018));
+      p.omega_z = Math.max(-45, Math.min(45, p.omega_z + impulse * 0.4));
+      p.omega_y = Math.max(-25, Math.min(25, p.omega_y + impulse * 0.2));
+    }
+    p.lastMouseX = e.clientX;
+    p.lastMouseTime = now;
+    startIdCardPhysicsLoop();
+  }, [startIdCardPhysicsLoop]);
+
+  const handleIdCardPointerLeave = useCallback(() => {
+    const p = cardPhysics.current;
+    p.isHovered = false;
+    p.lastMouseX = null;
+    p.lastMouseTime = null;
+    // Seamlessly continue physics loop to naturally damp into resting tilt
+    startIdCardPhysicsLoop();
+  }, [startIdCardPhysicsLoop]);
+
+  const handleIdCardPointerDown = useCallback((e) => {
+    const p = cardPhysics.current;
+    p.isDragging = true;
+    p.dragStartX = e.clientX;
+    p.dragStartTheta = p.theta;
+    p.lastMouseTime = performance.now();
+    try {
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+    } catch (_) {}
+    startIdCardPhysicsLoop();
+  }, [startIdCardPhysicsLoop]);
+
+  const handleIdCardPointerUp = useCallback((e) => {
+    const p = cardPhysics.current;
+    if (p.isDragging) {
+      p.isDragging = false;
+      try {
+        e.currentTarget.releasePointerCapture?.(e.pointerId);
+      } catch (_) {}
+      startIdCardPhysicsLoop();
+    }
+  }, [startIdCardPhysicsLoop]);
+
+  useEffect(() => {
+    const physics = cardPhysics.current;
+    return () => {
+      if (physics.rafId) {
+        cancelAnimationFrame(physics.rafId);
+      }
+    };
+  }, []);
 
   // Track Scroll Progress & Active Section
   useEffect(() => {
@@ -376,55 +594,55 @@ function App() {
     {
       id: 1,
       index: '01',
-      title: 'DayFlow — Full-Stack HRMS & Workforce Platform',
+      title: 'DayFlow — Full-Stack HRMS Platform',
       category: 'Web Development',
       filterGroup: 'Web Development',
       badgeText: 'SPEC_01 // HRMS & RBAC',
-      description: 'Enterprise full-stack Human Resource Management System engineered for workforce administration, real-time attendance tracking, time-off approvals, and organizational analytics.',
+      description: 'Enterprise full-stack HRMS platform engineered for workforce administration and attendance tracking.',
       impact: 'Architected role-based access control (RBAC), JWT security layer, modular REST endpoints, and Docker deployment.',
-      tags: ['React.js', 'TypeScript', 'TailwindCSS', 'Node.js', 'Express.js', 'PostgreSQL', 'Prisma', 'Docker'],
+      tags: ['React.js', 'TypeScript', 'Node.js', 'PostgreSQL'],
       demoLink: 'https://day-flow-six.vercel.app/',
       codeLink: 'https://github.com/Charan-718/Day-Flow',
       features: [
-        'Multi-tier RBAC & JSON Web Token authentication system',
-        'Attendance lifecycle, time-off approvals & organizational dashboard metrics',
-        'Modular REST API layer with PostgreSQL, Prisma ORM & Docker containerization'
+        'Multi-tier RBAC & JWT authentication',
+        'Attendance tracking & approvals',
+        'REST API with PostgreSQL & Docker'
       ]
     },
     {
       id: 2,
       index: '02',
-      title: 'Traveloop — AI-Powered Smart Travel Planning Platform',
+      title: 'Traveloop — AI Travel Planning Platform',
       category: 'AI & Next-Gen',
       filterGroup: 'AI & Machine Learning',
       badgeText: 'SPEC_02 // AI TRAVEL ENGINE',
-      description: 'Intelligent trip generation and exploration platform featuring AI-driven custom itinerary synthesis, interactive budget telemetry, and location discovery.',
+      description: 'Intelligent trip generation platform featuring AI itinerary synthesis and location discovery.',
       impact: 'Constructed responsive map integrations, dynamic planning workflows, and predictive recommendation pipelines.',
-      tags: ['React.js', 'JavaScript', 'Node.js', 'Express.js', 'PostgreSQL', 'AI APIs'],
+      tags: ['React.js', 'Node.js', 'PostgreSQL', 'AI APIs'],
       demoLink: 'https://traveloop-plum.vercel.app/',
       codeLink: 'https://github.com/mounikakorrakuti1/traveloop',
       features: [
-        'AI-driven custom multi-day itinerary generation tailored to user preferences',
-        'Interactive geospatial map integration for real-time waypoint routing',
-        'Dynamic budget forecasting and PostgreSQL transactional database schema'
+        'AI custom multi-day itinerary generation',
+        'Interactive geospatial map routing',
+        'Dynamic budget forecasting & PostgreSQL'
       ]
     },
     {
       id: 3,
       index: '03',
-      title: 'Sahakãrya — Cooperative Gig Services Platform',
+      title: 'Sahakārya — Gig Services Platform',
       category: 'Web & Mobile',
       filterGroup: 'Mobile & IoT',
       badgeText: 'SPEC_03 // GIG PLATFORM',
-      description: 'Decentralized cooperative gig-services platform connecting customers with local service workers through transparent pricing models, intelligent dispatch matching, and worker welfare fund contributions.',
+      description: 'Decentralized gig-services platform connecting customers with local service workers transparently.',
       impact: 'Engineered scalable microservice backends with PostGIS geospatial queries, FastAPI AI service, and Docker containerization.',
-      tags: ['React.js', 'React Native', 'Node.js', 'Express.js', 'TypeScript', 'Python', 'FastAPI', 'PostgreSQL', 'PostGIS', 'Prisma', 'Docker'],
+      tags: ['React Native', 'FastAPI', 'PostgreSQL', 'Docker'],
       demoLink: 'https://sahakarya.vercel.app/',
       codeLink: 'https://github.com/Kouhsik33/Cooperative-Gig-Services-Platform',
       features: [
-        'Intelligent dispatch matching with geospatial spatial indexing via PostGIS',
-        'Real-time job bookings, transparent ledger pricing & worker welfare fund integration',
-        'Cross-platform React/React Native clients powered by FastAPI AI microservice'
+        'Intelligent dispatch with PostGIS indexing',
+        'Real-time bookings & transparent pricing',
+        'React Native client & FastAPI microservice'
       ]
     },
 
@@ -1150,8 +1368,14 @@ function App() {
           maskId="heroCutoutMask"
         />
       )}
-      {/* Top Scroll Progress Indicator */}
-      <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }}></div>
+      {/* Top Cyberpunk HUD Scroll Progress */}
+      <div className="cyber-scroll-track" aria-hidden="true">
+        <div className="cyber-scroll-bar" style={{ width: `${scrollProgress}%` }}>
+          <div className="cyber-scroll-head">
+            <span className="cyber-scroll-laser"></span>
+          </div>
+        </div>
+      </div>
 
       {/* Top Technical HUD System Strip */}
       <div className="top-system-strip">
@@ -1265,6 +1489,9 @@ function App() {
             1. HERO SECTION
             ========================================================================== */}
         <section id="hero" className="section-hero">
+          {/* Cybernetic Red Circuit Lines Background Canvas */}
+          <HeroCircuitBackground />
+
           <div className="container">
             <div className="hero-grid">
               {/* Left Column: Monumental Typographic Display */}
@@ -1353,51 +1580,154 @@ function App() {
                 </div>
               </div>
 
-              {/* Right Column: Poster Media Frame */}
+              {/* Right Column: Poster Media Frame as Hanging ID Card */}
               <div className="hero-media">
-                <div className="swiss-poster-frame">
-                  {/* Top Technical Metadata */}
-                  <div className="poster-top-bar">
-                    <span className="poster-header-code">PROFILE SPOTLIGHT</span>
-                    <span className="poster-header-uid">● VERIFIED PORTFOLIO</span>
-                  </div>
+                <div className="id-card-assembly">
+                  {/* 1. Upper Lanyard Strap (Anchored to top) */}
+                  <svg className="id-card-strap-svg" viewBox="0 0 380 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="strapGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#FF1E27" />
+                        <stop offset="10%" stopColor="#FF1E27" />
+                        <stop offset="16%" stopColor="#0F0F14" />
+                        <stop offset="50%" stopColor="#262634" />
+                        <stop offset="84%" stopColor="#0F0F14" />
+                        <stop offset="90%" stopColor="#FF1E27" />
+                        <stop offset="100%" stopColor="#FF1E27" />
+                      </linearGradient>
+                      <linearGradient id="metalGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#48485C" />
+                        <stop offset="30%" stopColor="#262632" />
+                        <stop offset="70%" stopColor="#5C5C74" />
+                        <stop offset="100%" stopColor="#1A1A24" />
+                      </linearGradient>
+                      <linearGradient id="metalShine" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
+                        <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+                      </linearGradient>
+                    </defs>
 
-                  {/* Main Portrait Canvas with Crisp Corner Brackets */}
-                  <div className="poster-canvas-box">
-                    <div className="poster-corner-mark mark-tl"></div>
-                    <div className="poster-corner-mark mark-tr"></div>
-                    <div className="poster-corner-mark mark-bl"></div>
-                    <div className="poster-corner-mark mark-br"></div>
+                    {/* Lanyard Strap (Length: 46px, Width: 32px, X: 174..206) */}
+                    <rect x="174" y="0" width="32" height="46" fill="url(#strapGrad)" />
+                    <line x1="180" y1="0" x2="180" y2="46" stroke="rgba(255,255,255,0.08)" strokeDasharray="2,2" strokeWidth="1" />
+                    <line x1="200" y1="0" x2="200" y2="46" stroke="rgba(255,255,255,0.08)" strokeDasharray="2,2" strokeWidth="1" />
 
-                    {imageIndex < profileImages.length ? (
-                      <img
-                        src={profileImages[imageIndex]}
-                        alt="Charan Sai Barnikani"
-                        className="poster-profile-img"
-                        onError={() => setImageIndex((prev) => prev + 1)}
-                      />
-                    ) : (
-                      <div className="poster-fallback-box">
-                        <i className="fa-solid fa-user-gear poster-fallback-icon"></i>
-                        <h4 style={{ color: '#fff', fontFamily: 'var(--font-heading)' }}>CHARAN SAI BARNIKANI</h4>
-                        <span style={{ color: 'var(--vermillion)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>B.TECH AIML</span>
-                      </div>
-                    )}
-                  </div>
+                    {/* Lanyard Crimp Buckle / Metal Anchor */}
+                    <rect x="171" y="38" width="38" height="11" rx="2.5" fill="url(#metalGrad)" stroke="#6E6E8A" strokeWidth="0.8" />
+                    <rect x="171" y="38" width="38" height="5.5" rx="2.5" fill="url(#metalShine)" />
+                    <line x1="174" y1="43.5" x2="206" y2="43.5" stroke="#0C0C12" strokeWidth="1.2" />
 
-                  {/* Poster Specification Footer */}
-                  <div className="poster-spec-footer">
-                    <div className="poster-spec-row">
-                      <span className="poster-spec-title">CHARAN SAI BARNIKANI</span>
-                      <span className="poster-spec-title" style={{ color: 'var(--vermillion)' }}>B.TECH AIML</span>
+                    {/* Anchor D-Ring loop where hook connects */}
+                    <path d="M 182 48 L 198 48 Q 201 56 190 56 Q 179 56 182 48 Z" fill="none" stroke="url(#metalGrad)" strokeWidth="2.6" />
+                  </svg>
+
+                  {/* 2. Swinging Unit: Clasp Hook, Top Badge Tab & Card (Swings from hook at top) */}
+                  <div
+                    className="id-card-swinging-unit"
+                    ref={idCardRef}
+                    onPointerEnter={handleIdCardPointerEnter}
+                    onPointerMove={handleIdCardPointerMove}
+                    onPointerLeave={handleIdCardPointerLeave}
+                    onPointerDown={handleIdCardPointerDown}
+                    onPointerUp={handleIdCardPointerUp}
+                    onPointerCancel={handleIdCardPointerUp}
+                  >
+                    <svg className="id-card-clasp-tag-svg" viewBox="0 0 380 94" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="metalGrad2" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor="#48485C" />
+                          <stop offset="30%" stopColor="#262632" />
+                          <stop offset="70%" stopColor="#5C5C74" />
+                          <stop offset="100%" stopColor="#1A1A24" />
+                        </linearGradient>
+                        <linearGradient id="tabGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#1C1C26" />
+                          <stop offset="100%" stopColor="#0D0D11" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Hook / Clasp Assembly (Origin pivot: Y=6) */}
+                      <path d="M 186 2 L 194 2 Q 196 8 190 8 Q 184 8 186 2 Z" fill="none" stroke="url(#metalGrad2)" strokeWidth="2.4" />
+
+                      {/* Swivel Joint Collar */}
+                      <rect x="184" y="7" width="12" height="8" rx="2" fill="url(#metalGrad2)" stroke="#767692" strokeWidth="0.8" />
+                      <circle cx="190" cy="11" r="1.5" fill="#FF1E27" />
+
+                      {/* Main Clasp Body */}
+                      <path d="M 183 15 L 197 15 L 195 32 L 185 32 Z" fill="url(#metalGrad2)" stroke="#666680" strokeWidth="0.8" />
+                      <line x1="186" y1="19" x2="194" y2="19" stroke="#12121A" strokeWidth="1" />
+                      <line x1="186" y1="22" x2="194" y2="22" stroke="#12121A" strokeWidth="1" />
+                      <line x1="186" y1="25" x2="194" y2="25" stroke="#12121A" strokeWidth="1" />
+
+                      {/* Side thumb release lever */}
+                      <path d="M 183 18 L 177 23 L 183 26 Z" fill="#2A2A38" stroke="#FF1E27" strokeWidth="0.8" />
+
+                      {/* ID Badge Top Tab (Centered at X=190, Width=168, Y: 40..94) */}
+                      <path d="M 106 94 L 134 44 Q 136 40 142 40 L 238 40 Q 244 40 246 44 L 274 94 Z"
+                            fill="url(#tabGrad)" stroke="rgba(255,255,255,0.28)" strokeWidth="1" />
+
+                      {/* Vermillion Accent along top edge of tab */}
+                      <path d="M 142 40 L 238 40" stroke="#FF1E27" strokeWidth="2.2" strokeLinecap="round" />
+
+                      {/* Left Circular Hole */}
+                      <circle cx="156" cy="55" r="5" fill="#080808" stroke="rgba(255,255,255,0.22)" strokeWidth="1" />
+                      {/* Right Circular Hole */}
+                      <circle cx="224" cy="55" r="5" fill="#080808" stroke="rgba(255,255,255,0.22)" strokeWidth="1" />
+
+                      {/* Center Oblong Slot */}
+                      <rect x="172" y="48.5" width="36" height="13" rx="6.5" fill="#080808" stroke="rgba(255,255,255,0.28)" strokeWidth="1" />
+
+                      {/* Hook looping through center slot */}
+                      <path d="M 187 32 L 187 50 Q 187 56 190 56 Q 193 56 193 50 L 193 32" fill="none" stroke="#14141E" strokeWidth="3.2" />
+                      <path d="M 187 36 L 187 54 Q 187 58 190 58 Q 193 58 193 54 L 193 36" fill="none" stroke="url(#metalGrad2)" strokeWidth="3.2" strokeLinecap="round" />
+                      <path d="M 188.5 44 L 188.5 54" stroke="rgba(255,255,255,0.7)" strokeWidth="1" strokeLinecap="round" />
+                    </svg>
+
+                  <div className="swiss-poster-frame">
+                    {/* Top Technical Metadata */}
+                    <div className="poster-top-bar">
+                      <span className="poster-header-code">PROFILE SPOTLIGHT</span>
+                      <span className="poster-header-uid">● VERIFIED PORTFOLIO</span>
                     </div>
-                    <div className="poster-spec-row">
-                      <span className="poster-subinfo">SRKR ENGINEERING COLLEGE</span>
-                      <span className="poster-subinfo">CLASS OF 2027</span>
+
+                    {/* Main Portrait Canvas with Crisp Corner Brackets */}
+                    <div className="poster-canvas-box">
+                      <div className="poster-corner-mark mark-tl"></div>
+                      <div className="poster-corner-mark mark-tr"></div>
+                      <div className="poster-corner-mark mark-bl"></div>
+                      <div className="poster-corner-mark mark-br"></div>
+
+                      {imageIndex < profileImages.length ? (
+                        <img
+                          src={profileImages[imageIndex]}
+                          alt="Charan Sai Barnikani"
+                          className="poster-profile-img"
+                          onError={() => setImageIndex((prev) => prev + 1)}
+                        />
+                      ) : (
+                        <div className="poster-fallback-box">
+                          <i className="fa-solid fa-user-gear poster-fallback-icon"></i>
+                          <h4 style={{ color: '#fff', fontFamily: 'var(--font-heading)' }}>CHARAN SAI BARNIKANI</h4>
+                          <span style={{ color: 'var(--vermillion)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>B.TECH AIML</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Poster Specification Footer */}
+                    <div className="poster-spec-footer">
+                      <div className="poster-spec-row">
+                        <span className="poster-spec-title">CHARAN SAI BARNIKANI</span>
+                        <span className="poster-spec-title" style={{ color: 'var(--vermillion)' }}>B.TECH AIML</span>
+                      </div>
+                      <div className="poster-spec-row">
+                        <span className="poster-subinfo">SRKR ENGINEERING COLLEGE</span>
+                        <span className="poster-subinfo">CLASS OF 2027</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         </section>
@@ -1879,14 +2209,23 @@ function App() {
                   <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
 
                   {/* Form Header */}
-                  <div className="cyber-card-header" style={{ borderBottom: '1px solid var(--border-hairline)', paddingBottom: '12px' }}>
-                    <div className="cyber-header-banner" style={{ background: 'transparent', padding: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 8px #22c55e' }}></span>
-                        <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.08em', color: '#ffffff' }}>SEND A DIRECT MESSAGE</span>
-                      </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '16px 24px',
+                    borderBottom: '1px solid var(--border-hairline)',
+                    background: 'rgba(0, 0, 0, 0.45)',
+                    position: 'relative',
+                    zIndex: 2
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 10px #22c55e', flexShrink: 0 }}></span>
+                      <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.08em', color: '#ffffff', whiteSpace: 'nowrap' }}>
+                        SEND A DIRECT MESSAGE
+                      </span>
                     </div>
-                    <div className="cyber-header-badge-col">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                       <span className="project-badge-tag">FAST RESPONSE</span>
                     </div>
                   </div>

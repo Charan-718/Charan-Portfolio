@@ -1243,5 +1243,5 @@ export default function Character({
 }
 
 useGLTF.preload((process.env.PUBLIC_URL || '') + '/my-meshy-model.glb');
-useGLTF.preload((process.env.PUBLIC_URL || '') + '/models/sample_rigged_character.glb');
+useGLTF.preload((process.env.PUBLIC_URL || '') + '/my-meshy-solid-model.glb');
 
