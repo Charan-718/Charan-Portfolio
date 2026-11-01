@@ -136,15 +136,9 @@ export function generatePortfolioEmailHtml({ cleanName, cleanEmail, cleanSubject
             <td style="background-color: #111422; padding: 22px 24px; border-bottom: 2px solid #FF1E27;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <!-- 718 Geometric Logo Emblem -->
-                  <td width="42" style="vertical-align: middle;">
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                      <tr>
-                        <td width="38" height="38" align="center" style="background-color: #FF1E27; color: #FFFFFF; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 16px; font-weight: 900; letter-spacing: -0.05em; border-radius: 3px; box-shadow: 0 0 12px rgba(255, 30, 39, 0.6);">
-                          718
-                        </td>
-                      </tr>
-                    </table>
+                  <!-- Futuristic Silver and Red C Emblem -->
+                  <td width="48" style="vertical-align: middle;">
+                    <img src="https://raw.githubusercontent.com/Charan-718/Charan-Portfolio/master/frontend/public/Futuristic_Silver_and_Red_C_Emblem.png" width="46" height="30" alt="Charan" style="display: block; border: 0; outline: none; text-decoration: none;" />
                   </td>
                   <td style="padding-left: 14px; vertical-align: middle;">
                     <div style="font-size: 17px; font-weight: 900; letter-spacing: -0.02em; color: #FFFFFF; text-transform: uppercase; line-height: 1.1;">

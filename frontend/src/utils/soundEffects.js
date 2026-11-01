@@ -133,30 +133,31 @@ export function playClickSound(type = 'click') {
       break;
     }
 
+    case 'telemetry':
     case 'thwip': {
-      // Spider-Man web-shooter THWIP sound (~130ms)
+      // Futuristic cyber lock-on chirp (~110ms)
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1450, now);
-      osc.frequency.exponentialRampToValueAtTime(260, now + 0.12);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.exponentialRampToValueAtTime(1760, now + 0.05);
+      osc.frequency.exponentialRampToValueAtTime(1320, now + 0.11);
 
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(1200, now);
-      filter.frequency.exponentialRampToValueAtTime(400, now + 0.12);
-      filter.Q.setValueAtTime(3.5, now);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(2400, now);
+      filter.frequency.exponentialRampToValueAtTime(800, now + 0.11);
 
       gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.24, now + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(masterGain);
       osc.start(now);
-      osc.stop(now + 0.14);
+      osc.stop(now + 0.12);
       break;
     }
 

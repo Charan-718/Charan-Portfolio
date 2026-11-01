@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './index.css';
 import CharacterPlayground from './components/CharacterPlayground';
-import SpideyWebHero from './components/SpideyWebHero';
+import CyberChevronAttraction from './components/CyberChevronAttraction';
 import HeroCircuitBackground from './components/HeroCircuitBackground';
 import {
   initGlobalButtonSounds,
@@ -21,22 +21,18 @@ function InitialBlankCurtain({ onComplete, maskId = 'heroCutoutMask' }) {
   onCompleteRef.current = onComplete;
 
   useEffect(() => {
-    try {
-      sessionStorage.setItem('charan_intro_shown', 'true');
-    } catch (e) {}
-
-    // Hold completely fixed for 2.0 seconds
+    // Hold completely fixed for 1.8 seconds showing circuit background through stencil
     const holdTimer = setTimeout(() => {
       setIsSweeping(true);
-    }, 2000);
+    }, 1800);
 
-    // After 1.2s constant-speed zoom, unmount overlay cleanly
+    // After 1.0s constant-speed zoom, unmount overlay cleanly (total 2.8s)
     const finishTimer = setTimeout(() => {
       if (onCompleteRef.current) onCompleteRef.current();
       try {
         window.dispatchEvent(new CustomEvent('charan-curtain-complete'));
       } catch (e) {}
-    }, 3200);
+    }, 2800);
 
     return () => {
       clearTimeout(holdTimer);
@@ -134,16 +130,16 @@ function App() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [toastMessage, setToastMessage] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // Initial 2-second black screen hold & cinematic transparent cutout zoom (only on initial load, never on reloads)
-  const [showInitialIntro, setShowInitialIntro] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      if (sessionStorage.getItem('charan_intro_shown')) {
-        return false; // Skip completely on all reloads!
-      }
-    } catch (e) {}
-    return true;
-  });
+  // Initial black screen hold & cinematic transparent cutout zoom
+  const [showInitialIntro, setShowInitialIntro] = useState(true);
+  const [introFinished, setIntroFinished] = useState(false);
+  const [isAeroSwinging, setIsAeroSwinging] = useState(false);
+
+  const handleCurtainComplete = useCallback(() => {
+    setShowInitialIntro(false);
+    setIntroFinished(true);
+    setIsAeroSwinging(true);
+  }, []);
 
   const [isCharacterArenaOpen, setIsCharacterArenaOpen] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -334,18 +330,16 @@ function App() {
       p.phi_x += p.omega_x * subDt;
     }
 
-    // Apply 3D transform directly to DOM node for silky-smooth 120 FPS execution
+    // Apply 2D transform directly to DOM node for silky-smooth 120 FPS execution without 3D skew
     if (idCardRef.current) {
-      idCardRef.current.style.transform = `rotate(${p.theta.toFixed(3)}deg) rotateY(${p.phi_y.toFixed(3)}deg) rotateX(${p.phi_x.toFixed(3)}deg)`;
+      idCardRef.current.style.transform = `rotate(${p.theta.toFixed(3)}deg)`;
     }
 
     // Natural settling: seamlessly continue animating until naturally damped to rest
     const isStationary = !p.isHovered && !p.isDragging &&
       p.windEnvelope < 0.005 &&
       Math.abs(p.theta - p.targetTheta) < 0.008 &&
-      Math.abs(p.omega_z) < 0.01 &&
-      Math.abs(p.phi_y) < 0.008 &&
-      Math.abs(p.phi_x) < 0.008;
+      Math.abs(p.omega_z) < 0.01;
 
     if (!isStationary) {
       p.rafId = requestAnimationFrame(updateCardPhysics);
@@ -360,7 +354,7 @@ function App() {
       p.rafId = null;
       p.lastTime = null;
       if (idCardRef.current) {
-        idCardRef.current.style.transform = `rotate(${p.targetTheta}deg) rotateY(0deg) rotateX(0deg)`;
+        idCardRef.current.style.transform = `rotate(${p.targetTheta}deg)`;
       }
     }
   }, []);
@@ -374,6 +368,7 @@ function App() {
   }, [updateCardPhysics]);
 
   const handleIdCardPointerEnter = useCallback((e) => {
+    setIsAeroSwinging(false);
     const p = cardPhysics.current;
     p.isHovered = true;
     p.lastMouseX = e.clientX;
@@ -420,6 +415,7 @@ function App() {
   }, [startIdCardPhysicsLoop]);
 
   const handleIdCardPointerDown = useCallback((e) => {
+    setIsAeroSwinging(false);
     const p = cardPhysics.current;
     p.isDragging = true;
     p.dragStartX = e.clientX;
@@ -476,8 +472,40 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Dynamic Role Typing Effect
+  // Handle intro completion choreography & audio cues
   useEffect(() => {
+    if (!introFinished) return;
+
+    // 1. Lanyard tension catch sound when ID tag reaches bottom of drop (~550ms)
+    const lanyardTimer = setTimeout(() => {
+      try {
+        playClickSound('brake');
+      } catch (e) {}
+    }, 550);
+
+    // 2. Hologram chime when title strikes (~850ms)
+    const titleAudioTimer = setTimeout(() => {
+      try {
+        playClickSound('hologram');
+      } catch (e) {}
+    }, 850);
+
+    // 3. End aerodynamic entry swing after 2.4s and allow physics engine full control
+    const swingEndTimer = setTimeout(() => {
+      setIsAeroSwinging(false);
+    }, 2400);
+
+    return () => {
+      clearTimeout(lanyardTimer);
+      clearTimeout(titleAudioTimer);
+      clearTimeout(swingEndTimer);
+    };
+  }, [introFinished]);
+
+  // Dynamic Role Typing Effect (Gated until intro completes)
+  useEffect(() => {
+    if (!introFinished) return;
+
     const currentRole = ROLES[currentRoleIndex];
     let typingSpeed = isDeleting ? 25 : 65;
 
@@ -500,7 +528,7 @@ function App() {
     }, typingSpeed);
 
     return () => clearTimeout(timer);
-  }, [displayedText, isDeleting, currentRoleIndex]);
+  }, [displayedText, isDeleting, currentRoleIndex, introFinished]);
 
   // Copy Email to Clipboard
   const copyEmailToClipboard = () => {
@@ -584,6 +612,39 @@ function App() {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  // Helper to split project title into black brand prefix and red product name (Matching Image 1)
+  const formatHardwareTitle = (title) => {
+    if (!title) return null;
+    if (title.includes('—')) {
+      const [main, ...rest] = title.split('—');
+      return (
+        <>
+          <span className="hw-title-black">{main.trim()} — </span>
+          <span className="hw-title-red">{rest.join('—').trim()}</span>
+        </>
+      );
+    }
+    if (title.includes(' - ')) {
+      const [main, ...rest] = title.split(' - ');
+      return (
+        <>
+          <span className="hw-title-black">{main.trim()} — </span>
+          <span className="hw-title-red">{rest.join(' - ').trim()}</span>
+        </>
+      );
+    }
+    const parts = title.split(' ');
+    if (parts.length > 1) {
+      return (
+        <>
+          <span className="hw-title-black">{parts[0]} </span>
+          <span className="hw-title-red">{parts.slice(1).join(' ')}</span>
+        </>
+      );
+    }
+    return <span className="hw-title-red">{title}</span>;
   };
 
   // Projects from Charan's Portfolio
@@ -1201,7 +1262,7 @@ function App() {
       <>
         {showInitialIntro && (
           <InitialBlankCurtain
-            onComplete={() => setShowInitialIntro(false)}
+            onComplete={handleCurtainComplete}
             maskId="characterCutoutMask"
           />
         )}
@@ -1211,11 +1272,11 @@ function App() {
   }
 
   return (
-    <div className="portfolio-app-swiss">
-      {/* Initial 2-Second Black Blank Screen & Transparent Cutout Zoom Reveal */}
+    <div className={`portfolio-app-swiss ${!introFinished ? 'intro-active' : 'intro-complete'}`}>
+      {/* Initial Black Blank Screen & Transparent Cutout Zoom Reveal */}
       {showInitialIntro && (
         <InitialBlankCurtain
-          onComplete={() => setShowInitialIntro(false)}
+          onComplete={handleCurtainComplete}
           maskId="heroCutoutMask"
         />
       )}
@@ -1257,17 +1318,15 @@ function App() {
             {/* Brand Logo */}
             <button
               onClick={() => scrollToSection('hero')}
-              className="logo-brand"
+              className="logo-brand logo-brand-emblem-only"
               aria-label="Charan Sai Barnikani Portfolio"
             >
-              <div className="logo-badge" title="Charan Sai Barnikani">
-                718
-              </div>
-              <div>
-                <div className="logo-text">
-                  CHARAN<span className="logo-dot">.</span>
-                </div>
-                <span className="logo-sub">AIML & FULL-STACK</span>
+              <div className="logo-badge logo-emblem-badge" title="Charan Sai Barnikani">
+                <img
+                  src={`${process.env.PUBLIC_URL}/Futuristic_Silver_and_Red_C_Emblem.png`}
+                  alt="Charan Sai Barnikani Portfolio Logo"
+                  className="logo-emblem-img"
+                />
               </div>
             </button>
 
@@ -1302,13 +1361,17 @@ function App() {
                   id="navCubeArenaBtn"
                   onClick={openCharacterArena}
                   className="btn-nav-action btn-nav-icon-only nav-cube-btn"
-                  title="Play 3D Character Workspace"
-                  aria-label="Play 3D Character Workspace"
+                  title="Open 3D Character Workspace"
+                  aria-label="Open 3D Character Workspace"
                 >
-                  <div className="nav-cube-web-pattern" aria-hidden="true"></div>
+                  <div className="nav-cube-chevron-indicator" aria-hidden="true">
+                    <span className="n-chev n1"></span>
+                    <span className="n-chev n2"></span>
+                    <span className="n-chev n3"></span>
+                    <span className="n-chev n4"></span>
+                  </div>
                   <div className="nav-cube-laser-sheen" aria-hidden="true"></div>
                   <i className="fa-solid fa-cube nav-cube-icon"></i>
-                  <span className="nav-cube-emitter-nozzle" aria-hidden="true"></span>
                 </button>
               </div>
 
@@ -1357,99 +1420,148 @@ function App() {
           {/* Cybernetic Red Circuit Lines Background Canvas */}
           <HeroCircuitBackground />
 
-          <div className="container">
+          <div className="container hero-container-content">
             <div className="hero-grid">
               {/* Left Column: Monumental Typographic Display */}
               <div className="hero-content">
                 <div className="spec-header-tag">
-                  <span className="spec-code" style={{ background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', borderColor: 'rgba(34, 197, 94, 0.3)' }}>AVAILABLE</span>
+                  <span className="spec-code" style={{ background: 'rgba(255, 30, 39, 0.12)', color: 'var(--vermillion, #FF1E27)', borderColor: 'rgba(255, 30, 39, 0.35)' }}>AVAILABLE</span>
                   <span>OPEN TO SOFTWARE ENGINEERING & INTERNSHIP ROLES</span>
                 </div>
 
                 <h1 className="hero-title">
-                  CHARAN SAI
+                  <span className="hero-title-first-line">CHARAN SAI</span>
                   <span className="hero-name-highlight">BARNIKANI</span>
                 </h1>
 
-                {/* Dynamic Terminal Role Indicator */}
-                <div className="hero-typed-role">
-                  <span className="role-tag">[ROLE]:</span>
-                  <span>{displayedText}</span>
-                  <span className="role-cursor">█</span>
-                </div>
+                {/* Cyberpunk Technical Spec Card (Arranging Role to Network as Card) */}
+                <div className="hero-spec-card">
+                  {/* 4 Cyberpunk Corner Bracket Chevrons matching Image 2 */}
+                  <svg className="spec-card-corner corner-tl" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                    <path d="M 2 26 L 2 12 L 12 2 L 26 2" stroke="#FF1E27" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <svg className="spec-card-corner corner-tr" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                    <path d="M 26 26 L 26 12 L 16 2 L 2 2" stroke="#FF1E27" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <svg className="spec-card-corner corner-bl" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                    <path d="M 2 2 L 2 16 L 12 26 L 26 26" stroke="#FF1E27" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <svg className="spec-card-corner corner-br" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                    <path d="M 26 2 L 26 16 L 16 26 L 2 26" stroke="#FF1E27" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
 
-                <p className="hero-summary">
-                  Artificial Intelligence & Machine Learning undergraduate at <strong>S R K R Engineering College</strong> with a <strong>9.12 CGPA</strong>. 
-                  Focused on architecting scalable full-stack web platforms (React, TypeScript, Node.js, PostgreSQL), engineering deep learning models for electrochemical feature analysis, and multi-agent AI systems.
-                </p>
+                  <div className="hero-spec-card-inner">
+                    <div className="hero-typed-role">
+                      <span className="role-tag">[ROLE]:</span>
+                      <span>{displayedText}</span>
+                      <span className="role-cursor">█</span>
+                    </div>
 
-                {/* 4-Column Technical Metrics Modular Grid */}
-                <div className="hero-metrics-grid">
-                  <div className="metric-cell">
-                    <span className="metric-index">[01]</span>
-                    <span className="metric-number">9.12</span>
-                    <span className="metric-label">CGPA / SRKR AIML</span>
-                  </div>
-                  <div className="metric-cell">
-                    <span className="metric-index">[02]</span>
-                    <span className="metric-number">3X</span>
-                    <span className="metric-label">HACKATHON WINNER</span>
-                  </div>
-                  <div className="metric-cell">
-                    <span className="metric-index">[03]</span>
-                    <span className="metric-number">800+</span>
-                    <span className="metric-label">DSA SOLVED</span>
-                  </div>
-                  <div className="metric-cell">
-                    <span className="metric-index">[04]</span>
-                    <span className="metric-number">03</span>
-                    <span className="metric-label">CORE PLATFORMS</span>
-                  </div>
-                </div>
+                    <p className="hero-summary">
+                      Artificial Intelligence & Machine Learning undergraduate at <strong>S R K R Engineering College</strong> with a <strong>9.12 CGPA</strong>. 
+                      Focused on architecting scalable full-stack web platforms (React, TypeScript, Node.js, PostgreSQL), engineering deep learning models for electrochemical feature analysis, and multi-agent AI systems.
+                    </p>
 
-                {/* Action CTAs */}
-                <div className="hero-actions">
-                  <a
-                    href="https://leetcode.com/u/Charan_0608/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="btn-secondary"
-                  >
-                    <i className="fa-solid fa-terminal"></i>
-                    <span>LEETCODE PROFILE</span>
-                  </a>
+                    {/* 4-Column Technical Metrics Modular Grid */}
+                    <div className="hero-metrics-grid">
+                      <div className="metric-cell">
+                        <span className="metric-index">[01]</span>
+                        <span className="metric-number">9.12</span>
+                        <span className="metric-label">CGPA / SRKR AIML</span>
+                      </div>
+                      <div className="metric-cell">
+                        <span className="metric-index">[02]</span>
+                        <span className="metric-number">3X</span>
+                        <span className="metric-label">HACKATHON WINNER</span>
+                      </div>
+                      <div className="metric-cell">
+                        <span className="metric-index">[03]</span>
+                        <span className="metric-number">800+</span>
+                        <span className="metric-label">DSA SOLVED</span>
+                      </div>
+                      <div className="metric-cell">
+                        <span className="metric-index">[04]</span>
+                        <span className="metric-number">03</span>
+                        <span className="metric-label">CORE PLATFORMS</span>
+                      </div>
+                    </div>
 
-                  <button onClick={copyEmailToClipboard} className="btn-outline" title="Copy Email">
-                    <i className="fa-regular fa-copy"></i>
-                    <span>COPY EMAIL</span>
-                  </button>
-                </div>
+                    {/* Action CTAs */}
+                    <div className="hero-actions">
+                      <button
+                        id="hero3DWorkspaceBtn"
+                        onClick={openCharacterArena}
+                        className="btn-primary hero-workspace-btn"
+                        title="Enter 3D Interactive Workspace"
+                        aria-label="Enter 3D Interactive Workspace"
+                      >
+                        <div className="hero-btn-sheen" aria-hidden="true"></div>
+                        <i className="fa-solid fa-cube hero-btn-cube"></i>
+                        <span className="hero-btn-label">3D WORKSPACE</span>
+                        <span className="hero-chevrons-attraction" aria-hidden="true">
+                          <svg className="hero-chevrons-svg" viewBox="0 0 96 26" fill="none">
+                            <defs>
+                              <linearGradient id="heroChevGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#FF555D" />
+                                <stop offset="35%" stopColor="#FF1E27" />
+                                <stop offset="70%" stopColor="#D40C14" />
+                                <stop offset="100%" stopColor="#6B0005" />
+                              </linearGradient>
+                              <filter id="heroChevGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feDropShadow dx="0" dy="0" stdDeviation="2.2" floodColor="#FF1E27" floodOpacity="0.85" />
+                              </filter>
+                            </defs>
+                            <path className="h-chev c1" d="M 4 2 L 12 2 L 22 13 L 12 24 L 4 24 L 13 13 Z" fill="url(#heroChevGrad)" filter="url(#heroChevGlow)" />
+                            <path className="h-chev c2" d="M 26 2 L 34 2 L 44 13 L 34 24 L 26 24 L 35 13 Z" fill="url(#heroChevGrad)" filter="url(#heroChevGlow)" />
+                            <path className="h-chev c3" d="M 48 2 L 56 2 L 66 13 L 56 24 L 48 24 L 57 13 Z" fill="url(#heroChevGrad)" filter="url(#heroChevGlow)" />
+                            <path className="h-chev c4" d="M 70 2 L 78 2 L 88 13 L 78 24 L 70 24 L 79 13 Z" fill="url(#heroChevGrad)" filter="url(#heroChevGlow)" />
+                          </svg>
+                        </span>
+                      </button>
 
-                {/* Social Connect Coordinates */}
-                <div className="hero-social-strip">
-                  <span className="social-strip-label">NETWORK:</span>
-                  <div className="social-links-row">
-                    <a href="https://github.com/Charan-718" target="_blank" rel="noreferrer" className="social-node-link" title="GitHub">
-                      <i className="fa-brands fa-github"></i>
-                    </a>
-                    <a href="https://www.linkedin.com/in/charan-sai-barnikani/" target="_blank" rel="noreferrer" className="social-node-link" title="LinkedIn">
-                      <i className="fa-brands fa-linkedin-in"></i>
-                    </a>
-                    <a href="https://leetcode.com/u/Charan_0608/" target="_blank" rel="noreferrer" className="social-node-link" title="LeetCode">
-                      <i className="fa-solid fa-code"></i>
-                    </a>
-                    <a href="mailto:charan06082004@gmail.com" className="social-node-link" title="Email">
-                      <i className="fa-regular fa-envelope"></i>
-                    </a>
+                      <a
+                        href="https://leetcode.com/u/Charan_0608/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-secondary"
+                      >
+                        <i className="fa-solid fa-terminal"></i>
+                        <span>LEETCODE PROFILE</span>
+                      </a>
+
+                      <button onClick={copyEmailToClipboard} className="btn-outline" title="Copy Email">
+                        <i className="fa-regular fa-copy"></i>
+                        <span>COPY EMAIL</span>
+                      </button>
+                    </div>
+
+                    {/* Social Connect Coordinates */}
+                    <div className="hero-social-strip">
+                      <span className="social-strip-label">NETWORK:</span>
+                      <div className="social-links-row">
+                        <a href="https://github.com/Charan-718" target="_blank" rel="noreferrer" className="social-node-link" title="GitHub">
+                          <i className="fa-brands fa-github"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/charan-sai-barnikani/" target="_blank" rel="noreferrer" className="social-node-link" title="LinkedIn">
+                          <i className="fa-brands fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://leetcode.com/u/Charan_0608/" target="_blank" rel="noreferrer" className="social-node-link" title="LeetCode">
+                          <i className="fa-solid fa-code"></i>
+                        </a>
+                        <a href="mailto:charan06082004@gmail.com" className="social-node-link" title="Email">
+                          <i className="fa-regular fa-envelope"></i>
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Right Column: Poster Media Frame as Hanging ID Card */}
               <div className="hero-media">
-                <div className="id-card-assembly">
-                  {/* 1. Upper Lanyard Strap (Anchored to top) */}
-                  <svg className="id-card-strap-svg" viewBox="0 0 380 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <div className={`id-card-assembly ${introFinished ? 'id-card-drop-enter' : ''}`}>
+                  {/* 1. Upper Lanyard Strap (Anchored to top, compact 38px height) */}
+                  <svg className="id-card-strap-svg" viewBox="0 0 380 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <defs>
                       <linearGradient id="strapGrad" x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%" stopColor="#FF1E27" />
@@ -1472,23 +1584,23 @@ function App() {
                       </linearGradient>
                     </defs>
 
-                    {/* Lanyard Strap (Length: 46px, Width: 32px, X: 174..206) */}
-                    <rect x="174" y="0" width="32" height="46" fill="url(#strapGrad)" />
-                    <line x1="180" y1="0" x2="180" y2="46" stroke="rgba(255,255,255,0.08)" strokeDasharray="2,2" strokeWidth="1" />
-                    <line x1="200" y1="0" x2="200" y2="46" stroke="rgba(255,255,255,0.08)" strokeDasharray="2,2" strokeWidth="1" />
+                    {/* Lanyard Strap (Length: 30px, Width: 32px, X: 174..206) */}
+                    <rect x="174" y="0" width="32" height="30" fill="url(#strapGrad)" />
+                    <line x1="180" y1="0" x2="180" y2="30" stroke="rgba(255,255,255,0.08)" strokeDasharray="2,2" strokeWidth="1" />
+                    <line x1="200" y1="0" x2="200" y2="30" stroke="rgba(255,255,255,0.08)" strokeDasharray="2,2" strokeWidth="1" />
 
                     {/* Lanyard Crimp Buckle / Metal Anchor */}
-                    <rect x="171" y="38" width="38" height="11" rx="2.5" fill="url(#metalGrad)" stroke="#6E6E8A" strokeWidth="0.8" />
-                    <rect x="171" y="38" width="38" height="5.5" rx="2.5" fill="url(#metalShine)" />
-                    <line x1="174" y1="43.5" x2="206" y2="43.5" stroke="#121114" strokeWidth="1.2" />
+                    <rect x="171" y="24" width="38" height="9" rx="2" fill="url(#metalGrad)" stroke="#6E6E8A" strokeWidth="0.8" />
+                    <rect x="171" y="24" width="38" height="4.5" rx="2" fill="url(#metalShine)" />
+                    <line x1="174" y1="28.5" x2="206" y2="28.5" stroke="#121114" strokeWidth="1.2" />
 
                     {/* Anchor D-Ring loop where hook connects */}
-                    <path d="M 182 48 L 198 48 Q 201 56 190 56 Q 179 56 182 48 Z" fill="none" stroke="url(#metalGrad)" strokeWidth="2.6" />
+                    <path d="M 182 32 L 198 32 Q 201 38 190 38 Q 179 38 182 32 Z" fill="none" stroke="url(#metalGrad)" strokeWidth="2.4" />
                   </svg>
 
                   {/* 2. Swinging Unit: Clasp Hook, Top Badge Tab & Card (Swings from hook at top) */}
                   <div
-                    className="id-card-swinging-unit"
+                    className={`id-card-swinging-unit ${isAeroSwinging ? 'aero-swing-active' : ''}`}
                     ref={idCardRef}
                     onPointerEnter={handleIdCardPointerEnter}
                     onPointerMove={handleIdCardPointerMove}
@@ -1627,12 +1739,12 @@ function App() {
               ))}
             </div>
 
-            {/* Swiss Poster Project Cards Grid */}
-            <div className="projects-grid">
+            {/* Industrial Hardware Project Cards Grid (Matching Image 1 & 2) */}
+            <div className="projects-grid cyber-hw-grid">
               {filteredProjects.map((proj, idx) => (
                 <div
                   key={proj.id}
-                  className={`project-card-swiss cyber-card-frame ${proj.demoLink ? 'clickable-card' : ''}`}
+                  className={`cyber-hw-card ${proj.demoLink ? 'has-demo' : ''}`}
                   onClick={(e) => {
                     if (e.target.closest('a') || e.target.closest('button')) return;
                     if (proj.demoLink) {
@@ -1640,88 +1752,151 @@ function App() {
                     }
                   }}
                 >
-                  <div className="cyber-card-inner">
-                    {/* Corner Targeting Crosshairs (Images 1 & 2) */}
-                    <span className="cyber-corner-bracket bracket-tl" aria-hidden="true"></span>
-                    <span className="cyber-corner-bracket bracket-tr" aria-hidden="true"></span>
-                    <span className="cyber-corner-bracket bracket-bl" aria-hidden="true"></span>
-                    <span className="cyber-corner-bracket bracket-br" aria-hidden="true"></span>
+                  {/* Decorative Allen Socket Bolts in 4 Corners (Image 1) */}
+                  <span className="cyber-hw-bolt bolt-tl" aria-hidden="true"></span>
+                  <span className="cyber-hw-bolt bolt-tr" aria-hidden="true"></span>
+                  <span className="cyber-hw-bolt bolt-bl" aria-hidden="true"></span>
+                  <span className="cyber-hw-bolt bolt-br" aria-hidden="true"></span>
 
-                    {/* Top Angled Cyber Ribbon Header */}
-                    <div className="cyber-card-header">
-                      <div className="cyber-header-banner">
-                        <span className="project-index-num">[{String(idx + 1).padStart(2, '0')}]</span>
+                  {/* Outer Red Glowing Conduits & Cable Connectors (Images 1 & 2) */}
+                  <span className="cyber-hw-conduit-left" aria-hidden="true"></span>
+                  <span className="cyber-hw-conduit-right" aria-hidden="true"></span>
+                  <span className="cyber-hw-underglow" aria-hidden="true"></span>
+
+                  <div className="cyber-hw-inner">
+                    {/* 1. TOP PLATE: Brushed Titanium / Silver Faceplate (Image 1) */}
+                    <div className="cyber-hw-plate-top">
+                      {/* Top Header: Red Trapezoid Badge + Spec Pill */}
+                      <div className="cyber-hw-top-header">
+                        {/* Red Trapezoid Index Badge (Sequential order: [01], [02], [03]...) */}
+                        <div className="cyber-hw-badge-red">
+                          <span className="cyber-hw-reticle-tl">┌</span>
+                          <span className="cyber-hw-index-num">[{String(idx + 1).padStart(2, '0')}]</span>
+                        </div>
+
+                        {/* Black Spec Pill with Hazard Stripes & LED (Sequential SPEC) */}
+                        <div className="cyber-hw-spec-pill">
+                          <span className="cyber-hw-spec-text">{`SPEC_${String(idx + 1).padStart(2, '0')} // BUILDS`}</span>
+                          <div className="cyber-hw-hazard-stripes" aria-hidden="true"></div>
+                          <span className="cyber-hw-led-dot" aria-hidden="true"></span>
+                        </div>
                       </div>
-                      <div className="cyber-header-badge-col">
-                        <span className="project-badge-tag">{proj.badgeText}</span>
-                        <div className="cyber-hazard-stripes" aria-hidden="true"></div>
+
+                      {/* Main Content Area on Silver Plate */}
+                      <div className="cyber-hw-top-body">
+                        <div className="cyber-hw-top-text">
+                          <span className="cyber-hw-category">{proj.category || 'WEB DEVELOPMENT'}</span>
+                          <h3 className="cyber-hw-title">
+                            {formatHardwareTitle(proj.title)}
+                          </h3>
+                          <p className="cyber-hw-desc">{proj.description}</p>
+                          <div className="cyber-hw-vent-barcode" aria-hidden="true">
+                            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                          </div>
+                        </div>
+
+                        {/* Top-Right Hardware Module: Sequential stamp, heatsink slats, slider switch */}
+                        <div className="cyber-hw-heatsink-module" aria-hidden="true">
+                          <div className="cyber-hw-stamp-21">({String(idx + 1).padStart(2, '0')})</div>
+                          <div className="cyber-hw-heatsink-slats">
+                            <span></span><span></span><span></span><span></span><span></span>
+                          </div>
+                          <div className="cyber-hw-slider-switch">
+                            <div className="cyber-hw-switch-track">
+                              <div className="cyber-hw-switch-ribs"></div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="project-card-body">
-                      <div className="project-category-row">
-                        <span className="project-category-sub">{proj.category}</span>
+                    {/* 2. BOTTOM PLATE: Deep Carbon Matte Telemetry Deck (Image 1) */}
+                    <div className="cyber-hw-plate-bottom">
+                      {/* Left Hardware Module: Rotary Jog Dial with Glowing Red Arc */}
+                      <div className="cyber-hw-dial-col" aria-hidden="true">
+                        <div className="cyber-hw-jog-dial">
+                          <div className="cyber-hw-dial-inner">
+                            <div className="cyber-hw-dial-indicator"></div>
+                          </div>
+                        </div>
+                        <div className="cyber-hw-dial-ticks">
+                          <span></span><span></span><span></span>
+                        </div>
                       </div>
-                      <h3 className="project-title-swiss">
-                        {proj.demoLink ? (
-                          <a
-                            href={proj.demoLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="project-title-direct-link"
-                          >
-                            {proj.title}
-                          </a>
-                        ) : (
-                          proj.title
-                        )}
-                      </h3>
-                      <p className="project-desc-swiss">{proj.description}</p>
 
-                      <ul className="project-features-block">
-                        {proj.features.map((feat, fIdx) => (
-                          <li key={fIdx}>
-                            <i className="fa-solid fa-angles-right" style={{ color: '#FF1E27', fontSize: '0.72rem' }}></i>
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      {/* Center Content: Features List & Tech Matrix Pills */}
+                      <div className="cyber-hw-bottom-center">
+                        <ul className="cyber-hw-features-list">
+                          {proj.features.map((feat, fIdx) => (
+                            <li key={fIdx}>
+                              <span className="cyber-hw-chevron">&gt;&gt;</span>
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
 
-                      <div className="project-tags-matrix">
-                        {proj.tags.map((tag, tIdx) => (
-                          <span key={tIdx} className="tech-pill">{tag}</span>
-                        ))}
+                        <div className="cyber-hw-tags-row">
+                          {proj.tags.map((tag, tIdx) => (
+                            <span key={tIdx} className="cyber-hw-tag-pill">{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right Hardware Module: Vertical LED Capsule, 5 Pinholes & Louvers */}
+                      <div className="cyber-hw-status-col" aria-hidden="true">
+                        <div className="cyber-hw-status-capsule">
+                          <span className="cyber-hw-laser-bar"></span>
+                        </div>
+                        <div className="cyber-hw-pinholes">
+                          <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <div className="cyber-hw-louver-vent">
+                          <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        {/* Dual LED Capsule Pill matching DIESEL console (Image 2) */}
+                        <div className="cyber-hw-capsule-strip">
+                          <span className="capsule-led"></span>
+                          <span className="capsule-led"></span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="project-card-footer cyber-card-footer">
+                    {/* 3. BOTTOM CONTROL / ACTION BAR (Image 1) */}
+                    <div className="cyber-hw-action-bar">
                       {proj.demoLink ? (
                         <a
                           href={proj.demoLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="project-action-btn btn-demo-swiss cyber-btn-left"
+                          className="cyber-hw-btn cyber-hw-btn-demo"
                         >
+                          <span className="cyber-hw-btn-bracket">┌</span>
                           <span>LAUNCH DEMO</span>
                           <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                          <span className="cyber-hw-btn-bracket">┘</span>
                         </a>
                       ) : (
                         <span
-                          className="project-action-btn btn-demo-disabled cyber-btn-left"
+                          className="cyber-hw-btn cyber-hw-btn-disabled"
                           title="Live demonstration not configured for this repository"
                         >
+                          <span className="cyber-hw-btn-bracket">┌</span>
                           <span>NOT CONFIGURED</span>
                           <i className="fa-solid fa-ban"></i>
+                          <span className="cyber-hw-btn-bracket">┘</span>
                         </span>
                       )}
+
                       <a
                         href={proj.codeLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="project-action-btn btn-code-swiss cyber-btn-right"
+                        className="cyber-hw-btn cyber-hw-btn-code"
                       >
+                        <span className="cyber-hw-btn-bracket">┌</span>
                         <i className="fa-brands fa-github"></i>
                         <span>SOURCE CODE</span>
+                        <span className="cyber-hw-btn-bracket">┘</span>
                       </a>
                     </div>
                   </div>
@@ -2107,7 +2282,7 @@ function App() {
                     zIndex: 2
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 10px #22c55e', flexShrink: 0 }}></span>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--vermillion, #FF1E27)', display: 'inline-block', boxShadow: '0 0 10px rgba(255, 30, 39, 0.8)', flexShrink: 0 }}></span>
                       <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.08em', color: '#ffffff', whiteSpace: 'nowrap' }}>
                         SEND A DIRECT MESSAGE
                       </span>
@@ -2208,9 +2383,16 @@ function App() {
       <footer className="site-footer-swiss">
         <div className="container">
           <div className="footer-flex-row">
-            <div>
-              <div className="footer-logo-title">CHARAN SAI BARNIKANI</div>
-              <div className="footer-sub-text">B.TECH IN ARTIFICIAL INTELLIGENCE &amp; MACHINE LEARNING • SRKR ENGINEERING COLLEGE</div>
+            <div className="footer-brand-wrap">
+              <img
+                src={`${process.env.PUBLIC_URL}/Futuristic_Silver_and_Red_C_Emblem.png`}
+                alt="Charan Sai Barnikani Portfolio Emblem"
+                className="footer-logo-emblem"
+              />
+              <div>
+                <div className="footer-logo-title">CHARAN SAI BARNIKANI</div>
+                <div className="footer-sub-text">B.TECH IN ARTIFICIAL INTELLIGENCE &amp; MACHINE LEARNING • SRKR ENGINEERING COLLEGE</div>
+              </div>
             </div>
 
             <div className="footer-nav-items">
@@ -2241,8 +2423,8 @@ function App() {
         </div>
       )}
 
-      {/* SPIDER-MAN WEB ATTRACTION LINKED DIRECTLY TO NAVBAR 3D PLAY BUTTON */}
-      <SpideyWebHero onOpenArena={openCharacterArena} targetId="navCubeArenaBtn" />
+      {/* CYBER CHEVRON ATTRACTION LINKED DIRECTLY TO NAVBAR 3D PLAY BUTTON */}
+      <CyberChevronAttraction onOpenArena={openCharacterArena} targetId="navCubeArenaBtn" enabled={introFinished} />
     </div>
   );
 }

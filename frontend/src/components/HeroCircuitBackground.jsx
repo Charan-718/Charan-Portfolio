@@ -110,29 +110,29 @@ export default function HeroCircuitBackground() {
           {/* Lane 1 (Accent with animated pulse) */}
           <path
             className="circuit-trace-accent"
-            d="M 510,310 L 640,310 L 700,370 L 810,370 L 850,330 L 950,330"
+            d="M 520,260 L 650,260 L 700,310 L 810,310 L 850,270 L 950,270"
           />
           <path
             className="circuit-pulse pulse-mid"
-            d="M 510,310 L 640,310 L 700,370 L 810,370 L 850,330 L 950,330"
+            d="M 520,260 L 650,260 L 700,310 L 810,310 L 850,270 L 950,270"
           />
 
           {/* Lane 2 (Mid) */}
           <path
             className="circuit-trace-base"
-            d="M 495,325 L 630,325 L 685,380 L 800,380 L 835,345 L 935,345"
+            d="M 505,275 L 640,275 L 685,325 L 800,325 L 835,285 L 935,285"
           />
 
           {/* Lane 3 (Inner) */}
           <path
             className="circuit-trace-base"
-            d="M 480,340 L 620,340 L 670,390 L 790,390 L 820,360 L 920,360"
+            d="M 490,290 L 630,290 L 670,340 L 790,340 L 820,300 L 920,300"
           />
 
           {/* Terminal Pads */}
-          <circle cx="950" cy="330" r="4" className="circuit-node-dot" />
-          <circle cx="935" cy="345" r="3.2" className="circuit-node-ring" />
-          <circle cx="920" cy="360" r="3.5" className="circuit-node-dot" />
+          <circle cx="950" cy="270" r="4" className="circuit-node-dot" />
+          <circle cx="935" cy="285" r="3.2" className="circuit-node-ring" />
+          <circle cx="920" cy="300" r="3.5" className="circuit-node-dot" />
         </g>
 
         {/* Center Alignment Crosshairs */}
@@ -147,22 +147,8 @@ export default function HeroCircuitBackground() {
         </g>
 
         {/* ==========================================================================
-            3. BOTTOM LEFT: METRICS BOUNDARY TECH BRACKET & BUSES
+            3. BOTTOM BUS TRACES RUNNING ALONG FOOTER
             ========================================================================== */}
-        {/* Chamfered 45-degree Technical Framing Box (Cyberpunk Card Perimeter) */}
-        <path
-          className="circuit-trace-subtle"
-          d="M 48,465 L 78,435 L 485,435 L 515,465 L 515,720 L 485,750 L 78,750 L 48,720 Z"
-          strokeDasharray="16, 7, 5, 7"
-        />
-
-        {/* High-Contrast Chamfered Corner Chevrons */}
-        <path d="M 42,488 L 42,460 L 68,434 L 105,434" fill="none" stroke="#FF1E27" strokeOpacity="0.48" strokeWidth="1.8" />
-        <path d="M 521,488 L 521,460 L 495,434 L 458,434" fill="none" stroke="#FF1E27" strokeOpacity="0.48" strokeWidth="1.8" />
-        <path d="M 42,698 L 42,725 L 68,751 L 105,751" fill="none" stroke="#FF1E27" strokeOpacity="0.48" strokeWidth="1.8" />
-        <path d="M 521,698 L 521,725 L 495,751 L 458,751" fill="none" stroke="#FF1E27" strokeOpacity="0.48" strokeWidth="1.8" />
-
-        {/* Bottom Bus Traces Running Along Footer */}
         <path
           className="circuit-trace-base"
           d="M 0,815 L 160,815 L 210,765 L 390,765 L 420,795 L 630,795"
@@ -170,8 +156,6 @@ export default function HeroCircuitBackground() {
         <circle cx="630" cy="795" r="4" className="circuit-node-dot" />
         <path className="circuit-trace-base" d="M 210,765 L 240,735 L 330,735" />
         <circle cx="330" cy="735" r="3.2" className="circuit-node-ring" />
-
-        <text x="76" y="774" className="circuit-label-text">{"// CORE.METRICS.SPEC [CGPA_9.12]"}</text>
 
         {/* ==========================================================================
             4. RIGHT SIDE: CYBERPUNK MOTHERBOARD FRAME & ID BADGE CONTOUR

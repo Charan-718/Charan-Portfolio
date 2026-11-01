@@ -43,6 +43,16 @@
   --font-body: 'Chakra Petch', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'Chakra Petch', 'JetBrains Mono', monospace;
 
+  /* Golden Ratio Modular Typography Scale (phi = 1.618034) */
+  --scale-2xs: 0.618rem;   /* phi^-1  ~  9.9px (micro tech indices, coordinates) */
+  --scale-xs:  0.786rem;   /* phi^-0.5 ~ 12.6px (spec tags, badges, buttons) */
+  --scale-sm:  0.885rem;   /* ~ 14.2px (compact captions, sub-metadata) */
+  --scale-base: 1.000rem;  /* phi^0   = 16.0px (standard body typography) */
+  --scale-md:  1.272rem;   /* phi^0.5 ~ 20.4px (subheadings, card titles) */
+  --scale-lg:  1.618rem;   /* phi^1   ~ 25.9px (metrics numbers, section taglines) */
+  --scale-xl:  2.058rem;   /* phi^1.5 ~ 32.9px (section h2 titles) */
+  --scale-2xl: 2.618rem;   /* phi^2   ~ 41.9px (monumental hero h1) */
+
   /* Layout Constants */
   --container-max: 1280px;
   --header-height: 72px;
@@ -370,7 +380,42 @@ button {
   flex-shrink: 0;
 }
 
-.logo-brand:hover .logo-badge {
+.logo-brand-emblem-only {
+  padding: 4px 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-emblem-badge {
+  width: 48px;
+  height: 40px;
+  background: transparent;
+  clip-path: none;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.logo-emblem-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(255, 30, 39, 0.7));
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), filter 0.28s ease;
+}
+
+.logo-brand:hover .logo-emblem-img {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 18px rgba(255, 30, 39, 0.98)) drop-shadow(0 0 25px rgba(255, 255, 255, 0.5));
+}
+
+.logo-brand:hover .logo-badge:not(.logo-emblem-badge) {
   transform: rotate(-5deg) scale(1.05);
 }
 
@@ -710,16 +755,16 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 12px;
+  padding: 4px 10px;
   background: var(--bg-panel);
   border: 1px solid var(--border-subtle);
   border-left: 3px solid var(--vermillion);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: var(--scale-xs, 0.786rem);
   color: var(--text-secondary);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: clamp(10px, 1.6vh, 18px);
+  margin-bottom: clamp(6px, 1vh, 10px);
 }
 
 .spec-code {
@@ -727,23 +772,30 @@ button {
   font-weight: 700;
 }
 
-/* Massive Swiss Typography Headline */
+/* Golden Ratio Typography Headline (Balanced Viewport Fit) */
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 4.3vw, 4.2rem);
+  font-size: clamp(1.85rem, 2.618vw, 2.618rem);
   font-weight: 800;
-  line-height: 0.95;
-  letter-spacing: -0.05em;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
   text-transform: uppercase;
   color: var(--text-white);
-  margin-bottom: clamp(12px, 1.8vh, 18px);
+  margin-top: -8px;
+  margin-bottom: clamp(6px, 1vh, 10px);
+}
+
+.hero-title-first-line {
+  display: block;
+  white-space: nowrap;
 }
 
 .hero-name-highlight {
   display: block;
   color: var(--vermillion);
-  text-shadow: 0 0 35px var(--vermillion-glow);
+  text-shadow: 0 0 28px var(--vermillion-glow);
   position: relative;
+  white-space: nowrap;
 }
 
 /* Dynamic Terminal Role */
@@ -752,19 +804,19 @@ button {
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: clamp(0.92rem, 1.1vw, 1.02rem);
+  font-size: clamp(0.786rem, 0.9vw, 0.885rem);
   font-weight: 600;
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-hairline);
-  padding: clamp(6px, 1vh, 9px) 14px;
-  margin-bottom: clamp(12px, 1.8vh, 18px);
+  padding: 4px 10px;
+  margin-bottom: clamp(6px, 1vh, 10px);
   width: fit-content;
 }
 
 .role-tag {
   color: var(--vermillion);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
@@ -779,12 +831,94 @@ button {
   50%, 100% { opacity: 0; }
 }
 
+/* ==========================================================================
+   HERO CYBERPUNK SPEC CARD (Arranged from Role to Network Block)
+   ========================================================================== */
+.hero-spec-card {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  margin-top: clamp(6px, 1vh, 10px);
+  background: transparent;
+  border: 1px solid rgba(255, 30, 39, 0.22);
+  clip-path: polygon(
+    18px 0,
+    calc(100% - 18px) 0,
+    100% 18px,
+    100% calc(100% - 18px),
+    calc(100% - 18px) 100%,
+    18px 100%,
+    0 calc(100% - 18px),
+    0 18px
+  );
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+}
+
+.hero-spec-card:hover {
+  border-color: rgba(255, 30, 39, 0.45);
+}
+
+.hero-spec-card-inner {
+  clip-path: inherit;
+  background: transparent;
+  padding: clamp(14px, 1.8vh, 18px) clamp(16px, 2vw, 22px) clamp(12px, 1.5vh, 16px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 4 High-Contrast Vermillion Corner Chevrons (Matching Reference Image 2) */
+.spec-card-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10;
+  filter: drop-shadow(0 0 4px #FF1E27);
+  transition: transform 0.3s ease;
+}
+
+.spec-card-corner.corner-tl {
+  top: 1px;
+  left: 1px;
+}
+
+.spec-card-corner.corner-tr {
+  top: 1px;
+  right: 1px;
+}
+
+.spec-card-corner.corner-bl {
+  bottom: 1px;
+  left: 1px;
+}
+
+.spec-card-corner.corner-br {
+  bottom: 1px;
+  right: 1px;
+}
+
+.hero-spec-card:hover .spec-card-corner.corner-tl {
+  transform: translate(-1px, -1px);
+}
+.hero-spec-card:hover .spec-card-corner.corner-tr {
+  transform: translate(1px, -1px);
+}
+.hero-spec-card:hover .spec-card-corner.corner-bl {
+  transform: translate(-1px, 1px);
+}
+.hero-spec-card:hover .spec-card-corner.corner-br {
+  transform: translate(1px, 1px);
+}
+
 .hero-summary {
-  font-size: clamp(0.94rem, 1.05vw, 1.02rem);
+  font-size: clamp(0.82rem, 0.9vw, 0.885rem);
   color: var(--text-secondary);
   line-height: 1.6;
-  max-width: 620px;
-  margin-bottom: clamp(14px, 2.2vh, 24px);
+  max-width: 100%;
+  margin-bottom: clamp(10px, 1.4vh, 14px);
 }
 
 .hero-summary strong {
@@ -792,19 +926,19 @@ button {
   font-weight: 600;
 }
 
-/* 4-Column Technical Metrics Modular Grid */
+/* 4-Column Technical Metrics Modular Grid (Golden Ratio Scaled) */
 .hero-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
   background: var(--border-hairline);
   border: 1px solid var(--border-hairline);
-  margin-bottom: clamp(14px, 2.2vh, 24px);
+  margin-bottom: clamp(12px, 1.6vh, 16px);
 }
 
 .metric-cell {
   background: var(--bg-panel);
-  padding: clamp(10px, 1.5vh, 16px) clamp(10px, 1.2vw, 16px);
+  padding: clamp(6px, 0.9vh, 9px) clamp(8px, 1vw, 12px);
   position: relative;
   transition: all 0.2s ease;
 }
@@ -817,7 +951,7 @@ button {
 
 .metric-index {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: var(--scale-2xs, 0.618rem);
   color: var(--vermillion);
   display: block;
   letter-spacing: 0.1em;
@@ -825,8 +959,8 @@ button {
 }
 
 .metric-number {
-  font-family: var(--font-heading);
-  font-size: clamp(1.45rem, 1.9vw, 1.8rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.272rem, 1.618vw, 1.618rem);
   font-weight: 800;
   color: var(--text-white);
   line-height: 1;
@@ -836,7 +970,7 @@ button {
 
 .metric-label {
   font-family: var(--font-mono);
-  font-size: clamp(0.62rem, 0.7vw, 0.68rem);
+  font-size: var(--scale-2xs, 0.618rem);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -849,8 +983,8 @@ button {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: clamp(8px, 1vw, 14px);
-  margin-bottom: clamp(14px, 2vh, 22px);
+  gap: clamp(8px, 1vw, 12px);
+  margin-bottom: clamp(10px, 1.4vh, 14px);
 }
 
 .btn-primary {
@@ -884,6 +1018,124 @@ button {
 
 .btn-primary:hover i {
   transform: translateX(4px);
+}
+
+/* Hero 3D Workspace Attraction Button & Chevrons (>>>>) */
+.hero-workspace-btn {
+  background: linear-gradient(135deg, #FF1E27 0%, #D40C14 55%, #800004 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  color: #FFFFFF !important;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  ) !important;
+  box-shadow: 
+    0 0 20px rgba(255, 30, 39, 0.55),
+    0 4px 16px rgba(0, 0, 0, 0.6) !important;
+  padding: clamp(10px, 1.4vh, 13px) clamp(16px, 1.8vw, 22px);
+  gap: 10px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease !important;
+}
+
+.hero-workspace-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: #FFFFFF !important;
+  box-shadow: 
+    0 0 32px rgba(255, 30, 39, 0.9),
+    0 0 45px rgba(255, 255, 255, 0.35),
+    0 8px 24px rgba(0, 0, 0, 0.7) !important;
+}
+
+.hero-btn-cube {
+  font-size: 1.05rem;
+  color: #FFFFFF;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+  animation: heroCubeSpin 4s ease-in-out infinite;
+}
+
+@keyframes heroCubeSpin {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-1.5px) rotate(6deg); }
+}
+
+.hero-btn-label {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  color: #FFFFFF;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.hero-btn-sheen {
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+  transform: skewX(-25deg);
+  animation: heroBtnSheenSweep 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes heroBtnSheenSweep {
+  0% { left: -150%; }
+  35% { left: 220%; }
+  100% { left: 220%; }
+}
+
+/* 4 Red Chevrons Container in Hero Button */
+.hero-chevrons-attraction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+}
+
+.hero-chevrons-svg {
+  width: 64px;
+  height: 18px;
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 0 4px #FF1E27);
+}
+
+/* Individual Chevrons Pulsing Wave */
+.hero-chevrons-svg .h-chev {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  transform-origin: center;
+  animation: chevronChase 1.4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-chevrons-svg .h-chev.c1 { animation-delay: 0s; }
+.hero-chevrons-svg .h-chev.c2 { animation-delay: 0.15s; }
+.hero-chevrons-svg .h-chev.c3 { animation-delay: 0.3s; }
+.hero-chevrons-svg .h-chev.c4 { animation-delay: 0.45s; }
+
+@keyframes chevronChase {
+  0%, 100% {
+    opacity: 0.45;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(2.5px);
+    filter: drop-shadow(0 0 6px #FFFFFF);
+  }
+}
+
+.hero-workspace-btn:hover .hero-chevrons-svg .h-chev {
+  animation-duration: 0.8s;
+  opacity: 1;
 }
 
 .btn-secondary {
@@ -1005,26 +1257,25 @@ button {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: clamp(340px, 30vw, 410px);
+  max-width: clamp(255px, 21.5vw, 295px);
   z-index: 1;
-  perspective: 1200px;
   /* Physically realistic directional drop shadow cast to the left and bottom (matching reference image) */
-  filter: drop-shadow(-20px 24px 28px rgba(0, 0, 0, 0.92))
-          drop-shadow(-8px 10px 14px rgba(0, 0, 0, 0.75))
-          drop-shadow(-2px 3px 5px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(-14px 18px 22px rgba(0, 0, 0, 0.92))
+          drop-shadow(-5px 7px 10px rgba(0, 0, 0, 0.75))
+          drop-shadow(-2px 3px 4px rgba(0, 0, 0, 0.5));
   transition: filter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .id-card-assembly:hover {
-  filter: drop-shadow(-26px 32px 34px rgba(0, 0, 0, 0.96))
-          drop-shadow(-10px 14px 18px rgba(0, 0, 0, 0.85))
-          drop-shadow(-3px 4px 6px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(-20px 24px 28px rgba(0, 0, 0, 0.96))
+          drop-shadow(-7px 10px 14px rgba(0, 0, 0, 0.85))
+          drop-shadow(-3px 4px 5px rgba(0, 0, 0, 0.6));
 }
 
-/* 1. Upper Lanyard Strap (Anchored to the ceiling/header above) */
+/* 1. Upper Lanyard Strap (Anchored to the ceiling/header above, compact 38px) */
 .id-card-strap-svg {
   width: 100%;
-  height: 56px;
+  height: 38px;
   display: block;
   margin-bottom: -1px;
   position: relative;
@@ -1042,8 +1293,8 @@ button {
   z-index: 3;
   /* The top hook of the tag acts as the physical pivot point */
   transform-origin: 50% 6px;
-  /* Initial natural tilt matching the reference ID badge */
-  transform: rotate(-3.5deg) rotateY(0deg) rotateX(0deg);
+  /* Initial natural tilt matching the reference ID badge (2D rotation only) */
+  transform: rotate(-3.5deg);
   cursor: grab;
   will-change: transform;
   user-select: none;
@@ -1058,7 +1309,7 @@ button {
 .id-card-clasp-tag-svg {
   width: 100%;
   height: auto;
-  max-height: 94px;
+  max-height: 82px;
   display: block;
   margin-bottom: -1px;
   position: relative;
@@ -1066,21 +1317,24 @@ button {
   overflow: visible;
 }
 
+/* ==========================================================================
+   SWISS POSTER ID BADGE (COMPACT ARCHITECTURAL SPECIFICATION BADGE)
+   ========================================================================== */
 .swiss-poster-frame {
   width: 100%;
   background: #0D0D11;
   border: 1px solid var(--border-strong);
-  padding: clamp(14px, 2vh, 18px);
+  padding: clamp(9px, 1.3vh, 12px);
   position: relative;
   z-index: 1;
   clip-path: polygon(
     0 0,
-    calc(100% - 16px) 0,
-    100% 16px,
-    100% calc(100% - 12px),
-    calc(100% - 12px) 100%,
-    14px 100%,
-    0 calc(100% - 14px)
+    calc(100% - 13px) 0,
+    100% 13px,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    12px 100%,
+    0 calc(100% - 12px)
   );
 }
 
@@ -1089,31 +1343,31 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 14px clamp(8px, 1.2vh, 12px) 8px;
+  padding: 0 6px clamp(5px, 0.7vh, 7px) 4px;
   border-bottom: 1px solid var(--border-hairline);
-  margin-bottom: clamp(10px, 1.4vh, 14px);
+  margin-bottom: clamp(6px, 0.9vh, 8px);
 }
 
 .poster-header-code {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--vermillion);
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 }
 
 .poster-header-uid {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 
-/* Main Image Container with Geometric Crosshair Guides */
+/* Main Image Container with Geometric Crosshair Guides (Compact Height) */
 .poster-canvas-box {
   position: relative;
   width: 100%;
-  height: clamp(310px, 39vh, 385px);
+  height: clamp(200px, 24vh, 235px);
   background: #080808;
   border: 1px solid var(--border-hairline);
   overflow: hidden;
@@ -1122,7 +1376,7 @@ button {
   justify-content: center;
 }
 
-/* Structural Diagonal Guides (Inspired by the Reference Poster) */
+/* Structural Diagonal Guides */
 .poster-grid-cross {
   position: absolute;
   top: 0;
@@ -1147,37 +1401,21 @@ button {
 
 .poster-corner-mark {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border: 1.5px solid var(--vermillion);
   z-index: 3;
 }
-.mark-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
-.mark-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
-.mark-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
-.mark-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
-
-/* Large Kinetic Watermark behind image */
-.poster-watermark-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: var(--font-display);
-  font-size: 8rem;
-  font-weight: 900;
-  color: rgba(255, 30, 39, 0.12);
-  letter-spacing: -0.05em;
-  user-select: none;
-  pointer-events: none;
-  z-index: 1;
-}
+.mark-tl { top: 5px; left: 5px; border-right: none; border-bottom: none; }
+.mark-tr { top: 5px; right: 5px; border-left: none; border-bottom: none; }
+.mark-bl { bottom: 5px; left: 5px; border-right: none; border-top: none; }
+.mark-br { bottom: 5px; right: 5px; border-left: none; border-top: none; }
 
 .poster-profile-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 10%;
+  object-position: center 12%;
   position: relative;
   z-index: 2;
   filter: contrast(106%) brightness(102%);
@@ -1188,6 +1426,43 @@ button {
 .swiss-poster-frame:hover .poster-profile-img {
   filter: contrast(108%) brightness(105%);
   transform: none;
+}
+
+/* Poster Bottom Specification Strip */
+.poster-spec-footer {
+  margin-top: 8px;
+  padding: 6px 10px 2px 10px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.poster-spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.poster-spec-title {
+  font-family: var(--font-heading);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-white);
+  text-transform: uppercase;
+}
+
+.poster-spec-val {
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  color: var(--vermillion);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.poster-subinfo {
+  font-family: var(--font-mono);
+  font-size: 0.60rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
 }
 
 /* ==========================================================================
@@ -1226,8 +1501,8 @@ button {
 
 .initial-blank-curtain.sweep-active .initial-curtain-gpu-stage {
   animation:
-    splashLinearZoom 1.2s linear forwards,
-    splashLinearFade 1.2s linear forwards;
+    splashLinearZoom 1.0s linear forwards,
+    splashLinearFade 1.0s linear forwards;
 }
 
 @keyframes splashLinearZoom {
@@ -1235,7 +1510,7 @@ button {
     transform: translate3d(0, 0, 0) scale(1);
   }
   100% {
-    transform: translate3d(0, 0, 0) scale(22);
+    transform: translate3d(0, 0, 0) scale(24);
   }
 }
 
@@ -1243,7 +1518,7 @@ button {
   0% {
     opacity: 1;
   }
-  60% {
+  65% {
     opacity: 1;
   }
   100% {
@@ -1282,6 +1557,371 @@ button {
   .cutout-text-line-2,
   .cutout-stroke-line-2 {
     font-size: 105px;
+  }
+}
+
+/* ==========================================================================
+   INITIAL INTRO GATED VISIBILITY (ONLY CIRCUIT BACKGROUND VISIBLE INITIALLY)
+   ========================================================================== */
+.portfolio-app-swiss.intro-active {
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+
+.portfolio-app-swiss.intro-active .cyber-scroll-track,
+.portfolio-app-swiss.intro-active .top-system-strip,
+.portfolio-app-swiss.intro-active .header-nav,
+.portfolio-app-swiss.intro-active .marquee-ticker,
+.portfolio-app-swiss.intro-active .hero-container-content,
+.portfolio-app-swiss.intro-active .hero-content,
+.portfolio-app-swiss.intro-active .hero-media,
+.portfolio-app-swiss.intro-active main > section:not(#hero),
+.portfolio-app-swiss.intro-active footer {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.portfolio-app-swiss.intro-active .section-hero {
+  min-height: 100vh !important;
+  height: 100vh !important;
+  padding: 0 !important;
+}
+
+.portfolio-app-swiss.intro-active .hero-circuit-container {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+/* ==========================================================================
+   ID CARD AERODYNAMIC DROP & HARMONIC SWING ENTRANCE
+   ========================================================================== */
+.id-card-assembly.id-card-drop-enter {
+  animation: idCardDropIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes idCardDropIn {
+  0% {
+    transform: translateY(-135vh);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  58% {
+    transform: translateY(22px);
+  }
+  74% {
+    transform: translateY(-12px);
+  }
+  88% {
+    transform: translateY(5px);
+  }
+  96% {
+    transform: translateY(-1.5px);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.id-card-swinging-unit.aero-swing-active {
+  animation: idCardAerodynamicSwing 2.4s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+  will-change: transform;
+}
+
+@keyframes idCardAerodynamicSwing {
+  0% {
+    /* Plumb vertical freefall during drop - ZERO 3D skewing, ZERO warp */
+    transform: rotate(0deg);
+  }
+  50% {
+    /* Main drop continues straight down with zero tilt */
+    transform: rotate(0deg);
+  }
+  58% {
+    /* Lanyard reaches full extension: hook catches, tag swings out cleanly in 2D */
+    transform: rotate(6.8deg);
+  }
+  68% {
+    /* Harmonic return swing */
+    transform: rotate(-6.0deg);
+  }
+  78% {
+    /* Secondary swing */
+    transform: rotate(1.8deg);
+  }
+  88% {
+    /* Damped oscillation */
+    transform: rotate(-4.2deg);
+  }
+  96% {
+    /* Fine harmonic settling */
+    transform: rotate(-3.3deg);
+  }
+  100% {
+    /* Settles perfectly into the natural resting tilt */
+    transform: rotate(-3.5deg);
+  }
+}
+
+/* ==========================================================================
+   CYBERPUNK CHOREOGRAPHED ENTRANCE BOOT SEQUENCE (.intro-complete)
+   ========================================================================== */
+
+/* 1. Top Technical HUD System Strip */
+.portfolio-app-swiss.intro-complete .top-system-strip {
+  animation: cyberHudSlideDown 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+@keyframes cyberHudSlideDown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  70% {
+    transform: translateY(2px);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 2. Main Navigation Header */
+.portfolio-app-swiss.intro-complete .header-nav {
+  animation: cyberNavDrop 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+}
+
+@keyframes cyberNavDrop {
+  0% {
+    transform: translateY(-40px) scale(0.98);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  70% {
+    transform: translateY(2px) scale(1.005);
+    opacity: 0.95;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 3. High-Velocity Marquee Spec Strip */
+.portfolio-app-swiss.intro-complete .marquee-ticker {
+  animation: cyberMarqueeOpen 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both;
+}
+
+@keyframes cyberMarqueeOpen {
+  0% {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  60% {
+    opacity: 0.9;
+    transform: scaleY(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* 4. Availability Status Badge */
+.portfolio-app-swiss.intro-complete .spec-header-tag {
+  animation: cyberBadgeGlitchIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+}
+
+@keyframes cyberBadgeGlitchIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  45% {
+    opacity: 0.4;
+    transform: translateX(-6px);
+  }
+  75% {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 5. Monumental Hero Title */
+.portfolio-app-swiss.intro-complete .hero-title {
+  animation: cyberTitleStrike 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.65s both;
+}
+
+@keyframes cyberTitleStrike {
+  0% {
+    opacity: 0;
+    transform: translateX(-40px);
+    letter-spacing: -0.075em;
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(3px);
+    letter-spacing: -0.048em;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.35));
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    letter-spacing: -0.05em;
+    filter: none;
+  }
+}
+
+.portfolio-app-swiss.intro-complete .hero-name-highlight {
+  animation: cyberNeonBloom 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.72s both;
+}
+
+@keyframes cyberNeonBloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateX(-20px);
+    text-shadow: 0 0 0 transparent;
+  }
+  45% {
+    opacity: 0.5;
+    text-shadow: 0 0 14px #FF1E27;
+  }
+  75% {
+    opacity: 1;
+    transform: scale(1.02) translateX(2px);
+    text-shadow: 0 0 45px #FF1E27, 0 0 75px rgba(255, 30, 39, 0.65);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+    text-shadow: 0 0 35px var(--vermillion-glow);
+  }
+}
+
+/* 6. Dynamic Terminal Role Indicator */
+.portfolio-app-swiss.intro-complete .hero-typed-role {
+  animation: cyberRolePowerOn 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.92s both;
+}
+
+@keyframes cyberRolePowerOn {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.3) translateX(-20px);
+    transform-origin: left;
+    box-shadow: 0 0 0 rgba(255, 30, 39, 0);
+  }
+  65% {
+    opacity: 1;
+    transform: scaleX(1.03) translateX(0);
+    box-shadow: 0 0 16px rgba(255, 30, 39, 0.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1) translateX(0);
+    box-shadow: none;
+  }
+}
+
+/* 7. Hero Summary Bio */
+.portfolio-app-swiss.intro-complete .hero-summary {
+  animation: cyberBioSlideUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) 1.02s both;
+}
+
+@keyframes cyberBioSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* 8. 4-Column Technical Metrics Modular Grid (Staggered Telemetry Boot) */
+.portfolio-app-swiss.intro-complete .metric-cell:nth-child(1) {
+  animation: cyberMetricCellBoot 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.15s both;
+}
+
+.portfolio-app-swiss.intro-complete .metric-cell:nth-child(2) {
+  animation: cyberMetricCellBoot 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.28s both;
+}
+
+.portfolio-app-swiss.intro-complete .metric-cell:nth-child(3) {
+  animation: cyberMetricCellBoot 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.41s both;
+}
+
+.portfolio-app-swiss.intro-complete .metric-cell:nth-child(4) {
+  animation: cyberMetricCellBoot 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.54s both;
+}
+
+@keyframes cyberMetricCellBoot {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94);
+    box-shadow: 0 0 18px rgba(255, 30, 39, 0.4);
+    background: rgba(255, 30, 39, 0.08);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 0 10px rgba(255, 30, 39, 0.25);
+    background: rgba(255, 30, 39, 0.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    box-shadow: none;
+    background: var(--bg-panel);
+  }
+}
+
+/* 9. Action CTAs & Social Strip */
+.portfolio-app-swiss.intro-complete .hero-actions {
+  animation: cyberActionsRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.65s both;
+}
+
+.portfolio-app-swiss.intro-complete .hero-social-strip {
+  animation: cyberActionsRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.75s both;
+}
+
+@keyframes cyberActionsRise {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 10. Top Cyberpunk HUD Scroll Track */
+.portfolio-app-swiss.intro-complete .cyber-scroll-track {
+  animation: cyberScrollTrackFade 0.6s ease 1.85s both;
+}
+
+@keyframes cyberScrollTrackFade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 
@@ -1399,7 +2039,7 @@ button {
 
 .section-title {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-size: clamp(1.618rem, 2.058vw, 2.058rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   text-transform: uppercase;
@@ -1450,16 +2090,741 @@ button {
 }
 
 /* =============================================================================
-   2. FEATURED PROJECTS SECTION (CYBER MECHA SHAPED CARDS)
-   Asymmetrical polygon chamfers, DATACORP red ribbons, barcodes, targeting brackets
+   2. FEATURED PROJECTS SECTION (HARDWARE CHASSIS CARDS - IMAGES 1 & 2)
+   DayFlow / DIESEL Dual-Plate Industrial Mecha Console Cards
    ============================================================================= */
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 24px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+.cyber-hw-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 24px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Outer Industrial Chassis (Cyberpunk Mecha Silhouette - Matching Image 2 DIESEL) */
+.cyber-hw-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 30, 39, 0.65) 45%, rgba(255, 255, 255, 0.14) 100%);
+  padding: 1.5px;
+  /* Cyberpunk Chamfered Mecha Silhouette */
+  clip-path: polygon(
+    24px 0,
+    calc(100% - 18px) 0,
+    100% 18px,
+    100% calc(100% - 24px),
+    calc(100% - 24px) 100%,
+    20px 100%,
+    0 calc(100% - 20px),
+    0 24px
+  );
+  filter: drop-shadow(0 0 16px rgba(255, 30, 39, 0.2)) drop-shadow(0 18px 36px rgba(0, 0, 0, 0.9));
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.35s ease;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+}
+
+.cyber-hw-card.has-demo {
+  cursor: pointer;
+}
+
+.cyber-hw-card:hover {
+  transform: translateY(-6px);
+  filter: drop-shadow(0 0 32px rgba(255, 30, 39, 0.55)) drop-shadow(0 26px 52px rgba(0, 0, 0, 0.98));
+}
+
+/* Corner Allen Socket Hex Bolts (Positioned inside the chamfered corners) */
+.cyber-hw-bolt {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #5A6273 0%, #2B303C 70%, #151820 100%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cyber-hw-bolt::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: #0D0F14;
+  border-radius: 1px;
+  box-shadow: inset 0 0.5px 1px rgba(0, 0, 0, 0.9);
+}
+
+.cyber-hw-bolt.bolt-tl { top: 9px; left: 18px; }
+.cyber-hw-bolt.bolt-tr { top: 9px; right: 18px; }
+.cyber-hw-bolt.bolt-bl { bottom: 9px; left: 18px; }
+.cyber-hw-bolt.bolt-br { bottom: 9px; right: 18px; }
+
+/* Side Conduits & Connectors (Matching DIESEL audio-jack coaxial plugs - Image 2) */
+.cyber-hw-conduit-left {
+  position: absolute;
+  left: -9px;
+  top: 32%;
+  width: 9px;
+  height: 26px;
+  background: linear-gradient(90deg, #64748B, #E2E8F0 50%, #475569);
+  border-radius: 2px;
+  box-shadow: -2px 0 6px rgba(0, 0, 0, 0.8), 0 0 8px rgba(255, 30, 39, 0.6);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cyber-hw-conduit-left::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 8px;
+  background: #1E293B;
+  border-radius: 1px;
+}
+
+.cyber-hw-conduit-right {
+  position: absolute;
+  right: -6px;
+  top: 20%;
+  width: 6px;
+  height: 32px;
+  background: linear-gradient(180deg, #E2E8F0, #475569);
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(255, 30, 39, 0.5);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.cyber-hw-underglow {
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: #FF1E27;
+  box-shadow: 0 0 18px 3px #FF1E27;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.cyber-hw-card:hover .cyber-hw-underglow {
+  opacity: 1;
+}
+
+/* Inner Body (Clips into chamfered mecha silhouette) */
+.cyber-hw-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  clip-path: inherit;
+  background: #0C0E13;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 1. TOP PLATE: Brushed Titanium / Silver Module with DIESEL Stepped Overhang */
+.cyber-hw-plate-top {
+  background: linear-gradient(175deg, #ECEFF4 0%, #D8DCE5 50%, #C7CCD6 100%);
+  padding: 18px 22px 18px 22px;
+  position: relative;
+  z-index: 5;
+  /* Stepped bottom edge matching DIESEL console (Image 2) */
+  clip-path: polygon(
+    24px 0,
+    calc(100% - 18px) 0,
+    100% 18px,
+    100% 100%,
+    76% 100%,
+    72% calc(100% - 16px),
+    46% calc(100% - 16px),
+    42% 100%,
+    0 100%,
+    0 24px
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Intense Vermillion Red Neon Backlight Overhang Glow (Matching Image 2 DIESEL) */
+.cyber-hw-plate-top::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 40%;
+  width: 36%;
+  height: 14px;
+  background: #FF1E27;
+  box-shadow: 0 0 24px 6px #FF1E27, 0 4px 14px rgba(255, 30, 39, 0.9);
+  filter: blur(4px);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.cyber-hw-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+/* Red Trapezoid Index Badge (Image 1 [01]) */
+.cyber-hw-badge-red {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #FF1E27 0%, #C40B12 100%);
+  color: #FFFFFF;
+  padding: 5px 16px 5px 10px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  box-shadow: 0 2px 8px rgba(255, 30, 39, 0.45);
+}
+
+.cyber-hw-reticle-tl {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.cyber-hw-index-num {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: #FFFFFF;
+}
+
+/* Spec Pill with Hazard Stripes & LED Dot */
+.cyber-hw-spec-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0B0D12;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 4px 10px;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.cyber-hw-spec-text {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #E2E8F0;
+  text-transform: uppercase;
+}
+
+.cyber-hw-hazard-stripes {
+  width: 24px;
+  height: 6px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #FF1E27,
+    #FF1E27 2.5px,
+    transparent 2.5px,
+    transparent 5.5px
+  );
+  opacity: 0.9;
+}
+
+.cyber-hw-led-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FF1E27;
+  box-shadow: 0 0 6px #FF1E27;
+  animation: cyberHwLedPulse 2.2s infinite ease-in-out;
+}
+
+@keyframes cyberHwLedPulse {
+  0%, 100% { opacity: 0.8; box-shadow: 0 0 6px #FF1E27; }
+  50% { opacity: 1; box-shadow: 0 0 10px #FF1E27, 0 0 14px rgba(255, 30, 39, 0.8); }
+}
+
+/* Top Body Row: Title & Text on Left, Heatsink Module on Right */
+.cyber-hw-top-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.cyber-hw-top-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.cyber-hw-category {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #64748B;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.cyber-hw-title {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 1.25rem;
+  font-weight: 900;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.hw-title-black {
+  color: #0F172A;
+  font-weight: 900;
+}
+
+.hw-title-red {
+  color: #DC2626;
+  font-weight: 900;
+}
+
+.cyber-hw-desc {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.45;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cyber-hw-vent-barcode {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 9px;
+  opacity: 0.7;
+}
+
+.cyber-hw-vent-barcode span {
+  width: 1.5px;
+  height: 100%;
+  background: #334155;
+}
+
+.cyber-hw-vent-barcode span:nth-child(2n) { width: 2.5px; }
+.cyber-hw-vent-barcode span:nth-child(3n) { width: 1px; }
+
+/* Top-Right Module: Heatsink slats, (21) stamp, slider switch */
+.cyber-hw-heatsink-module {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  padding: 4px 6px 6px;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.cyber-hw-stamp-21 {
+  font-family: var(--font-mono);
+  font-size: 0.60rem;
+  font-weight: 900;
+  color: #1E293B;
+  border: 1px solid #1E293B;
+  border-radius: 8px;
+  padding: 0 4px;
+  line-height: 1.2;
+}
+
+.cyber-hw-heatsink-slats {
+  display: flex;
+  gap: 2.5px;
+  height: 38px;
+}
+
+.cyber-hw-heatsink-slats span {
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, #FFFFFF 0%, #94A3B8 50%, #475569 100%);
+  border-radius: 1px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.cyber-hw-slider-switch {
+  width: 20px;
+  height: 32px;
+  background: #0B0D12;
+  border: 1.5px solid #334155;
+  border-radius: 3px;
+  padding: 2px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.cyber-hw-switch-track {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cyber-hw-switch-ribs {
+  width: 100%;
+  height: 14px;
+  background: linear-gradient(180deg, #64748B 0%, #334155 100%);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* 2. BOTTOM PLATE: Deep Carbon Matte Telemetry Deck (Image 1) */
+.cyber-hw-plate-bottom {
+  background: linear-gradient(180deg, #13151D 0%, #0D0F15 60%, #080A0E 100%);
+  padding: 18px 20px 14px 20px;
+  display: grid;
+  grid-template-columns: 74px 1fr 48px;
+  gap: 16px;
+  align-items: center;
+  flex-grow: 1;
+}
+
+/* Left Jog Dial Column */
+.cyber-hw-dial-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.cyber-hw-jog-dial {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #0A0C10;
+  border: 2px solid #282D3B;
+  position: relative;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95), 0 4px 12px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Glowing Red LED Arc on Dial */
+.cyber-hw-jog-dial::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #FF1E27;
+  border-left-color: #FF1E27;
+  filter: drop-shadow(0 0 6px #FF1E27);
+  pointer-events: none;
+}
+
+.cyber-hw-dial-inner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #252834 0%, #101217 80%);
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.cyber-hw-dial-indicator {
+  position: absolute;
+  top: 4px;
+  left: calc(50% - 1.5px);
+  width: 3px;
+  height: 10px;
+  background: #FF1E27;
+  border-radius: 1px;
+  box-shadow: 0 0 6px #FF1E27;
+}
+
+.cyber-hw-dial-ticks {
+  display: flex;
+  gap: 4px;
+}
+
+.cyber-hw-dial-ticks span {
+  width: 8px;
+  height: 1.5px;
+  background: #3B4252;
+}
+
+/* Center Bottom: Features & Tags */
+.cyber-hw-bottom-center {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cyber-hw-features-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+  margin: 0;
+}
+
+.cyber-hw-features-list li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-sans);
+  font-size: 0.79rem;
+  color: #D1D5DB;
+  line-height: 1.35;
+}
+
+.cyber-hw-chevron {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #FF1E27;
+  text-shadow: 0 0 6px rgba(255, 30, 39, 0.8);
+  flex-shrink: 0;
+}
+
+.cyber-hw-features-list li span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cyber-hw-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.cyber-hw-tag-pill {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #E2E8F0;
+  background: #141721;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 3px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
+
+/* Right Status Column: Vertical LED capsule, 5 pinholes, louvers */
+.cyber-hw-status-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.cyber-hw-status-capsule {
+  width: 13px;
+  height: 38px;
+  background: #080A0E;
+  border: 1.5px solid #2A303F;
+  border-radius: 7px;
+  padding: 2.5px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.cyber-hw-laser-bar {
+  display: block;
+  width: 4px;
+  height: 100%;
+  margin: 0 auto;
+  background: #FF1E27;
+  border-radius: 2px;
+  box-shadow: 0 0 10px #FF1E27;
+}
+
+.cyber-hw-pinholes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cyber-hw-pinholes span {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #06070A;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.cyber-hw-louver-vent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cyber-hw-louver-vent span {
+  width: 14px;
+  height: 2px;
+  background: #1E2330;
+  border-radius: 1px;
+}
+
+/* Dual LED Capsule Pill matching DIESEL console (Image 2) */
+.cyber-hw-capsule-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 32px;
+  height: 10px;
+  background: #080A0E;
+  border: 1px solid #2A303F;
+  border-radius: 5px;
+  margin-top: 6px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.capsule-led {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #FF1E27;
+  box-shadow: 0 0 6px #FF1E27;
+  animation: cyberHwLedPulse 2.4s infinite ease-in-out;
+}
+
+/* 3. CONTROL / ACTION BAR (Image 1) */
+.cyber-hw-action-bar {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px 14px 20px;
+  background: #08090D;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cyber-hw-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cyber-hw-btn-bracket {
+  color: #FF6B72;
+  font-weight: 900;
+}
+
+.cyber-hw-btn-demo {
+  background: rgba(255, 30, 39, 0.12);
+  border: 1.5px solid #FF1E27;
+  color: #FFFFFF;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  box-shadow: inset 0 0 8px rgba(255, 30, 39, 0.2), 0 0 12px rgba(255, 30, 39, 0.25);
+}
+
+.cyber-hw-btn-demo:hover,
+.cyber-hw-card:hover .cyber-hw-btn-demo {
+  background: #FF1E27 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 24px rgba(255, 30, 39, 0.85), inset 0 0 10px rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+.cyber-hw-btn-demo:hover .cyber-hw-btn-bracket,
+.cyber-hw-card:hover .cyber-hw-btn-demo .cyber-hw-btn-bracket {
+  color: #FFFFFF !important;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+}
+
+.cyber-hw-btn-demo:hover i,
+.cyber-hw-card:hover .cyber-hw-btn-demo i {
+  color: #FFFFFF !important;
+  transform: translate(2px, -2px);
+  text-shadow: 0 0 8px #FFFFFF;
+}
+
+.cyber-hw-btn-code {
+  background: #141721;
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  color: #E2E8F0;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+.cyber-hw-btn-code:hover {
+  background: #202434;
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.cyber-hw-btn-disabled {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  color: #64748B;
+  cursor: not-allowed;
+  user-select: none;
+}
+
+.cyber-hw-btn-disabled .cyber-hw-btn-bracket {
+  color: #64748B;
+}
+
+/* Responsive adjustments for hardware card */
+@media (max-width: 1024px) {
+  .cyber-hw-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .cyber-hw-plate-bottom {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .cyber-hw-dial-col {
+    display: none;
+  }
+  .cyber-hw-status-col {
+    display: none;
+  }
+  .cyber-hw-top-body {
+    flex-direction: column;
+  }
+  .cyber-hw-heatsink-module {
+    display: none;
+  }
+  .cyber-hw-action-bar {
+    flex-direction: column;
+  }
 }
 
 /* Universal Cyber Card Polygon Frame (Outer Border & Drop-Shadow) */
@@ -2401,6 +3766,25 @@ button {
   margin-bottom: 32px;
 }
 
+.footer-brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-logo-emblem {
+  width: 52px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(255, 30, 39, 0.5));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.footer-brand-wrap:hover .footer-logo-emblem {
+  transform: scale(1.08) rotate(-2deg);
+  filter: drop-shadow(0 0 18px rgba(255, 30, 39, 0.9));
+}
+
 .footer-logo-title {
   font-family: var(--font-display);
   font-size: 1.4rem;
@@ -2500,8 +3884,9 @@ button {
   .swiss-poster-frame {
     max-width: 380px;
   }
-  .projects-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .projects-grid,
+  .cyber-hw-grid {
+    grid-template-columns: 1fr;
   }
   .skills-matrix-grid {
     grid-template-columns: 1fr 1fr;
@@ -2541,7 +3926,7 @@ button {
     display: none;
   }
   .hero-title {
-    font-size: 2.6rem;
+    font-size: clamp(1.618rem, 6.5vw, 2.058rem);
   }
   .hero-metrics-grid {
     grid-template-columns: repeat(2, 1fr);

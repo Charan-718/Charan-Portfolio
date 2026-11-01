@@ -29,93 +29,97 @@ function isUpperArmTrack(trackName) {
   );
 }
 
-// Create Cyberpunk Floor Sensor Decal Texture (Matching Image 3)
+// Create Cyberpunk Symmetric Hexagonal Floor Sensor Decal Texture
 function createCyberpunkDecalTexture() {
   const canvas = document.createElement('canvas');
-  canvas.width = 1024;
+  canvas.width = 512;
   canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
   const redraw = (pulsePhase = 0, isMoving = false) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const cx = 256;
+    const cy = 256;
+    const R = 215;
 
-    // 1. Outer Cyber Chamfered Bracket (Matching Image 3)
+    // 1. Symmetrical Outer Hexagon
     ctx.save();
     ctx.beginPath();
-    // Flat back edge
-    ctx.moveTo(80, 90);
-    // Top border with cyber notches
-    ctx.lineTo(410, 90);
-    ctx.lineTo(410, 102);
-    ctx.lineTo(455, 102);
-    ctx.lineTo(455, 90);
-    ctx.lineTo(760, 90);
-    // Front angled chamfer cuts (Image 3)
-    ctx.lineTo(870, 175);
-    ctx.lineTo(930, 256);
-    ctx.lineTo(870, 337);
-    ctx.lineTo(760, 422);
-    // Bottom border with cyber notches
-    ctx.lineTo(455, 422);
-    ctx.lineTo(455, 410);
-    ctx.lineTo(410, 410);
-    ctx.lineTo(410, 422);
-    ctx.lineTo(80, 422);
+    for (let i = 0; i < 6; i++) {
+      const rad = (i * 60 + 30) * Math.PI / 180;
+      const x = cx + R * Math.cos(rad);
+      const y = cy + R * Math.sin(rad);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
     ctx.closePath();
 
     // Subtle dark red glowing fill
-    ctx.fillStyle = isMoving ? 'rgba(255, 30, 39, 0.22)' : 'rgba(255, 30, 39, 0.09)';
+    ctx.fillStyle = isMoving ? 'rgba(255, 30, 39, 0.22)' : 'rgba(255, 30, 39, 0.08)';
     ctx.fill();
 
-    // Glowing Neon Perimeter Border
+    // Glowing Neon Hexagon Perimeter Border
     ctx.strokeStyle = '#FF1E27';
     ctx.shadowColor = '#FF1E27';
-    ctx.shadowBlur = isMoving ? 24 : 15;
+    ctx.shadowBlur = isMoving ? 26 : 16;
     ctx.lineWidth = 5;
     ctx.stroke();
-    ctx.restore();
+    ctx.shadowBlur = 0;
 
-    // 2. Corner Bracket Ticks (Top & Bottom Left)
-    ctx.strokeStyle = 'rgba(255, 163, 167, 0.7)';
-    ctx.lineWidth = 2.5;
+    // 2. Symmetric Outer Corner Brackets on the 6 Hex Vertices
+    for (let i = 0; i < 6; i++) {
+      const rad = (i * 60 + 30) * Math.PI / 180;
+      const vx = cx + (R + 10) * Math.cos(rad);
+      const vy = cy + (R + 10) * Math.sin(rad);
+      ctx.fillStyle = '#FF1E27';
+      ctx.beginPath();
+      ctx.arc(vx, vy, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. Inner Concentric Symmetrical Hexagon
+    const R2 = 145;
     ctx.beginPath();
-    ctx.moveTo(105, 115); ctx.lineTo(135, 115);
-    ctx.moveTo(105, 115); ctx.lineTo(105, 145);
-    ctx.moveTo(105, 397); ctx.lineTo(135, 397);
-    ctx.moveTo(105, 397); ctx.lineTo(105, 367);
+    for (let i = 0; i < 6; i++) {
+      const rad = (i * 60 + 30) * Math.PI / 180;
+      const x = cx + R2 * Math.cos(rad);
+      const y = cy + R2 * Math.sin(rad);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255, 163, 167, 0.75)';
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // 3. Three Glowing Forward Chevrons: >>> (Exact Image 3)
-    const chevrons = [
-      { x: 395, phase: 0 },
-      { x: 480, phase: 0.33 },
-      { x: 565, phase: 0.66 }
-    ];
+    // 4. Center Reticle Target & Symmetrical Crosshairs
+    const alpha = isMoving ? 0.65 + 0.35 * Math.sin(pulsePhase * 8) : 0.85;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 55, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(255, 30, 39, ${alpha})`;
+    ctx.shadowColor = '#FF1E27';
+    ctx.shadowBlur = 14;
+    ctx.lineWidth = 3.5;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
 
-    chevrons.forEach((ch) => {
-      const alpha = isMoving 
-        ? 0.45 + 0.55 * Math.sin(pulsePhase * 7 - ch.phase * Math.PI * 2)
-        : 0.85;
+    // Center glowing core dot
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.fill();
 
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(ch.x, 195);
-      ctx.lineTo(ch.x + 52, 256);
-      ctx.lineTo(ch.x, 317);
-      ctx.strokeStyle = `rgba(255, 30, 39, ${alpha})`;
-      ctx.shadowColor = '#FF1E27';
-      ctx.shadowBlur = 18;
-      ctx.lineWidth = 8.5;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.stroke();
+    // Symmetrical Crosshair Ticks (N, S, E, W)
+    ctx.strokeStyle = '#FF1E27';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - 105, cy); ctx.lineTo(cx - 65, cy);
+    ctx.moveTo(cx + 65, cy); ctx.lineTo(cx + 105, cy);
+    ctx.moveTo(cx, cy - 105); ctx.lineTo(cx, cy - 65);
+    ctx.moveTo(cx, cy + 65); ctx.lineTo(cx, cy + 105);
+    ctx.stroke();
 
-      // Bright inner core highlight
-      ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.8})`;
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-      ctx.restore();
-    });
+    ctx.restore();
   };
 
   redraw();
@@ -969,26 +973,26 @@ export default function Character({
     }
 
 
-    // 3. Modern Lounge Furniture Collision (corner lounge at [4.5, 2.2], radius 1.65m)
-    const loungeX = 4.5;
-    const loungeZ = 2.2;
+    // 3. Modern Lounge Furniture Collision (corner lounge matching Image 4 at [-3.8, 0.8], radius 1.75m)
+    const loungeX = -3.8;
+    const loungeZ = 0.8;
     const distFromLounge = Math.hypot(root.current.position.x - loungeX, root.current.position.z - loungeZ);
-    const minLoungeDist = 1.65;
+    const minLoungeDist = 1.75;
     if (distFromLounge < minLoungeDist && distFromLounge > 0.001) {
       const angle = Math.atan2(root.current.position.z - loungeZ, root.current.position.x - loungeX);
       root.current.position.x = loungeX + Math.cos(angle) * minLoungeDist;
       root.current.position.z = loungeZ + Math.sin(angle) * minLoungeDist;
     }
 
-    // 4. Cyber Command Pylon Collision (pylon base at [-5.2, 3.4], radius 1.35m)
-    const plantX = -5.2;
-    const plantZ = 3.4;
-    const distFromPlant = Math.hypot(root.current.position.x - plantX, root.current.position.z - plantZ);
-    const minPlantDist = 1.35;
-    if (distFromPlant < minPlantDist && distFromPlant > 0.001) {
-      const angle = Math.atan2(root.current.position.z - plantZ, root.current.position.x - plantX);
-      root.current.position.x = plantX + Math.cos(angle) * minPlantDist;
-      root.current.position.z = plantZ + Math.sin(angle) * minPlantDist;
+    // 4. Quick Access Console Kiosk Collision (kiosk console at [2.4, -0.1], radius 1.15m)
+    const kioskX = 2.4;
+    const kioskZ = -0.1;
+    const distFromKiosk = Math.hypot(root.current.position.x - kioskX, root.current.position.z - kioskZ);
+    const minKioskDist = 1.15;
+    if (distFromKiosk < minKioskDist && distFromKiosk > 0.001) {
+      const angle = Math.atan2(root.current.position.z - kioskZ, root.current.position.x - kioskX);
+      root.current.position.x = kioskX + Math.cos(angle) * minKioskDist;
+      root.current.position.z = kioskZ + Math.sin(angle) * minKioskDist;
     }
 
     // 5. Main Center Display Screen Solid Collision ([0, 4.35, 11.2], width 9.5m, thickness 0.5m)
@@ -1247,13 +1251,13 @@ export default function Character({
         <primitive object={scene} />
       </group>
 
-      {/* Cyberpunk Directional Sensor Decal (Matching Image 3) */}
+      {/* Cyberpunk Symmetrical Hexagonal Sensor Decal */}
       <mesh
         ref={footstepDecalRef}
-        rotation={[-Math.PI / 2, 0, -Math.PI / 2]}
-        position={[0, 0.005, 0.15]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 0.005, 0]}
       >
-        <planeGeometry args={[1.35, 0.68]} />
+        <planeGeometry args={[1.2, 1.2]} />
         <meshBasicMaterial
           map={cyberDecal.texture}
           transparent
